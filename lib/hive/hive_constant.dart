@@ -1,0 +1,76 @@
+///Box Name
+const String hiveSettings = "settings";
+const String hiveUserInfo = "user_info";
+const String hiveUserPrefBox = "user_pref";
+
+///keys for [settingsBox]
+const String hiveAppTheme = "AppTheme";
+const String hiveServiceAccountAccessToken = "serviceAccountAccessToken";
+const String hiveDeviceToken = "deviceToken";
+const String hiveServerTimeZone = "serverTimeZone";
+const String hiveAuthKey = "AuthKey";
+const String hiveSelectedCurrency = "SelectedCurrency";
+const String hiveIsGoogleAllow = "is_google";
+const String hiveIsFaceBookAllow = "is_facebook";
+const String hiveIsAppleAllow = "is_apple";
+const String hiveIsFingerAllow = "is_finger";
+const String hiveUniqueId = "unique_id";
+const String hiveIsLoginWithBiometrics = "is_login_with_biometrics";
+const String hiveAccessToken = "AccessToken";
+const String hiveDriverStatus = "driverStatus";
+const String hiveDocumentStatus = "documentStatus";
+const String hiveVehicleStatus = "vehicleStatus";
+const String hiveDriverType = "driverType";
+const String hiveUserVerified = "userVerified";
+const String hivePendingSignupAfterOtp = "pendingSignupAfterOtp";
+const String hivePendingSignupFullName = "pendingSignupFullName";
+const String hivePendingSignupEmail = "pendingSignupEmail";
+const String hivePendingSignupReferral = "pendingSignupReferral";
+const String hivePendingSignupProfilePath = "pendingSignupProfilePath";
+const String hiveDemoSheetOpen = "demoSheetOpen";
+const String hiveIsShownOnBoarding = "isShownOnBoarding";
+const String hivePaymentTypeCash = "paymentTypeCash";
+const String hivePaymentTypeOnline = "paymentTypeOnline";
+const String hivePaymentTypeWallet = "paymentTypeWallet";
+const String hiveServiceId = "serviceId";
+const String hiveIsLoggedIn = "isLoggedIn";
+const String hiveAppMode = "AppMode";
+const String hiveDriverCurrentStatus = "driverCurrentStatus";
+const String hiveDisclosureDialogOpen = "disclosureDialogOpen";
+const String hiveNewRequestPojo = "newRequestPojo";
+const String hiveBgLocationTime = "bgLocationTime";
+const String hiveBgLocationData = "bgLocationData";
+const String hiveIsAutoSettle = "isAutoSettle";
+const String hiveUniqueIdGoogleApiCall = "uniqueGoogleId";
+const String hiveSessionIdHeader = "sessionId";
+const String hiveSessionLastKey = "SessionLastKey";
+const String hiveDriverAcceptTransport = "driverAcceptTransport";
+const String hiveDriverAcceptDelivery = "driverAcceptDelivery";
+const String hiveDriverRequestFilter = "driverRequestFilter";
+const String hiveEmergencyContactName = "emergencyContactName";
+const String hiveSimpleInterfaceMode = "simpleInterfaceMode";
+const String hiveFareNegotiationStep = "fareNegotiationStep";
+const String hiveVatRateOnCommission = "vatRateOnCommission";
+const String hiveAdminCommissionPercent = "adminCommissionPercent";
+const String hiveDriverCancelUntilStatus = "driverCancelUntilStatus";
+const String hiveDestinationPaymentMethods = "destinationPaymentMethods";
+const String hiveEnableExpresoMobile = "enableExpresoMobile";
+const String hiveEnableEncomiendasMobile = "enableEncomiendasMobile";
+const String hiveRequireCourierPackageDimensions = "requireCourierPackageDimensions";
+
+///keys for [userPrefBox]
+const String hiveSelectedLanguageCode = "SelectedLanguageCode";
+
+///keys for [userInfoBox]
+const String hiveUserId = "UserId";
+const String hiveCountryCode = "countryCode";
+const String hiveUserName = "userName";
+const String hiveEmail = "email";
+const String hiveLoginType = "loginType";
+const String hiveProfileImage = "profileImage";
+const String hiveContactNumber = "contactNumber";
+const String hiveIsRegister = "isRegister";
+const String hiveEmergencyContact = "emergencyContact";
+const String hiveEmergencyCountryCode = "emergencyCountryCode";
+const String hiveReferralCode = "referralCode";
+

@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name" translatable="false">XISTI</string>
+
+    <!-- Reemplazar tras crear app Facebook XISTI -->
+    <string name="facebook_app_id" translatable="false">REPLACE_ME</string>
+    <string name="fb_login_protocol_scheme" translatable="false">fbREPLACE_ME</string>
+    <string name="facebook_client_token" translatable="false">REPLACE_ME</string>
+
+    <!-- Reemplazar tras crear key Maps Android en GCP -->
+    <string name="google_api_key" translatable="false">REPLACE_ME</string>
+</resources>

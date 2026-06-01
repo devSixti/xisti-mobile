@@ -1,0 +1,13 @@
+{
+  "fr": [
+    "walletMinTopupNotice"
+  ],
+
+  "it": [
+    "walletMinTopupNotice"
+  ],
+
+  "pt": [
+    "walletMinTopupNotice"
+  ]
+}

@@ -1,0 +1,128 @@
+import 'dart:io';
+
+import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
+import 'package:pin_code_fields/pin_code_fields.dart';
+
+import '../../../blocs/bloc.dart';
+import '../../../hive/hive_helper.dart';
+import '../../../networking/base_dl.dart';
+import '../../../utils/utils.dart';
+import '../../passengerMode/passengerHome/passenger_home.dart';
+import '../Login/login_dl.dart';
+import '../signup/sign_up_repo.dart';
+import 'otp_verify_repo.dart';
+
+class OtpVerifyBloc extends Bloc {
+  BuildContext context;
+
+  final OtpVerifyRepo _otpVerifyRepo = OtpVerifyRepo();
+  final SignUpRepo _signUpRepo = SignUpRepo();
+
+  OtpVerifyBloc(this.context);
+
+  final otpController = BehaviorSubject<String>();
+  final resendOTPController = BehaviorSubject<bool>.seeded(false);
+  final subjectResend = BehaviorSubject<ApiResponse<BaseModel>>();
+  final subjectVerify = BehaviorSubject<ApiResponse<LoginPojo>>();
+  DateTime timer = DateTime.now();
+  PinInputController pinInputController = PinInputController();
+
+  Future<void> verify() async {
+    if (await isNetworkConnected(
+      onRetryPressedCallApi: () {
+        verify();
+      },
+    )) {
+      subjectVerify.sink.add(ApiResponse.loading());
+      try {
+        var response = LoginPojo.fromJson(await _otpVerifyRepo.callVerifyOtpApi(otpController.value));
+
+        final message = getApiMsg(response.message, response.messageCode);
+        subjectVerify.sink.add(ApiResponse.completed(response));
+        if (!context.mounted) return;
+        if (isApiStatus(context, response.status ?? 0, message, true, messageCode: response.messageCode ?? 0)) {
+          putDataInSettingBox(hiveUserVerified, 1);
+          if (getBoolFromSettingBox(hivePendingSignupAfterOtp)) {
+            await _completePendingSignup();
+          } else {
+            manageLoginResponse(context, response);
+          }
+        } else {
+          openSimpleSnackbar(context, message);
+        }
+      } catch (e) {
+        subjectVerify.sink.add(ApiResponse.error(e.toString()));
+      }
+    }
+  }
+
+  Future<void> _completePendingSignup() async {
+    final profilePath = getStringFromSettingBox(hivePendingSignupProfilePath);
+    MultipartFile? multipartFile;
+    if (profilePath.isNotEmpty) {
+      final file = File(profilePath);
+      if (await file.exists()) {
+        multipartFile = MultipartFile.fromFileSync(file.path, filename: file.path.split('/').last);
+      }
+    }
+
+    try {
+      final response = LoginPojo.fromJson(
+        await _signUpRepo.signUp(
+          getStringFromUserInfoBox(hivePendingSignupFullName),
+          getStringFromUserInfoBox(hivePendingSignupEmail),
+          getStringFromUserInfoBox(hivePendingSignupReferral),
+          multipartFile,
+        ),
+      );
+      final message = getApiMsg(response.message, response.messageCode);
+      if (!context.mounted) return;
+      if (isApiStatus(context, response.status ?? 0, message, false, messageCode: response.messageCode ?? 0)) {
+        clearPendingSignupData();
+        setDataInHive(response);
+        putDataInSettingBox(hiveIsLoggedIn, true);
+        getGoogleMapKeyForApiCall();
+        openScreenWithClearPrevious(context, const PassengerHome());
+      }
+    } catch (e) {
+      if (!context.mounted) return;
+      openSimpleSnackbar(context, e.toString());
+    }
+  }
+
+  Future<void> resendOtp(BuildContext bottomSheetContext) async {
+    if (await isNetworkConnected(
+      onRetryPressedCallApi: () {
+        resendOtp(bottomSheetContext);
+      },
+    )) {
+      subjectResend.sink.add(ApiResponse.loading());
+      try {
+        var response = BaseModel.fromJson(await _otpVerifyRepo.callResendOtpApi());
+
+        String message = getApiMsg(response.message);
+        if (!context.mounted) return;
+        if (isApiStatus(context, response.status, message, true)) {
+          subjectResend.sink.add(ApiResponse.completed(response));
+          openSimpleSnackbar(context, languages.resendOtpSuccessMsg);
+          timer = DateTime.now();
+          resendOTPController.sink.add(true);
+        } else {
+          subjectResend.sink.add(ApiResponse.error(message));
+          openSimpleSnackbar(context, message);
+        }
+      } catch (e) {
+        subjectResend.sink.add(ApiResponse.error(e.toString()));
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    resendOTPController.close();
+    otpController.close();
+    subjectResend.close();
+    subjectVerify.close();
+  }
+}

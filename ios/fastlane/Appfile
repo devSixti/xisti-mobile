@@ -1,0 +1,3 @@
+app_identifier("com.app.xisti")
+team_id(ENV.fetch("APPLE_TEAM_ID", "8KLQR9X7ML"))
+itc_team_id(ENV["APP_STORE_CONNECT_TEAM_ID"]) if ENV["APP_STORE_CONNECT_TEAM_ID"]
