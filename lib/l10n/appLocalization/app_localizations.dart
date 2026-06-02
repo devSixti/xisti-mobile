@@ -110,13 +110,16 @@ abstract class AppLocalizations {
   /// **'XISTI'**
   String get appName;
 
-  /// XISTI product tagline.
+  /// No description provided for @tagline.
+  ///
+  /// In en, this message translates to:
+  /// **'Easy and Safe'**
   String get tagline;
 
   /// No description provided for @splashScreenMsg.
   ///
   /// In en, this message translates to:
-  /// **'Your bid, we drive.'**
+  /// **'Easy and Safe — negotiate your fare in Medellín.'**
   String get splashScreenMsg;
 
   /// No description provided for @year.

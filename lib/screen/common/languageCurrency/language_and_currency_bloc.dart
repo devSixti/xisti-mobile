@@ -18,8 +18,17 @@ class LanguageAndCurrencyBloc extends Bloc {
   BuildContext context;
 
   LanguageAndCurrencyBloc(this.context) {
-    getCurrencyData();
     getLanguageData();
+    _primeDefaultCurrency();
+    getCurrencyData();
+  }
+
+  void _primeDefaultCurrency() {
+    currency = _fallbackCurrencies.firstWhere(
+      (item) => item.currencySymbol == getStringFromSettingBox(hiveSelectedCurrency),
+      orElse: () => _fallbackCurrencies.first,
+    );
+    setSelectedCurrency(currency!);
   }
 
   List<LanguageListItem> spLanguage = [
@@ -90,16 +99,27 @@ class LanguageAndCurrencyBloc extends Bloc {
         if (!context.mounted) return;
         if (isApiStatus(context, response.status, response.message, true)) {
           setAuthKey(response.appKey ?? "");
-          if ((response.currencyList).isNotEmpty) {
-            int index = response.currencyList.indexWhere((element) => element.currencySymbol == getStringFromSettingBox(hiveSelectedCurrency));
+          final currencies = response.currencyList.isNotEmpty ? response.currencyList : _fallbackCurrencies;
+          if (currencies.isNotEmpty) {
+            int index = currencies.indexWhere((element) => element.currencySymbol == getStringFromSettingBox(hiveSelectedCurrency));
             if (index == -1) {
-              currency = response.currencyList[0];
+              currency = currencies[0];
             } else {
-              currency = response.currencyList[index];
+              currency = currencies[index];
             }
             setSelectedCurrency(currency!);
           }
-          _languageAndCurrencySubject.sink.add(ApiResponse.completed(response));
+          _languageAndCurrencySubject.sink.add(
+            ApiResponse.completed(
+              LanguageAndCurrencyResponse(
+                status: response.status,
+                message: response.message,
+                messageCode: response.messageCode,
+                currencyList: currencies,
+                appKey: response.appKey,
+              ),
+            ),
+          );
         } else {
           _languageAndCurrencySubject.sink.add(ApiResponse.error(response.message));
         }
@@ -108,6 +128,14 @@ class LanguageAndCurrencyBloc extends Bloc {
       }
     }
   }
+
+  static final List<CurrencyListItem> _fallbackCurrencies = [
+    CurrencyListItem(currencyId: 1, currencyName: 'COP', currencySymbol: 'COL\$', currencyCode: 'COP'),
+    CurrencyListItem(currencyId: 2, currencyName: 'USD', currencySymbol: '\$', currencyCode: 'USD'),
+    CurrencyListItem(currencyId: 3, currencyName: 'EUR', currencySymbol: '€', currencyCode: 'EUR'),
+    CurrencyListItem(currencyId: 4, currencyName: 'BRL', currencySymbol: 'R\$', currencyCode: 'BRL'),
+    CurrencyListItem(currencyId: 5, currencyName: 'ARS', currencySymbol: 'AR\$', currencyCode: 'ARS'),
+  ];
 
   Future<void> updateLanguageAndCurrency(bool isFromHome) async {
     if (await isNetworkConnected(onRetryPressedCallApi: () => updateLanguageAndCurrency(isFromHome))) {

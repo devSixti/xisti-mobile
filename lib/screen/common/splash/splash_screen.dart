@@ -36,36 +36,29 @@ class _SplashScreenState extends State<SplashScreen> {
       body: SafeArea(
         top: false,
         child: Container(
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             image: DecorationImage(image: AssetImage("assets/images/splash_bg.png"), fit: BoxFit.cover),
-            // gradient: LinearGradient(
-            //   begin: Alignment.topLeft,
-            //   end: Alignment.bottomRight,
-            //   colors: [getCurrentTheme(context).colorSplashGradient1, getCurrentTheme(context).colorSplashGradient2],
-            //   stops: [0.2, 0.5],
-            //   transform: GradientRotation(-0.6),
-            //   // tileMode: TileMode.decal
-            // ),
           ),
           child: Stack(
             children: [
-              // Image.asset("assets/images/splash_bg.png", fit: BoxFit.fitWidth,),
+              Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.black.withValues(alpha: 0.35),
+                      Colors.black.withValues(alpha: 0.15),
+                      Colors.black.withValues(alpha: 0.55),
+                    ],
+                  ),
+                ),
+              ),
               Container(
                 alignment: AlignmentDirectional.center,
                 padding: EdgeInsetsDirectional.only(start: commonHorizontalPadding, end: commonHorizontalPadding, bottom: 150.h),
-                child: Image.asset(setImagesBasedOnTheme(context, 'splash_logo.png'), width: 226.w, height: 183.h),
+                child: Image.asset(setImagesBasedOnTheme(context, 'splash_logo.png'), width: 280.w, fit: BoxFit.contain),
               ),
-              // Align(
-              //   alignment: AlignmentDirectional.bottomCenter,
-              //   child: Column(
-              //     mainAxisSize: MainAxisSize.min,
-              //     mainAxisAlignment: MainAxisAlignment.end,
-              //     children: [
-              //       SizedBox(height: 10.h),
-              //       appVersionName(textColor: getCurrentTheme(context).colorStaticBlack),
-              //     ],
-              //   ),
-              // ),
             ],
           ),
         ),

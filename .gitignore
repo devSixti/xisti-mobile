@@ -59,4 +59,6 @@ android/key.properties
 android/*.keystore
 android/xisti-signing.local.env
 android/oauth-client-secrets/
+android/*.base64.txt
+dist/
 **/google-services.json.bak

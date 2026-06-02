@@ -11,10 +11,12 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get appName => 'XISTI';
 
+  @override
   String get tagline => 'Fácil y Seguro';
 
   @override
-  String get splashScreenMsg => 'Fácil y Seguro — negocia tu tarifa y muévete en Medellín.';
+  String get splashScreenMsg =>
+      'Fácil y Seguro — negocia tu tarifa y muévete en Medellín.';
 
   @override
   String get year => 'año';
