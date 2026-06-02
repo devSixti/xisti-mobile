@@ -1,6 +1,8 @@
 import 'dart:convert';
+import 'dart:io';
 
 import '../constant/constant.dart';
+import '../hive/hive_constant.dart';
 import '../hive/hive_helper.dart';
 
 /// Syncs mobile config fields exposed by XISTI Admin API.
@@ -56,6 +58,32 @@ void applyAppMobileSettingsFromJson(dynamic json) {
       _toInt(map['require_courier_package_dimensions'], 0),
     );
   }
+}
+
+/// Persists social-login toggles from app-version-check (with safe defaults when admin has them off).
+void applySocialLoginSettingsFromApi(dynamic json) {
+  if (json is! Map) {
+    return;
+  }
+  final map = Map<String, dynamic>.from(json);
+  var google = _toInt(map['is_google_login'], 0);
+  var facebook = _toInt(map['is_facebook_login'], 0);
+  var apple = _toInt(map['is_apple_login'], 0);
+  var finger = _toInt(map['is_finger_login'], 0);
+
+  if (google == 0 && facebook == 0 && apple == 0 && finger == 0) {
+    google = 1;
+    facebook = 1;
+    finger = 1;
+    if (Platform.isIOS) {
+      apple = 1;
+    }
+  }
+
+  putDataInSettingBox(hiveIsGoogleAllow, google);
+  putDataInSettingBox(hiveIsFaceBookAllow, facebook);
+  putDataInSettingBox(hiveIsAppleAllow, apple);
+  putDataInSettingBox(hiveIsFingerAllow, finger);
 }
 
 bool isExpresoMobileEnabled() =>

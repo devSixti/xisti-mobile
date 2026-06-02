@@ -51,10 +51,7 @@ class SplashBloc extends Bloc {
         if (!context.mounted) return;
         if (isApiStatus(context, response.status, message, true)) {
           setAuthKey(response.appKey ?? "");
-          putDataInSettingBox(hiveIsGoogleAllow, response.isGoogleLogin ?? 0);
-          putDataInSettingBox(hiveIsFaceBookAllow, response.isFacebookLogin ?? 0);
-          putDataInSettingBox(hiveIsAppleAllow, response.isAppleLogin ?? 0);
-          putDataInSettingBox(hiveIsFingerAllow, response.isFingerLogin ?? 0);
+          applySocialLoginSettingsFromApi(response.toJson());
           applyAppMobileSettingsFromJson(response.toJson());
           _subject.sink.add(ApiResponse.completed(response));
           openForceFullyUpdateDialog(response.appVersion ?? "0", response.isForcefullyUpdate ?? 0);

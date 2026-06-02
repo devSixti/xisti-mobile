@@ -11,6 +11,7 @@ import '../../../commonView/scaffold_with_safe_area.dart';
 import '../../../commonView/socialLogin/social_login.dart';
 import '../../../hive/hive_helper.dart';
 import '../../../networking/api_response.dart';
+import '../../../utils/app_mobile_settings.dart';
 import '../../../utils/utils.dart';
 import '../../../utils/validator.dart';
 import 'login_bloc.dart';
@@ -29,7 +30,23 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   void didChangeDependencies() {
     _bloc ??= LoginBloc(context);
+    if (_ensureSocialLoginFlags()) {
+      setState(() {});
+    }
     super.didChangeDependencies();
+  }
+
+  bool _ensureSocialLoginFlags() {
+    final noneEnabled =
+        getIntFromSettingBox(hiveIsGoogleAllow) == 0 &&
+        getIntFromSettingBox(hiveIsFaceBookAllow) == 0 &&
+        getIntFromSettingBox(hiveIsAppleAllow) == 0 &&
+        getIntFromSettingBox(hiveIsFingerAllow) == 0;
+    if (noneEnabled) {
+      applySocialLoginSettingsFromApi(const {});
+      return true;
+    }
+    return false;
   }
 
   @override
