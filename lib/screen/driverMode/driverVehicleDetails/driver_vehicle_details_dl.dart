@@ -45,8 +45,8 @@ class DriverVehicleListPojo {
 
 /// service_id : 1
 /// service_name : "Taxi"
-/// service_icon : "https://staging-fox-drive.startuptrinity.com/assets/images/vehicle-service/32440820253005.png?v=0.4"
-/// vehicle_type_list : [{"vehicle_type_id":1,"vehicle_type_name":"Hatchback","vehicle_icon":"https://staging-fox-drive.startuptrinity.com/assets/images/service-category/transport-service-type/209151420200710.png?v=0.4"},{"vehicle_type_id":2,"vehicle_type_name":"SUV","vehicle_icon":"https://staging-fox-drive.startuptrinity.com/assets/images/service-category/transport-service-type/231141420200710.png?v=0.4"},{"vehicle_type_id":3,"vehicle_type_name":"Luxury","vehicle_icon":"https://staging-fox-drive.startuptrinity.com/assets/images/service-category/transport-service-type/251141420200710.png?v=0.4"},{"vehicle_type_id":4,"vehicle_type_name":"Sedan","vehicle_icon":"https://staging-fox-drive.startuptrinity.com/assets/images/service-category/transport-service-type/219141420200710.png?v=0.4"}]
+/// service_icon : "https://admin.xistiapp.com/assets/images/vehicle-service/32440820253005.png?v=0.4"
+/// vehicle_type_list : [{"vehicle_type_id":1,"vehicle_type_name":"Hatchback","vehicle_icon":"https://admin.xistiapp.com/assets/images/service-category/transport-service-type/209151420200710.png?v=0.4"},{"vehicle_type_id":2,"vehicle_type_name":"SUV","vehicle_icon":"https://admin.xistiapp.com/assets/images/service-category/transport-service-type/231141420200710.png?v=0.4"},{"vehicle_type_id":3,"vehicle_type_name":"Luxury","vehicle_icon":"https://admin.xistiapp.com/assets/images/service-category/transport-service-type/251141420200710.png?v=0.4"},{"vehicle_type_id":4,"vehicle_type_name":"Sedan","vehicle_icon":"https://admin.xistiapp.com/assets/images/service-category/transport-service-type/219141420200710.png?v=0.4"}]
 
 class ServiceList {
   ServiceList({
@@ -132,7 +132,7 @@ class ServiceList {
 
 /// vehicle_type_id : 1
 /// vehicle_type_name : "Hatchback"
-/// vehicle_icon : "https://staging-fox-drive.startuptrinity.com/assets/images/service-category/transport-service-type/209151420200710.png?v=0.4"
+/// vehicle_icon : "https://admin.xistiapp.com/assets/images/service-category/transport-service-type/209151420200710.png?v=0.4"
 
 class VehicleTypeList {
   VehicleTypeList({int? vehicleTypeId, String? vehicleTypeName, String? vehicleIcon}) {
@@ -176,7 +176,7 @@ class VehicleTypeList {
 /// model_year : 2018
 /// vehicle_plat_no : "asdfasdf"
 /// vehicle_color : "asdfasd"
-/// vehicle_image : "https://staging-fox-drive.startuptrinity.com/assets/images/provider-vehicle-image/9435301202504061.jpg"
+/// vehicle_image : "https://admin.xistiapp.com/assets/images/provider-vehicle-image/9435301202504061.jpg"
 
 class VehicleDetailsPojo {
   VehicleDetailsPojo({
@@ -303,7 +303,7 @@ class VehicleDetailsPojo {
 /// status : 1
 /// message : "Success"
 /// message_code : 1
-/// vehicle_type_icon : "https://fox-drive.startuptrinity.com/assets/images/service-category/transport-service-type/33101220230606.png"
+/// vehicle_type_icon : "https://admin.xistiapp.com/assets/images/service-category/transport-service-type/33101220230606.png"
 /// vehicle_type_name : "Sports"
 /// is_driver_type : 1
 /// driver_vehicle_status : 1

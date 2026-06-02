@@ -30,7 +30,7 @@ class ProfilePojo {
 /// country_code : "+1"
 /// contact_number : "47"
 /// emergency_contact : "5555"
-/// profile_image : "https://fox-drive.startuptrinity.com/assets/images/profile-images/customer/3472612202304073.jpg?v=0.4"
+/// profile_image : "https://admin.xistiapp.com/assets/images/profile-images/customer/3472612202304073.jpg?v=0.4"
 
 class UserDetails {
   UserDetails({

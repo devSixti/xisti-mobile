@@ -141,25 +141,25 @@ class AppLocalizationsEn extends AppLocalizations {
   String get preferenceMsg => 'You can change these settings later in the app.';
 
   @override
-  String get obTitle1 => 'Select Your Destination';
+  String get obTitle1 => 'Your city, your route';
 
   @override
   String get obMsg1 =>
-      'With just a few taps, you can choose , set your drop-off, and be on your way to wherever your destination calls.';
+      'Set your destination in Medellín and match with an urban driver in minutes.';
 
   @override
-  String get obTitle2 => 'Make an Offer or Negotiate';
+  String get obTitle2 => 'Negotiate your fare';
 
   @override
   String get obMsg2 =>
-      'Make an Offer or Negotiate with available drivers, ensuring you get a fair fare every time.';
+      'Bid in 500 COP steps and agree a fair urban ride price.';
 
   @override
-  String get obTitle3 => 'Have a comfortable ride';
+  String get obTitle3 => 'Ride with confidence';
 
   @override
   String get obMsg3 =>
-      'Reach your destination with ease and in comfort, ensuring a pleasant travel experience.';
+      'Verified drivers, flexible payments, and XISTI: Easy and Safe.';
 
   @override
   String get login => 'Login';

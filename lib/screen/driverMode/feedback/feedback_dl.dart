@@ -47,7 +47,7 @@ class FeedbackPojo {
 /// service_cat_id : 2
 /// ride_id : 919
 /// user_name : "Hardik Talaviya"
-/// user_profile_image : "https://fox-jek.startuptrinity.com/assets/images/profile-images/customer/9065615202001128.jpg"
+/// user_profile_image : "https://admin.xistiapp.com/assets/images/profile-images/customer/9065615202001128.jpg"
 /// rating : 4
 /// comment : ""
 /// service_category_name : "TAXI RIDE"

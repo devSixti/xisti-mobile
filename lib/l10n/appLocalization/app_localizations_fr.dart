@@ -144,25 +144,25 @@ class AppLocalizationsFr extends AppLocalizations {
       'Vous pouvez modifier ces paramètres ultérieurement dans l\'application.';
 
   @override
-  String get obTitle1 => 'Sélectionnez votre destination';
+  String get obTitle1 => 'Votre ville, votre trajet';
 
   @override
   String get obMsg1 =>
-      'En quelques clics, vous pouvez choisir, définir votre lieu de dépôt et être en route vers votre destination.';
+      'Définissez votre destination à Medellín et trouvez un chauffeur urbain en quelques minutes.';
 
   @override
-  String get obTitle2 => 'Faire une offre ou négocier';
+  String get obTitle2 => 'Négociez votre tarif';
 
   @override
   String get obMsg2 =>
-      'Faites une offre ou négociez avec les chauffeurs disponibles, en vous assurant d\'obtenir un tarif équitable à chaque fois.';
+      'Proposez par paliers de 500 COP et convenez d\'un prix urbain équitable.';
 
   @override
-  String get obTitle3 => 'Profitez d\'un voyage confortable';
+  String get obTitle3 => 'Voyagez en confiance';
 
   @override
   String get obMsg3 =>
-      'Atteignez votre destination en toute simplicité et confort, garantissant une expérience de voyage agréable.';
+      'Chauffeurs vérifiés, paiements flexibles et la confiance XISTI : Facile et Sûr.';
 
   @override
   String get login => 'Se connecter';

@@ -99,9 +99,9 @@ class DriverRideHistoryPojo {
 
 /// ride_id : 23
 /// user_name : "Test"
-/// user_profile : "https://fox-drive.startuptrinity.com/assets/images/profile-images/customer/4261206202313063.jpg?v=0.4"
+/// user_profile : "https://admin.xistiapp.com/assets/images/profile-images/customer/4261206202313063.jpg?v=0.4"
 /// driver_pay_settle_status : 0
-/// vehicle_type_icon : "https://fox-drive.startuptrinity.com/assets/images/service-category/transport-service-type/231141420200710.png"
+/// vehicle_type_icon : "https://admin.xistiapp.com/assets/images/service-category/transport-service-type/231141420200710.png"
 /// ride_status : 9
 /// ride_date_time : "2023-06-15 06:07:56"
 /// ride_amount : 2.82

@@ -6,7 +6,7 @@ import '../../../utils/service_mode_util.dart';
 /// status : 1
 /// message : "Success"
 /// message_code : 1
-/// services : [{"service_id":1,"service_name":"Taxi","cost_for_km":2,"min_offer_fare_amount":10,"service_icon":"https://fox-drive.startuptrinity.com/assets/images/vehicle-service/49361120230606.png?v=0.4"},{"service_id":3,"service_name":"Bike","cost_for_km":1,"min_offer_fare_amount":8,"service_icon":"https://fox-drive.startuptrinity.com/assets/images/vehicle-service/31371120230606.png?v=0.4"}]
+/// services : [{"service_id":1,"service_name":"Taxi","cost_for_km":2,"min_offer_fare_amount":10,"service_icon":"https://admin.xistiapp.com/assets/images/vehicle-service/49361120230606.png?v=0.4"},{"service_id":3,"service_name":"Bike","cost_for_km":1,"min_offer_fare_amount":8,"service_icon":"https://admin.xistiapp.com/assets/images/vehicle-service/31371120230606.png?v=0.4"}]
 
 class ServiceTypeModel {
   ServiceTypeModel({
@@ -215,7 +215,7 @@ class DriverList {
 /// service_name : "Taxi"
 /// cost_for_km : 2
 /// min_offer_fare_amount : 10
-/// service_icon : "https://fox-drive.startuptrinity.com/assets/images/vehicle-service/49361120230606.png?v=0.4"
+/// service_icon : "https://admin.xistiapp.com/assets/images/vehicle-service/49361120230606.png?v=0.4"
 
 class ServiceTypeItem {
   ServiceTypeItem({

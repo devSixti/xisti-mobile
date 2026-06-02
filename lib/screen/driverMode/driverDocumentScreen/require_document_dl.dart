@@ -4,7 +4,7 @@ import 'dart:io';
 /// message : "success!"
 /// message_code : 1
 /// doc_status : 1
-/// document_list : [{"document_id":2,"service_category_id":2,"document_name":"Driver’s License","document_file":"https://fox-jek.startuptrinity.com/assets/images/provider-documents/4235901202003127.jpg","document_status":0},{"document_id":13,"service_category_id":2,"document_name":"Insurance","document_file":"","document_status":3}]
+/// document_list : [{"document_id":2,"service_category_id":2,"document_name":"Driver’s License","document_file":"https://admin.xistiapp.com/assets/images/provider-documents/4235901202003127.jpg","document_status":0},{"document_id":13,"service_category_id":2,"document_name":"Insurance","document_file":"","document_status":3}]
 
 class RequireDocument {
   RequireDocument({this.status, this.message, this.messageCode, this.driverDocStatus, this.isDriverType, this.documentList});
@@ -46,7 +46,7 @@ class RequireDocument {
 
 /// document_id : 1
 /// document_name : "Driver’s License"
-/// document_file : "https://staging-fox-drive.startuptrinity.com/assets/images/provider-documents/8165301202504064.jpg"
+/// document_file : "https://admin.xistiapp.com/assets/images/provider-documents/8165301202504064.jpg"
 /// contains_expiry : 1
 /// document_expire_date : "2025-06-04"
 /// document_status : 0

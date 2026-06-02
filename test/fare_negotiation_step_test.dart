@@ -8,7 +8,7 @@ import 'package:hive/hive.dart';
 
 void main() {
   setUpAll(() async {
-    final dir = Directory.systemTemp.createTempSync('app_zimo_hive_test');
+    final dir = Directory.systemTemp.createTempSync('app_xisti_hive_test');
     Hive.init(dir.path);
     await initBox();
     await putDataInSettingBox(hiveSelectedCurrency, defaultCurrency);

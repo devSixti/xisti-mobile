@@ -353,37 +353,37 @@ abstract class AppLocalizations {
   /// No description provided for @obTitle1.
   ///
   /// In en, this message translates to:
-  /// **'Select Your Destination'**
+  /// **'Your city, your route'**
   String get obTitle1;
 
   /// No description provided for @obMsg1.
   ///
   /// In en, this message translates to:
-  /// **'With just a few taps, you can choose , set your drop-off, and be on your way to wherever your destination calls.'**
+  /// **'Set your destination in Medellín and match with an urban driver in minutes.'**
   String get obMsg1;
 
   /// No description provided for @obTitle2.
   ///
   /// In en, this message translates to:
-  /// **'Make an Offer or Negotiate'**
+  /// **'Negotiate your fare'**
   String get obTitle2;
 
   /// No description provided for @obMsg2.
   ///
   /// In en, this message translates to:
-  /// **'Make an Offer or Negotiate with available drivers, ensuring you get a fair fare every time.'**
+  /// **'Bid in 500 COP steps and agree a fair urban ride price.'**
   String get obMsg2;
 
   /// No description provided for @obTitle3.
   ///
   /// In en, this message translates to:
-  /// **'Have a comfortable ride'**
+  /// **'Ride with confidence'**
   String get obTitle3;
 
   /// No description provided for @obMsg3.
   ///
   /// In en, this message translates to:
-  /// **'Reach your destination with ease and in comfort, ensuring a pleasant travel experience.'**
+  /// **'Verified drivers, flexible payments, and XISTI: Easy and Safe.'**
   String get obMsg3;
 
   /// No description provided for @login.

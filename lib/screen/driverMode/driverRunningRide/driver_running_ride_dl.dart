@@ -34,7 +34,7 @@ class DriverRunningRidePojo {
 /// additional_remark : ""
 /// user_fcm_token : "cjNMbEL4TBucWTxTVhHAYa:APA91bFE7zXzQQaLHUBA5FmReUfkypD5qiu_IkLVRJ9woyRBg7GWSmrkwS9eaeep6T9JOHIXqgJnkzQZGQrMEqgXON1bA0ijG7z69dYbaGMRkJSRFlWMMvjjhfxTa8EiA3IzRNBPhxWN"
 /// booking_no : 9125607202314067
-/// user_profile_image : "https://fox-drive.startuptrinity.com/assets/images/profile-images/customer/4261206202313063.jpg"
+/// user_profile_image : "https://admin.xistiapp.com/assets/images/profile-images/customer/4261206202313063.jpg"
 /// user_name : "Test"
 /// contact_number : "+17532"
 /// pickup_datetime : "2023-06-14 07:56:12"

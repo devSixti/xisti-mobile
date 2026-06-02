@@ -144,25 +144,25 @@ class AppLocalizationsPt extends AppLocalizations {
       'Você pode alterar essas configurações mais tarde no aplicativo.';
 
   @override
-  String get obTitle1 => 'Selecione seu Destino';
+  String get obTitle1 => 'Sua cidade, sua rota';
 
   @override
   String get obMsg1 =>
-      'Com apenas alguns toques, você pode escolher, definir seu ponto de destino e seguir para onde quiser.';
+      'Defina seu destino em Medellín e encontre um motorista urbano em minutos.';
 
   @override
-  String get obTitle2 => 'Faça uma Oferta ou Negocie';
+  String get obTitle2 => 'Negocie sua tarifa';
 
   @override
   String get obMsg2 =>
-      'Faça uma oferta ou negocie com os motoristas disponíveis, garantindo uma tarifa justa em todas as vezes.';
+      'Ofereça em passos de 500 COP e combine um preço justo de mobilidade urbana.';
 
   @override
-  String get obTitle3 => 'Tenha uma viagem confortável';
+  String get obTitle3 => 'Viaje com confiança';
 
   @override
   String get obMsg3 =>
-      'Chegue ao seu destino com facilidade e conforto, garantindo uma experiência de viagem agradável.';
+      'Motoristas verificados, pagamentos flexíveis e a confiança XISTI: Fácil e Seguro.';
 
   @override
   String get login => 'Entrar';

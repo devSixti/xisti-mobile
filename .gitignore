@@ -60,5 +60,6 @@ android/*.keystore
 android/xisti-signing.local.env
 android/oauth-client-secrets/
 android/*.base64.txt
-dist/
-**/google-services.json.bak
+**/ios/Flutter/ephemeral/
+**/ios/Flutter/Generated.xcconfig
+**/ios/Flutter/flutter_export_environment.sh
