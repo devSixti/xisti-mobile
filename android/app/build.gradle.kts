@@ -1,4 +1,6 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import java.util.Properties
+import java.io.FileInputStream
 
 plugins {
     id("com.android.application")
@@ -52,19 +54,33 @@ android {
 
     signingConfigs {
         create("release") {
-            val keystorePath = System.getenv("ANDROID_KEYSTORE_PATH")
-            if (!keystorePath.isNullOrBlank()) {
-                storeFile = file(keystorePath)
-                storePassword = System.getenv("ANDROID_KEYSTORE_PASSWORD") ?: ""
-                keyAlias = System.getenv("ANDROID_KEY_ALIAS") ?: ""
-                keyPassword = System.getenv("ANDROID_KEY_PASSWORD") ?: ""
+            val keystoreProperties = Properties()
+            val keystorePropertiesFile = rootProject.file("key.properties")
+            val envKeystorePath = System.getenv("ANDROID_KEYSTORE_PATH")
+
+            when {
+                !envKeystorePath.isNullOrBlank() -> {
+                    storeFile = file(envKeystorePath)
+                    storePassword = System.getenv("ANDROID_KEYSTORE_PASSWORD") ?: ""
+                    keyAlias = System.getenv("ANDROID_KEY_ALIAS") ?: ""
+                    keyPassword = System.getenv("ANDROID_KEY_PASSWORD") ?: ""
+                }
+                keystorePropertiesFile.exists() -> {
+                    keystoreProperties.load(FileInputStream(keystorePropertiesFile))
+                    storeFile = file(keystoreProperties["storeFile"] as String)
+                    storePassword = keystoreProperties["storePassword"] as String
+                    keyAlias = keystoreProperties["keyAlias"] as String
+                    keyPassword = keystoreProperties["keyPassword"] as String
+                }
             }
         }
     }
 
     buildTypes {
         release {
-            signingConfig = if (!System.getenv("ANDROID_KEYSTORE_PATH").isNullOrBlank()) {
+            val hasReleaseSigning = !System.getenv("ANDROID_KEYSTORE_PATH").isNullOrBlank()
+                || rootProject.file("key.properties").exists()
+            signingConfig = if (hasReleaseSigning) {
                 signingConfigs.getByName("release")
             } else {
                 signingConfigs.getByName("debug")

@@ -56,4 +56,7 @@ app.*.map.json
 **/service_account.json
 !**/service_account.json.example
 android/key.properties
+android/*.keystore
+android/xisti-signing.local.env
+android/oauth-client-secrets/
 **/google-services.json.bak

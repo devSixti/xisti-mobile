@@ -1,22 +1,47 @@
 {
   "project_info": {
-    "project_number": "REPLACE_AFTER_FLUTTERFIRE",
-    "firebase_url": "https://REPLACE_ME-default-rtdb.firebaseio.com",
-    "project_id": "REPLACE_ME",
-    "storage_bucket": "REPLACE_ME.firebasestorage.app"
+    "project_number": "980764435052",
+    "firebase_url": "https://xisti-app-ad901-default-rtdb.firebaseio.com",
+    "project_id": "xisti-app-ad901",
+    "storage_bucket": "xisti-app-ad901.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:REPLACE:android:REPLACE",
+        "mobilesdk_app_id": "1:980764435052:android:4f3b06c480ee148e87ee49",
         "android_client_info": {
           "package_name": "com.app.xisti"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "980764435052-5ddt7lsm69u97degn21tgfiklte1e3v3.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.app.xisti",
+            "certificate_hash": "3c9bd10970543e001eddbd3cedf14de79c8095b6"
+          }
+        },
+        {
+          "client_id": "980764435052-gfbjgjb5h69nnnpja5v9t3qd0ihm61ub.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.app.xisti",
+            "certificate_hash": "6e0ad22c71a5d3bee5e41d3182aa524ea648aa0b"
+          }
+        },
+        {
+          "client_id": "980764435052-q2dl4gn4823lmfioklsvajs7k73c8sq6.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.app.xisti",
+            "certificate_hash": "fd32ac8eee0f7f39edacd460fc0d1f71e2eeb003"
+          }
+        }
+      ],
       "api_key": [
         {
-          "current_key": "REPLACE_ME"
+          "current_key": "AIzaSyCXWKfKbBGa0HCF8p084SXOfsKt96VZY8g"
         }
       ],
       "services": {

@@ -1,4 +1,4 @@
-// PLACEHOLDER — Regenerar con: flutterfire configure --project=xisti-app
+// Generated from Firebase console configs (project: xisti-app-ad901).
 // ignore_for_file: type=lint
 import 'package:firebase_core/firebase_core.dart' show FirebaseOptions;
 import 'package:flutter/foundation.dart'
@@ -7,7 +7,9 @@ import 'package:flutter/foundation.dart'
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
-      throw UnsupportedError('Configure Firebase for web via flutterfire configure.');
+      throw UnsupportedError(
+        'Configure Firebase for web via flutterfire configure.',
+      );
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
@@ -22,22 +24,21 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'REPLACE_ME',
-    appId: '1:REPLACE:android:REPLACE',
-    messagingSenderId: 'REPLACE',
-    projectId: 'REPLACE_ME',
-    databaseURL: 'https://REPLACE_ME-default-rtdb.firebaseio.com',
-    storageBucket: 'REPLACE_ME.firebasestorage.app',
+    apiKey: 'AIzaSyCXWKfKbBGa0HCF8p084SXOfsKt96VZY8g',
+    appId: '1:980764435052:android:4f3b06c480ee148e87ee49',
+    messagingSenderId: '980764435052',
+    projectId: 'xisti-app-ad901',
+    databaseURL: 'https://xisti-app-ad901-default-rtdb.firebaseio.com',
+    storageBucket: 'xisti-app-ad901.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'REPLACE_ME',
-    appId: '1:REPLACE:ios:REPLACE',
-    messagingSenderId: 'REPLACE',
-    projectId: 'REPLACE_ME',
-    databaseURL: 'https://REPLACE_ME-default-rtdb.firebaseio.com',
-    storageBucket: 'REPLACE_ME.firebasestorage.app',
-    iosClientId: 'REPLACE.apps.googleusercontent.com',
+    apiKey: 'AIzaSyA7a_ZtJkpH2xBm7ChzzCUXdOvbbc4U-ts',
+    appId: '1:980764435052:ios:42e8f22a7615f00d87ee49',
+    messagingSenderId: '980764435052',
+    projectId: 'xisti-app-ad901',
+    databaseURL: 'https://xisti-app-ad901-default-rtdb.firebaseio.com',
+    storageBucket: 'xisti-app-ad901.firebasestorage.app',
     iosBundleId: 'com.app.xisti',
   );
 }
