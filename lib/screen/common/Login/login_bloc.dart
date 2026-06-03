@@ -30,6 +30,9 @@ class LoginBloc extends Bloc {
     String? countryCode,
     required String phoneNum,
   }) async {
+    if (loginType == LoginType.email) {
+      clearPendingSignupData();
+    }
     if (await isNetworkConnected(
       onRetryPressedCallApi: () {
         loginApiCall(loginType: loginType, phoneNum: phoneNum, name: name, countryCode: countryCode, loginId: loginId, profileImg: profileImg);

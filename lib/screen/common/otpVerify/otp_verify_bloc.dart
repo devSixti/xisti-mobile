@@ -43,9 +43,14 @@ class OtpVerifyBloc extends Bloc {
         if (!context.mounted) return;
         if (isApiStatus(context, response.status ?? 0, message, true, messageCode: response.messageCode ?? 0)) {
           putDataInSettingBox(hiveUserVerified, 1);
-          if (getBoolFromSettingBox(hivePendingSignupAfterOtp)) {
+          final pendingSocialSignup = getBoolFromSettingBox(hivePendingSignupAfterOtp);
+          final registrationComplete = (response.isRegister ?? 0) == 1;
+          if (pendingSocialSignup && !registrationComplete) {
             await _completePendingSignup();
           } else {
+            if (pendingSocialSignup) {
+              clearPendingSignupData();
+            }
             manageLoginResponse(context, response);
           }
         } else {
