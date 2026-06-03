@@ -184,7 +184,7 @@ class ServiceModeKind {
     }
   }
 
-  /// Envío / Encomiendas: moto, carro, bici, motoratón (not single service card).
+  /// Envío / Encomiendas: moto, carro y motoratón (opciones desde delivery_vehicle_options).
   static List<ServiceTypeItem> serviceItemsFromDeliveryOptions(
     List<DeliveryVehicleOption> options, {
     String serviceMode = delivery,

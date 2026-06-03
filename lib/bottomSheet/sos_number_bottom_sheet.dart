@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -6,13 +8,22 @@ import '../commonView/custom_rounded_button.dart';
 import '../commonView/scaffold_with_safe_area.dart';
 import '../hive/hive_helper.dart';
 import '../networking/base_dl.dart';
+import '../networking/sos_trigger_log_repo.dart';
 import '../utils/phone_util.dart';
 import '../utils/utils.dart';
 
+class SosTriggerContext {
+  final int? rideId;
+  final String userRole;
+
+  const SosTriggerContext({this.rideId, this.userRole = 'passenger'});
+}
+
 class SosNumberBottomSheet extends StatefulWidget {
   final List<SosContactList> sosNumber;
+  final SosTriggerContext? triggerContext;
 
-  const SosNumberBottomSheet({super.key, required this.sosNumber});
+  const SosNumberBottomSheet({super.key, required this.sosNumber, this.triggerContext});
 
   @override
   State<SosNumberBottomSheet> createState() => _SosNumberBottomSheetState();
@@ -132,7 +143,20 @@ class _SosNumberBottomSheetState extends State<SosNumberBottomSheet> {
                         : () async {
                           if (!isBottomSheetOpen) {
                             isBottomSheetOpen = true;
-                            openUrl("tel:${selectedValue?.countryCode}${selectedValue?.contactNumber}");
+                            final contact = selectedValue!;
+                            openUrl("tel:${contact.countryCode}${contact.contactNumber}");
+                            final ctx = widget.triggerContext;
+                            if (ctx != null) {
+                              unawaited(
+                                SosTriggerLogRepo().logTrigger(
+                                  rideId: ctx.rideId,
+                                  userRole: ctx.userRole,
+                                  contactName: contact.name,
+                                  countryCode: contact.countryCode,
+                                  contactNumber: contact.contactNumber,
+                                ),
+                              );
+                            }
                             await Future.delayed(const Duration(milliseconds: 1000));
                             isBottomSheetOpen = false;
                           }
@@ -182,7 +206,11 @@ List<SosContactList> mergeUserEmergencyIntoSosList(List<SosContactList> sosConta
   ];
 }
 
-void openSosBottomSheet(BuildContext context, List<SosContactList> sosContactList) {
+void openSosBottomSheet(
+  BuildContext context,
+  List<SosContactList> sosContactList, {
+  SosTriggerContext? triggerContext,
+}) {
   final mergedContacts = mergeUserEmergencyIntoSosList(sosContactList);
   showModalBottomSheet(
     context: context,
@@ -195,7 +223,7 @@ void openSosBottomSheet(BuildContext context, List<SosContactList> sosContactLis
         duration: const Duration(milliseconds: 150),
         curve: Curves.easeOut,
         padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom, top: MediaQueryData.fromView(View.of(context)).padding.top + 10.h),
-        child: SosNumberBottomSheet(sosNumber: mergedContacts),
+        child: SosNumberBottomSheet(sosNumber: mergedContacts, triggerContext: triggerContext),
       );
     },
   );

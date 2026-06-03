@@ -156,6 +156,7 @@ class ApiConst {
 
   //Running Ride
   static const endPointCancelRide = "cancel-ride";
+  static const endPointLogSosTrigger = "log-sos-trigger";
 
   //Manage Card
   static const String endPointCardList = "card-list";
@@ -245,6 +246,9 @@ class ApiParam {
 
   //Ride Detail
   static const paramRideId = "ride_id";
+  static const paramUserRole = "user_role";
+  static const paramContactName = "contact_name";
+  static const paramCountryCode = "country_code";
 
   //OfferRide
   static const paramServiceId = "service_id";

@@ -77,14 +77,14 @@ class ServiceModeSelector extends StatelessWidget {
   String _subtitleFor(String mode) {
     switch (mode) {
       case ServiceModeKind.delivery:
-        return 'Paquetes';
+        return 'Paquetes en Medellín';
       case ServiceModeKind.expreso:
-        return 'Larga distancia';
+        return 'Intermunicipal';
       case ServiceModeKind.encomiendas:
-        return 'Compras';
+        return 'Compras por ti';
       case ServiceModeKind.transport:
       default:
-        return 'Movilidad';
+        return 'Tu trayecto, tus reglas';
     }
   }
 

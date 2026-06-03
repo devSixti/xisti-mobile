@@ -268,7 +268,11 @@ class _DriverRunningRideState extends State<DriverRunningRide> {
       alignment: AlignmentDirectional.bottomEnd,
       child: GestureDetector(
         onTap: () {
-          openSosBottomSheet(context, sosContactList);
+          openSosBottomSheet(
+            context,
+            sosContactList,
+            triggerContext: SosTriggerContext(rideId: widget.rideId, userRole: 'driver'),
+          );
         },
         child: Container(
           margin: EdgeInsetsDirectional.only(end: commonHorizontalPadding, bottom: 10.h),

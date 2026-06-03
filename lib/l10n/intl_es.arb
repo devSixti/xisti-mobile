@@ -285,7 +285,7 @@
   "enterContactOrEmailToSearchPerson": "Ingresa el número o correo para buscar a la persona.",
   "proceedToAddMoney": "Proceder a agregar dinero",
   "chooseAmount": "Elegir monto",
-  "walletMinTopupNotice": "La recarga mínima siempre es $13.000 COP.",
+  "walletMinTopupNotice": "Recarga mínima $13.000 COP. Comisión XISTI 8% — más margen para conductores.",
   "pleaseEnterAmount": "Por favor ingresa o selecciona el monto.",
   "walletAddSuccessful": "Dinero agregado a la billetera con éxito",
   "invalidRequestCashOutAmountMsg": "No puedes retirar más de tu saldo disponible",

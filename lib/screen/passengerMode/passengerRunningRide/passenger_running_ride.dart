@@ -327,7 +327,11 @@ class _PassengerRunningRideState extends State<PassengerRunningRide> {
       alignment: AlignmentDirectional.bottomEnd,
       child: GestureDetector(
         onTap: () {
-          openSosBottomSheet(context, sosContactList);
+          openSosBottomSheet(
+            context,
+            sosContactList,
+            triggerContext: SosTriggerContext(rideId: widget.rideId, userRole: 'passenger'),
+          );
         },
         child: Container(
           margin: EdgeInsetsDirectional.only(end: commonHorizontalPadding, bottom: 10.h),

@@ -285,7 +285,7 @@
   "enterContactOrEmailToSearchPerson": "Please enter the contact number or email to search for the person.",
   "proceedToAddMoney": "Proceed to add money",
   "chooseAmount": "Choose Amount",
-  "walletMinTopupNotice": "Minimum top-up is always COP 13,000.",
+  "walletMinTopupNotice": "Minimum top-up COP 13,000. XISTI commission is 8% — fair margin for drivers.",
   "pleaseEnterAmount": "Please enter or select the amount.",
   "walletAddSuccessful": "Wallet amount was added successfully",
   "invalidRequestCashOutAmountMsg": "You don't make cash out request more than your wallet balance",

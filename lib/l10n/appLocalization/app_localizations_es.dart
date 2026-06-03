@@ -911,7 +911,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get walletMinTopupNotice =>
-      'La recarga mínima siempre es \$13.000 COP.';
+      'Recarga mínima \$13.000 COP. Comisión XISTI 8% — más margen para conductores.';
 
   @override
   String get pleaseEnterAmount => 'Por favor ingresa o selecciona el monto.';
