@@ -6,8 +6,7 @@
     <string name="fb_login_protocol_scheme" translatable="false">fbREPLACE_ME</string>
     <string name="facebook_client_token" translatable="false">REPLACE_ME</string>
 
-    <!-- Reemplazar tras crear key Maps Android en GCP -->
-    <string name="google_api_key" translatable="false">REPLACE_ME</string>
+    <!-- google_api_key lo genera el plugin google-services desde google-services.json (no usar REPLACE_ME aquí) -->
 
     <!-- Web OAuth client (client_type 3) — también generado por google-services plugin -->
     <string name="default_web_client_id" translatable="false">980764435052-jvlsr21keklk5i5djg3giqqfv35054th.apps.googleusercontent.com</string>
