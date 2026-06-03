@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
-# Builds one debug APK in dist/ (replaces any previous *.apk).
+# Builds one debug APK under dist/emulador or dist/celular (replaces old APK in that folder).
 # Usage:
-#   ./scripts/build-qa-apk.sh          # teléfono físico (arm64, ~110 MB)
-#   ./scripts/build-qa-apk.sh emulator # emulador x86_64 (~110 MB, no fat 157 MB)
+#   ./scripts/build-qa-apk.sh              # teléfono físico → dist/celular/
+#   ./scripts/build-qa-apk.sh celular      # igual que arriba
+#   ./scripts/build-qa-apk.sh emulador     # emulador x86_64 → dist/emulador/
+#   ./scripts/build-qa-apk.sh emulator     # alias de emulador
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -10,26 +12,38 @@ cd "$ROOT"
 
 export PATH="${FLUTTER_ROOT:-$HOME/flutter}/bin:${ANDROID_HOME:-$HOME/Android/Sdk}/platform-tools:$PATH"
 
-TARGET="${1:-phone}"
+TARGET="${1:-celular}"
 OUT_NAME="xisti-debug-full-branding.apk"
 API_DOMAIN="${API_DOMAIN:-http://54.159.169.235}"
 
-mkdir -p dist
-rm -f dist/*.apk
+case "$TARGET" in
+  emulador|emulator)
+    DIST_DIR="dist/emulador"
+    PLATFORM_ARGS=(--target-platform android-x64)
+    SRC_ABI="app-x86_64-debug.apk"
+    ;;
+  celular|phone)
+    DIST_DIR="dist/celular"
+    PLATFORM_ARGS=(--target-platform android-arm64)
+    SRC_ABI="app-arm64-v8a-debug.apk"
+    ;;
+  *)
+    echo "Uso: $0 [celular|emulador]" >&2
+    exit 1
+    ;;
+esac
 
-echo "Building QA APK (target=$TARGET, API_DOMAIN=$API_DOMAIN)..."
-if [ "$TARGET" = "emulator" ]; then
-  flutter build apk --debug --split-per-abi \
-    --target-platform android-x64 \
-    --dart-define=API_DOMAIN="$API_DOMAIN"
-  SRC="build/app/outputs/flutter-apk/app-x86_64-debug.apk"
-else
-  flutter build apk --debug --split-per-abi \
-    --target-platform android-arm64 \
-    --dart-define=API_DOMAIN="$API_DOMAIN"
-  SRC="build/app/outputs/flutter-apk/app-arm64-v8a-debug.apk"
-fi
+mkdir -p "$DIST_DIR"
+rm -f "$DIST_DIR"/*.apk
+# Limpieza de layout antiguo (APK sueltos en dist/)
+rm -f dist/*.apk 2>/dev/null || true
 
-cp -f "$SRC" "dist/$OUT_NAME"
-ls -lh "dist/$OUT_NAME"
-echo "Done: dist/$OUT_NAME ($TARGET)"
+echo "Building QA APK → $DIST_DIR (API_DOMAIN=$API_DOMAIN)..."
+flutter build apk --debug --split-per-abi \
+  "${PLATFORM_ARGS[@]}" \
+  --dart-define=API_DOMAIN="$API_DOMAIN"
+
+SRC="build/app/outputs/flutter-apk/$SRC_ABI"
+cp -f "$SRC" "$DIST_DIR/$OUT_NAME"
+ls -lh "$DIST_DIR/$OUT_NAME"
+echo "Done: $DIST_DIR/$OUT_NAME"

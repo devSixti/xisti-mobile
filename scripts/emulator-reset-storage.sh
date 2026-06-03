@@ -27,4 +27,4 @@ emulator -avd "$AVD" -wipe-data -no-snapshot-load &
 echo "Espera a que arranque el teléfono virtual, luego:"
 echo "  adb wait-for-device"
 echo "  adb shell getprop sys.boot_completed   # debe devolver 1"
-echo "  adb install -r dist/xisti-debug-full-branding.apk"
+echo "  adb install -r dist/emulador/xisti-debug-full-branding.apk"

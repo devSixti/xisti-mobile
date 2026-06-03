@@ -62,6 +62,7 @@ android/oauth-client-secrets/
 android/*.base64.txt
 
 # QA debug APKs (regenerate with scripts/build-qa-apk.sh)
+dist/**/*.apk
 dist/*.apk
 **/ios/Flutter/ephemeral/
 **/ios/Flutter/Generated.xcconfig
