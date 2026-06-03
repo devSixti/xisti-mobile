@@ -317,19 +317,10 @@ String getRandomString(int length) {
 }
 
 Future<bool> isNetworkConnected({Function()? onRetryPressedCallApi}) async {
-  bool isConnected = false;
-  List<ConnectivityResult> connectivityResult = await (Connectivity().checkConnectivity());
-  if (connectivityResult.contains(ConnectivityResult.mobile)) {
-    isConnected = true;
-  } else if (connectivityResult.contains(ConnectivityResult.wifi)) {
-    isConnected = true;
-  } else if (connectivityResult.contains(ConnectivityResult.ethernet)) {
-    isConnected = true;
-  } else {
-    isConnected = false;
-  }
+  final connectivityResult = await Connectivity().checkConnectivity();
+  final isConnected = !connectivityResult.contains(ConnectivityResult.none);
   if (isConnected) {
-    return isConnected;
+    return true;
   } else {
     showInternetConnectivityLossSheet(
       navigatorKey.currentContext!,
@@ -337,9 +328,8 @@ Future<bool> isNetworkConnected({Function()? onRetryPressedCallApi}) async {
         return onRetryPressedCallApi?.call();
       },
     );
-    isConnected = false;
+    return false;
   }
-  return isConnected;
 }
 
 void setChangedLanguage(BuildContext context, String languageCode, {Function()? nextAction}) {

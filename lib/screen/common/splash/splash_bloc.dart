@@ -37,33 +37,36 @@ class SplashBloc extends Bloc {
   BehaviorSubject<ApiResponse<AppVersionCheckPojo>> get subject => _subject;
 
   Future<void> checkAppVersionApi() async {
-    if (await isNetworkConnected(
+    if (!await isNetworkConnected(
       onRetryPressedCallApi: () {
         checkAppVersionApi();
       },
     )) {
-      _subject.sink.add(ApiResponse.loading());
-      try {
-        var response = AppVersionCheckPojo.fromJson(await _splashRepo.appVersionCheckApi());
+      debugPrint('$tag checkAppVersionApi: no connectivity, using defaults');
+      _continueAfterBootstrapFailure();
+      return;
+    }
+    _subject.sink.add(ApiResponse.loading());
+    try {
+      var response = AppVersionCheckPojo.fromJson(await _splashRepo.appVersionCheckApi());
 
-        String message = getApiMsg(response.message);
+      String message = getApiMsg(response.message);
 
-        if (!context.mounted) return;
-        if (isApiStatus(context, response.status, message, true)) {
-          setAuthKey(response.appKey ?? "");
-          applySocialLoginSettingsFromApi(response.toJson());
-          applyAppMobileSettingsFromJson(response.toJson());
-          _subject.sink.add(ApiResponse.completed(response));
-          openForceFullyUpdateDialog(response.appVersion ?? "0", response.isForcefullyUpdate ?? 0);
-        } else {
-          _subject.sink.add(ApiResponse.error(message));
-          _continueAfterBootstrapFailure();
-        }
-      } catch (e) {
-        debugPrint('$tag checkAppVersionApi: $e');
-        _subject.sink.add(ApiResponse.error(e.toString()));
+      if (!context.mounted) return;
+      if (isApiStatus(context, response.status, message, true)) {
+        setAuthKey(response.appKey ?? "");
+        applySocialLoginSettingsFromApi(response.toJson());
+        applyAppMobileSettingsFromJson(response.toJson());
+        _subject.sink.add(ApiResponse.completed(response));
+        openForceFullyUpdateDialog(response.appVersion ?? "0", response.isForcefullyUpdate ?? 0);
+      } else {
+        _subject.sink.add(ApiResponse.error(message));
         _continueAfterBootstrapFailure();
       }
+    } catch (e) {
+      debugPrint('$tag checkAppVersionApi: $e');
+      _subject.sink.add(ApiResponse.error(e.toString()));
+      _continueAfterBootstrapFailure();
     }
   }
 
