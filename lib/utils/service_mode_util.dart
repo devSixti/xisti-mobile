@@ -17,7 +17,6 @@ class ServiceModeKind {
   static const Set<int> transportServiceIds = {
     ServiceType.taxi,
     ServiceType.bike,
-    ServiceType.rickshaw,
   };
 
   static const Set<int> deliveryServiceIds = {ServiceType.courier};
@@ -109,7 +108,23 @@ class ServiceModeKind {
           if (g.mode == encomiendas && !isEncomiendasMobileEnabled()) return false;
           return true;
         })
+        .map(_filterActiveVehicleServicesInGroup)
         .toList();
+  }
+
+  static ServiceModeGroup _filterActiveVehicleServicesInGroup(ServiceModeGroup g) {
+    if (g.mode != transport) {
+      return g;
+    }
+    final filtered = g.services
+        .where((s) => s.serviceId != ServiceType.rickshaw)
+        .toList();
+    return ServiceModeGroup(
+      mode: g.mode,
+      label: g.label,
+      displayOrder: g.displayOrder,
+      services: filtered,
+    );
   }
 
   /// Ensures Expreso / Encomiendas tabs exist when admin flags are on (single service per mode).
@@ -144,7 +159,9 @@ class ServiceModeKind {
   }
 
   static List<ServiceModeGroup> groupsFromFlatServices(List<ServiceTypeItem> flat) {
-    final transportServices = filterByMode(flat, transport);
+    final transportServices = filterByMode(flat, transport)
+        .where((s) => s.serviceId != ServiceType.rickshaw)
+        .toList();
     final deliveryServices = filterByMode(flat, delivery);
     final groups = <ServiceModeGroup>[];
     if (transportServices.isNotEmpty) {
@@ -184,7 +201,7 @@ class ServiceModeKind {
     }
   }
 
-  /// Envío / Encomiendas: moto, carro y motoratón (opciones desde delivery_vehicle_options).
+  /// Envío / Encomiendas: moto y carro (delivery_vehicle_options desde API).
   static List<ServiceTypeItem> serviceItemsFromDeliveryOptions(
     List<DeliveryVehicleOption> options, {
     String serviceMode = delivery,
