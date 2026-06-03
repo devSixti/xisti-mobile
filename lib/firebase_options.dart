@@ -43,9 +43,14 @@ class DefaultFirebaseOptions {
   );
 }
 
-/// Android may auto-init Firebase natively; avoid [core/duplicate-app] on second init.
+/// Android auto-inits Firebase natively before Dart; [Firebase.apps] can still be empty.
 Future<void> ensureFirebaseInitialized() async {
-  if (Firebase.apps.isEmpty) {
+  if (Firebase.apps.isNotEmpty) return;
+  try {
     await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  } on FirebaseException catch (e) {
+    if (e.code != 'duplicate-app') rethrow;
+  } catch (e) {
+    if (!e.toString().contains('duplicate-app')) rethrow;
   }
 }
