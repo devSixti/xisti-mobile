@@ -8,6 +8,8 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
+export PATH="${FLUTTER_ROOT:-$HOME/flutter}/bin:${ANDROID_HOME:-$HOME/Android/Sdk}/platform-tools:$PATH"
+
 TARGET="${1:-phone}"
 OUT_NAME="xisti-debug-full-branding.apk"
 API_DOMAIN="${API_DOMAIN:-http://54.159.169.235}"
