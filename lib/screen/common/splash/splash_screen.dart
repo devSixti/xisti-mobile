@@ -36,11 +36,17 @@ class _SplashScreenState extends State<SplashScreen> {
       body: SafeArea(
         top: false,
         child: Container(
-          decoration: const BoxDecoration(
-            image: DecorationImage(image: AssetImage("assets/images/splash_bg.png"), fit: BoxFit.cover),
-          ),
+          color: const Color(0xFF0B0B0B),
           child: Stack(
             children: [
+              Positioned.fill(
+                child: Image.asset(
+                  'assets/images/splash_bg.png',
+                  fit: BoxFit.cover,
+                  filterQuality: FilterQuality.medium,
+                  errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+                ),
+              ),
               Container(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
@@ -57,7 +63,17 @@ class _SplashScreenState extends State<SplashScreen> {
               Container(
                 alignment: AlignmentDirectional.center,
                 padding: EdgeInsetsDirectional.only(start: commonHorizontalPadding, end: commonHorizontalPadding, bottom: 150.h),
-                child: Image.asset(setImagesBasedOnTheme(context, 'splash_logo.png'), width: 280.w, fit: BoxFit.contain),
+                child: Image.asset(
+                  setImagesBasedOnTheme(context, 'splash_logo.png'),
+                  width: 280.w,
+                  fit: BoxFit.contain,
+                  filterQuality: FilterQuality.medium,
+                  errorBuilder: (_, __, ___) => Image.asset(
+                    'assets/images/xisti/logo_full.png',
+                    width: 200.w,
+                    fit: BoxFit.contain,
+                  ),
+                ),
               ),
             ],
           ),

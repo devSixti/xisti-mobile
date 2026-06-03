@@ -59,19 +59,26 @@ void main() async {
   await initSharedPreferences();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-  await initAppConfig();
   initFileDownloader();
+  checkAndSetGestureNavigation();
+  runApp(const MyApp());
+  unawaited(_bootstrapAfterFirstFrame());
+}
+
+/// Heavy init after first frame so splash UI paints immediately.
+Future<void> _bootstrapAfterFirstFrame() async {
   try {
-    final GoogleMapsFlutterPlatform mapsImplementation = GoogleMapsFlutterPlatform.instance;
-    if (mapsImplementation is GoogleMapsFlutterAndroid) {
-      await mapsImplementation.initializeWithRenderer(AndroidMapRenderer.latest);
+    if (Platform.isAndroid) {
+      final GoogleMapsFlutterPlatform mapsImplementation = GoogleMapsFlutterPlatform.instance;
+      if (mapsImplementation is GoogleMapsFlutterAndroid) {
+        await mapsImplementation.initializeWithRenderer(AndroidMapRenderer.latest);
+      }
     }
   } catch (e) {
     logd(e.toString());
   }
+  await initAppConfig();
   await _initPlayer();
-  checkAndSetGestureNavigation();
-  runApp(const MyApp());
 }
 
 Future<void> _initPlayer() async {
