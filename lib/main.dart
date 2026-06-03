@@ -57,7 +57,7 @@ void main() async {
 
   tz.initializeTimeZones();
   await initSharedPreferences();
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await ensureFirebaseInitialized();
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   initFileDownloader();
   checkAndSetGestureNavigation();
@@ -302,7 +302,7 @@ void backgroundCallback() {
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage notification) async {
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await ensureFirebaseInitialized();
   localTimeZone = (await FlutterTimezone.getLocalTimezone()).identifier;
   tz.initializeTimeZones();
   Map<String, dynamic> notificationData = notification.data;

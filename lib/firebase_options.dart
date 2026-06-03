@@ -1,6 +1,6 @@
 // Generated from Firebase console configs (project: xisti-app-ad901).
 // ignore_for_file: type=lint
-import 'package:firebase_core/firebase_core.dart' show FirebaseOptions;
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart'
     show defaultTargetPlatform, kIsWeb, TargetPlatform;
 
@@ -41,4 +41,11 @@ class DefaultFirebaseOptions {
     storageBucket: 'xisti-app-ad901.firebasestorage.app',
     iosBundleId: 'com.app.xisti',
   );
+}
+
+/// Android may auto-init Firebase natively; avoid [core/duplicate-app] on second init.
+Future<void> ensureFirebaseInitialized() async {
+  if (Firebase.apps.isEmpty) {
+    await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  }
 }
