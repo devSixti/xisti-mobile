@@ -18,10 +18,14 @@ export 'api_response.dart';
 class ApiBaseHelper {
   final Dio _dio = Dio();
 
-  ApiBaseHelper({String? baseUrl}) {
+  ApiBaseHelper({
+    String? baseUrl,
+    Duration? connectTimeout,
+    Duration? receiveTimeout,
+  }) {
     _dio.options.baseUrl = baseUrl ?? BaseUrl.baseUrlCustomer;
-    _dio.options.connectTimeout = const Duration(minutes: 3);
-    _dio.options.receiveTimeout = const Duration(minutes: 3);
+    _dio.options.connectTimeout = connectTimeout ?? const Duration(minutes: 3);
+    _dio.options.receiveTimeout = receiveTimeout ?? const Duration(minutes: 3);
     _dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) {

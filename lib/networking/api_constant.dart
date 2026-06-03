@@ -1,9 +1,11 @@
 import '../utils/utils.dart';
 
 class BaseUrl {
+  /// Override at build: `--dart-define=API_DOMAIN=https://admin.xistiapp.com`
+  /// Default uses EC2 until `admin.xistiapp.com` DNS is live.
   static const domain = String.fromEnvironment(
     'API_DOMAIN',
-    defaultValue: 'https://admin.xistiapp.com',
+    defaultValue: 'http://54.159.169.235',
   );
 
   static const endPointBaseUrlApi = "/api/";

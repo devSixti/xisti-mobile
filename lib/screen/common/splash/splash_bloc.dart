@@ -57,11 +57,20 @@ class SplashBloc extends Bloc {
           openForceFullyUpdateDialog(response.appVersion ?? "0", response.isForcefullyUpdate ?? 0);
         } else {
           _subject.sink.add(ApiResponse.error(message));
+          _continueAfterBootstrapFailure();
         }
       } catch (e) {
+        debugPrint('$tag checkAppVersionApi: $e');
         _subject.sink.add(ApiResponse.error(e.toString()));
+        _continueAfterBootstrapFailure();
       }
     }
+  }
+
+  void _continueAfterBootstrapFailure() {
+    if (!context.mounted) return;
+    applyBootstrapDefaultsWhenApiUnavailable();
+    openForceFullyUpdateDialog("0", 0);
   }
 
   Future<void> openForceFullyUpdateDialog(String versionName, int forcefullyUpdate) async {
@@ -238,7 +247,11 @@ class SplashBloc extends Bloc {
           }
         }
       } catch (e) {
-        debugPrint(e.toString());
+        debugPrint('$tag callPassengerRunningServiceApi: $e');
+        _timer = Timer(const Duration(milliseconds: 3000), () {
+          if (!context.mounted) return;
+          openScreenWithClearPrevious(context, const PassengerHome());
+        });
       }
     }
   }

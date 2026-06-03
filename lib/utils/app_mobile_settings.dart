@@ -60,6 +60,23 @@ void applyAppMobileSettingsFromJson(dynamic json) {
   }
 }
 
+/// Defaults when app-version-check is unreachable (DNS down, offline, etc.).
+void applyBootstrapDefaultsWhenApiUnavailable() {
+  applySocialLoginSettingsFromApi({
+    'is_google_login': 1,
+    'is_facebook_login': 1,
+    'is_apple_login': 1,
+    'is_finger_login': 1,
+  });
+  putDataInSettingBox(hiveFareNegotiationStep, kColombiaFareNegotiationStep);
+  putDataInSettingBox(hiveVatRateOnCommission, 19);
+  putDataInSettingBox(hiveAdminCommissionPercent, kDefaultAdminCommissionPercent);
+  putDataInSettingBox(hiveDriverCancelUntilStatus, 3);
+  putDataInSettingBox(hiveEnableExpresoMobile, 0);
+  putDataInSettingBox(hiveEnableEncomiendasMobile, 1);
+  putDataInSettingBox(hiveRequireCourierPackageDimensions, 0);
+}
+
 /// Persists social-login toggles from app-version-check (with safe defaults when admin has them off).
 void applySocialLoginSettingsFromApi(dynamic json) {
   if (json is! Map) {

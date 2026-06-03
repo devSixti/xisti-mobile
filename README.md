@@ -9,7 +9,8 @@ App Flutter única (pasajero + conductor) para **XISTI**.
 | Package Dart | `app_xisti` |
 | Android `applicationId` | `com.app.xisti` |
 | iOS bundle (configurar en Xcode) | `com.app.xisti` |
-| API producción | `https://admin.xistiapp.com/api/customer/` |
+| API producción | `https://admin.xistiapp.com/api/customer/` (cuando DNS esté activo) |
+| API debug default | `http://54.159.169.235/api/customer/` |
 | Tema | Oscuro urbano — verde neón `#39FF14`, morado `#9333EA` |
 
 ## Build
@@ -18,6 +19,8 @@ App Flutter única (pasajero + conductor) para **XISTI**.
 flutter pub get
 dart run flutter_launcher_icons
 dart run flutter_native_splash:create
+flutter build apk --debug
+# Cuando admin.xistiapp.com resuelva DNS:
 flutter build apk --release --dart-define=API_DOMAIN=https://admin.xistiapp.com
 ```
 

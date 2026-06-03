@@ -5,7 +5,10 @@ import '../../../networking/api_base_helper.dart';
 import '../../../utils/utils.dart';
 
 class SplashRepo {
-  final ApiBaseHelper _apiBaseHelper = ApiBaseHelper();
+  final ApiBaseHelper _apiBaseHelper = ApiBaseHelper(
+    connectTimeout: const Duration(seconds: 25),
+    receiveTimeout: const Duration(seconds: 25),
+  );
 
   Future getDriverRunningServiceApi() async {
     final response = await _apiBaseHelper.post(
