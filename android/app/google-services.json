@@ -1,7 +1,6 @@
 {
   "project_info": {
     "project_number": "980764435052",
-    "firebase_url": "https://xisti-app-ad901-default-rtdb.firebaseio.com",
     "project_id": "xisti-app-ad901",
     "storage_bucket": "xisti-app-ad901.firebasestorage.app"
   },
@@ -37,6 +36,10 @@
             "package_name": "com.app.xisti",
             "certificate_hash": "fd32ac8eee0f7f39edacd460fc0d1f71e2eeb003"
           }
+        },
+        {
+          "client_id": "980764435052-jvlsr21keklk5i5djg3giqqfv35054th.apps.googleusercontent.com",
+          "client_type": 3
         }
       ],
       "api_key": [
@@ -46,7 +49,20 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "980764435052-jvlsr21keklk5i5djg3giqqfv35054th.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "980764435052-rudvg41gq53dr17pce16a5p0adsuq226.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.app.xisti",
+                "app_store_id": "6775680182"
+              }
+            }
+          ]
         }
       }
     }

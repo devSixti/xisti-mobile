@@ -8,6 +8,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
+import '../../config/google_sign_in_config.dart';
 import '../../utils/utils.dart';
 import 'social_login_bloc.dart';
 
@@ -41,6 +42,7 @@ class SocialLogin extends StatefulWidget {
 
 class _SocialLoginState extends State<SocialLogin> {
   SocialLoginBloc? _bloc;
+  bool _googleSignInInitialized = false;
 
   @override
   void didChangeDependencies() {
@@ -78,8 +80,8 @@ class _SocialLoginState extends State<SocialLogin> {
             child: socialLoginButton(
               "assets/images/google_img.png",
               onPressed: () async {
-                if (await isNetworkConnected(onRetryPressedCallApi: () => _signInWithGoogle())) {
-                  _signInWithGoogle();
+                if (await isNetworkConnected(onRetryPressedCallApi: _signInWithGoogle)) {
+                  await _signInWithGoogle();
                 }
               },
             ),
@@ -90,8 +92,8 @@ class _SocialLoginState extends State<SocialLogin> {
             child: socialLoginButton(
               "assets/images/facebook_img.png",
               onPressed: () async {
-                if (await isNetworkConnected(onRetryPressedCallApi: () => _signInWithGoogle())) {
-                  _signInWithFacebook();
+                if (await isNetworkConnected(onRetryPressedCallApi: _signInWithFacebook)) {
+                  await _signInWithFacebook();
                 }
               },
             ),
@@ -103,8 +105,8 @@ class _SocialLoginState extends State<SocialLogin> {
               "assets/images/apple_img.png",
               imageColor: getCurrentTheme(context).colorIconCommon,
               onPressed: () async {
-                if (await isNetworkConnected(onRetryPressedCallApi: () => _signInWithGoogle())) {
-                  _signInWithApple();
+                if (await isNetworkConnected(onRetryPressedCallApi: _signInWithApple)) {
+                  await _signInWithApple();
                 }
               },
             ),
@@ -138,22 +140,45 @@ class _SocialLoginState extends State<SocialLogin> {
     );
   }
 
+  Future<void> _ensureGoogleSignInInitialized() async {
+    if (_googleSignInInitialized) {
+      return;
+    }
+    final GoogleSignIn signIn = GoogleSignIn.instance;
+    await signIn.initialize(serverClientId: kGoogleWebClientId);
+    _googleSignInInitialized = true;
+  }
+
+  void _reportSocialError(String message) {
+    debugPrint('SocialLogin: $message');
+    widget.errorFunction?.call(error: message);
+    if (!mounted) {
+      return;
+    }
+    showApiMessage(context, true, message, 0, const []);
+  }
+
   Future<void> _signInWithGoogle() async {
     try {
+      await _ensureGoogleSignInInitialized();
       final GoogleSignIn signIn = GoogleSignIn.instance;
-      await signIn.initialize();
-      // bool isSignedIn = await googleSignIn.isSignedIn();
-      // if (isSignedIn) {
-      //   await googleSignIn.signOut();
-      // }
-      GoogleSignInAccount googleSignInAccount = await signIn.authenticate(scopeHint: ['email']);
-      var id = googleSignInAccount.id;
-      var email = googleSignInAccount.email;
-      var name = googleSignInAccount.displayName ?? "-";
+      if (!signIn.supportsAuthenticate()) {
+        _reportSocialError('Google Sign-In no está disponible en este dispositivo.');
+        return;
+      }
+      final GoogleSignInAccount googleSignInAccount = await signIn.authenticate(scopeHint: ['email']);
+      final id = googleSignInAccount.id;
+      final email = googleSignInAccount.email;
+      final name = googleSignInAccount.displayName ?? '-';
 
       widget.function.call(loginType: LoginType.google, name: name, email: email, id: id);
+    } on GoogleSignInException catch (e) {
+      if (e.code == GoogleSignInExceptionCode.canceled) {
+        return;
+      }
+      _reportSocialError(e.description ?? e.code.name);
     } catch (error) {
-      debugPrint("_signInWithGoogle $error");
+      _reportSocialError(error.toString());
     }
   }
 
@@ -163,43 +188,43 @@ class _SocialLoginState extends State<SocialLogin> {
 
     switch (result.status) {
       case LoginStatus.success:
-        final token = result.accessToken?.tokenString ?? "-";
+        final token = result.accessToken?.tokenString ?? '-';
         final graphResponse = await get(Uri.parse('https://graph.facebook.com/v2.12/me?fields=name,first_name,last_name,email&access_token=$token'));
         var body = jsonDecode(graphResponse.body);
         if (body != null) {
-          var name = body["name"] ?? "";
-          var email = body["email"] ?? "";
-          var id = body["id"] ?? "";
+          var name = body['name'] ?? '';
+          var email = body['email'] ?? '';
+          var id = body['id'] ?? '';
 
           widget.function.call(loginType: LoginType.facebook, name: name, email: email, id: id);
         }
         facebookAuth.logOut();
         break;
       case LoginStatus.cancelled:
-        widget.errorFunction?.call(error: "Facebook login cancelled by the user. ${result.message}");
-        debugPrint("Facebook login cancelled by the user.");
+        widget.errorFunction?.call(error: 'Facebook login cancelled by the user. ${result.message}');
+        debugPrint('Facebook login cancelled by the user.');
         break;
       case LoginStatus.failed:
-        widget.errorFunction?.call(error: "Facebook login Failed ${result.message}");
+        widget.errorFunction?.call(error: 'Facebook login Failed ${result.message}');
         debugPrint('Failed');
         break;
       case LoginStatus.operationInProgress:
-        widget.errorFunction?.call(error: "Facebook login in Progress ${result.message}");
-        debugPrint("In Progress");
+        widget.errorFunction?.call(error: 'Facebook login in Progress ${result.message}');
+        debugPrint('In Progress');
         break;
     }
   }
 
   Future<void> _signInWithApple() async {
     final credential = await SignInWithApple.getAppleIDCredential(scopes: [AppleIDAuthorizationScopes.email, AppleIDAuthorizationScopes.fullName]);
-    var id = credential.userIdentifier ?? "";
-    var email = credential.email ?? "";
+    var id = credential.userIdentifier ?? '';
+    var email = credential.email ?? '';
 
-    String givenName = credential.givenName ?? "";
-    String familyName = credential.familyName ?? "";
-    String fullName = "$givenName $familyName";
+    String givenName = credential.givenName ?? '';
+    String familyName = credential.familyName ?? '';
+    String fullName = '$givenName $familyName';
     if (givenName.trim().isEmpty && familyName.trim().isEmpty) {
-      fullName = "N/A";
+      fullName = 'N/A';
     }
 
     widget.function.call(loginType: LoginType.apple, name: fullName, email: email, id: id);

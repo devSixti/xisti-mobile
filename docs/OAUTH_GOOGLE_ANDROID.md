@@ -39,12 +39,31 @@ cp ~/Descargas/client_secret_980764435052-*.json xisti-mobile/android/oauth-clie
 
 Crea cliente OAuth **iOS** (`com.app.xisti`) en GCP/Firebase y actualiza `ios/Runner/Info.plist` (`CFBundleURLSchemes` con el reversed client id). El plist actual aún puede tener un client id antiguo.
 
+## Cliente Web (`client_type: 3`) — obligatorio en Android
+
+`google_sign_in` 7.x exige `serverClientId` (cliente OAuth **Aplicación web**). Debe existir en `google-services.json`:
+
+```json
+{
+  "client_id": "980764435052-jvlsr21keklk5i5djg3giqqfv35054th.apps.googleusercontent.com",
+  "client_type": 3
+}
+```
+
+Si falta, en Firebase Console → **Authentication** → **Google** → habilitar y volver a descargar config:
+
+```bash
+firebase apps:sdkconfig ANDROID 1:980764435052:android:4f3b06c480ee148e87ee49 --project xisti-app-ad901 > android/app/google-services.json
+```
+
+En Dart también está en `lib/config/google_sign_in_config.dart` (`kGoogleWebClientId`).
+
 ## Probar Google Sign-In
 
 ```bash
 cd xisti-mobile
-flutter run   # debug → cliente 5ddt7...
-flutter build apk --release   # release → cliente gfbjgj...
+flutter run   # debug → SHA-1 debug → cliente gfbjgj...
+flutter build apk --release   # release → cliente q2dl4g...
 ```
 
 Tras publicar en Play, el build de tienda usa el certificado **App Signing** → cliente `q2dl4g...`.
