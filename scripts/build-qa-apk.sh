@@ -14,7 +14,7 @@ export PATH="${FLUTTER_ROOT:-$HOME/flutter}/bin:${ANDROID_HOME:-$HOME/Android/Sd
 
 TARGET="${1:-celular}"
 OUT_NAME="xisti-debug-full-branding.apk"
-API_DOMAIN="${API_DOMAIN:-http://54.159.169.235}"
+API_DOMAIN="${API_DOMAIN:-https://admin.xistiapp.com}"
 
 case "$TARGET" in
   emulador|emulator)

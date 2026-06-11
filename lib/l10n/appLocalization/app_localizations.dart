@@ -1823,7 +1823,7 @@ abstract class AppLocalizations {
   /// No description provided for @walletMinTopupNotice.
   ///
   /// In en, this message translates to:
-  /// **'Minimum top-up is always COP 13,000.'**
+  /// **'Minimum top-up COP 13,000. XISTI commission is 8% — fair margin for drivers.'**
   String get walletMinTopupNotice;
 
   /// No description provided for @pleaseEnterAmount.

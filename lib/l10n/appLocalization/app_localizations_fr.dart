@@ -915,7 +915,8 @@ class AppLocalizationsFr extends AppLocalizations {
   String get chooseAmount => 'Choisissez le montant';
 
   @override
-  String get walletMinTopupNotice => 'Minimum top-up is always COP 13,000.';
+  String get walletMinTopupNotice =>
+      'Minimum top-up COP 13,000. XISTI commission is 8% — fair margin for drivers.';
 
   @override
   String get pleaseEnterAmount => 'Veuillez saisir ou sélectionner le montant.';
