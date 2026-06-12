@@ -317,13 +317,13 @@ abstract class AppLocalizations {
   /// No description provided for @locationMessageTitle.
   ///
   /// In en, this message translates to:
-  /// **'Disclosure'**
+  /// **'Location permissions and data processing'**
   String get locationMessageTitle;
 
   /// No description provided for @locationMessage.
   ///
   /// In en, this message translates to:
-  /// **'This app collects location data to enable getting new taxi service rides (jobs), even when the app is closed or not in use.\n\nFeature: Transport Service App\n\nCollects location data of the driver to track real-time location of taxi ride. And when the app is closed this will use background location to get the driver\'s real-time position. So, they can get new ride requests.\n\nSo allow this app to \"Allow all the time\"'**
+  /// **'XISTI uses device location to connect users and independent drivers through the platform.\n\nWhen the app is active or in the background, location may be used to:\n\n• Show nearby requests.\n• Improve trip accuracy.\n• Help users and drivers locate each other.\n• Keep availability updated within the platform.\n\nFeature: Technology platform connecting users and independent drivers.\n\nInformation will be processed according to our Privacy Policy and Personal Data Processing Policy.\n\nPlease allow \"Always\" location access if you are an independent driver.'**
   String get locationMessage;
 
   /// No description provided for @preferences.
@@ -599,14 +599,50 @@ abstract class AppLocalizations {
   /// No description provided for @byRegisterYouAgree.
   ///
   /// In en, this message translates to:
-  /// **'by registering you are agree with our'**
+  /// **'I have read and accept the'**
   String get byRegisterYouAgree;
 
   /// No description provided for @termsCondition.
   ///
   /// In en, this message translates to:
-  /// **'Terms & Condition'**
+  /// **'Terms and Conditions'**
   String get termsCondition;
+
+  /// No description provided for @privacyPolicy.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy and Personal Data Processing Policy'**
+  String get privacyPolicy;
+
+  /// No description provided for @platformConnectionNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'I understand that XISTI is a technology platform connecting users with independent drivers, and does not provide transportation services or operate vehicles.'**
+  String get platformConnectionNotice;
+
+  /// No description provided for @driverIndependentNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'I declare that I act as an independent driver and that using the XISTI platform does not create any employment, subordination, commercial representation, or exclusivity relationship with XISTI.'**
+  String get driverIndependentNotice;
+
+  /// No description provided for @deliveryLegalNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Deliveries are package handoffs managed between users through the platform. XISTI only facilitates the connection and does not provide passenger or freight transport services.'**
+  String get deliveryLegalNotice;
+
+  /// No description provided for @agreeAndContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Agree and continue'**
+  String get agreeAndContinue;
+
+  /// No description provided for @marketingOptIn.
+  ///
+  /// In en, this message translates to:
+  /// **'I authorize receiving communications, news and promotions from XISTI.'**
+  String get marketingOptIn;
 
   /// No description provided for @account.
   ///
@@ -623,7 +659,7 @@ abstract class AppLocalizations {
   /// No description provided for @passengerMode.
   ///
   /// In en, this message translates to:
-  /// **'Passenger Mode'**
+  /// **'User Mode'**
   String get passengerMode;
 
   /// No description provided for @rideHistory.

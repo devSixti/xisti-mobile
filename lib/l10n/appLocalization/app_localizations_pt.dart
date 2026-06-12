@@ -281,6 +281,28 @@ class AppLocalizationsPt extends AppLocalizations {
   String get termsCondition => 'Termos e Condições';
 
   @override
+  String get privacyPolicy => 'Privacy and Personal Data Processing Policy';
+
+  @override
+  String get platformConnectionNotice =>
+      'I understand that XISTI is a technology platform connecting users with independent drivers, and does not provide transportation services or operate vehicles.';
+
+  @override
+  String get driverIndependentNotice =>
+      'I declare that I act as an independent driver and that using the XISTI platform does not create any employment, subordination, commercial representation, or exclusivity relationship with XISTI.';
+
+  @override
+  String get deliveryLegalNotice =>
+      'Deliveries are package handoffs managed between users through the platform. XISTI only facilitates the connection and does not provide passenger or freight transport services.';
+
+  @override
+  String get agreeAndContinue => 'Agree and continue';
+
+  @override
+  String get marketingOptIn =>
+      'I authorize receiving communications, news and promotions from XISTI.';
+
+  @override
   String get account => 'Conta';
 
   @override

@@ -1,5 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
+
+import 'package:crypto/crypto.dart';
 
 import '../constant/constant.dart';
 import '../hive/hive_constant.dart';
@@ -60,8 +63,26 @@ void applyAppMobileSettingsFromJson(dynamic json) {
   }
 }
 
+/// Injected at build time for QA APKs: `--dart-define=QA_APP_KEY=...`
+const String kQaAppKey = String.fromEnvironment('QA_APP_KEY', defaultValue: '');
+
+void _applyQaAppKeyIfConfigured() {
+  if (kQaAppKey.isEmpty) {
+    return;
+  }
+  final authKey = base64.encode(utf8.encode(kQaAppKey));
+  final md5String = md5.convert(utf8.encode(authKey)).toString();
+  const chars = 'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890';
+  final rnd = Random();
+  String rand(int n) => String.fromCharCodes(
+        Iterable.generate(n, (_) => chars.codeUnitAt(rnd.nextInt(chars.length))),
+      );
+  putDataInSettingBox(hiveAuthKey, '${rand(57)}$md5String${rand(43)}');
+}
+
 /// Defaults when app-version-check is unreachable (DNS down, offline, etc.).
 void applyBootstrapDefaultsWhenApiUnavailable() {
+  _applyQaAppKeyIfConfigured();
   applySocialLoginSettingsFromApi({
     'is_google_login': 1,
     'is_facebook_login': 1,

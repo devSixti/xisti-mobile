@@ -107,9 +107,10 @@ dev_dependencies:
 flutter_launcher_icons:
   android: launcher_icon
   ios: true
-  image_path: assets/images/xisti/logo_full.png
+  image_path: assets/images/xisti/app_launcher.png
   adaptive_icon_background: "#0B0B0B"
-  adaptive_icon_foreground: assets/images/xisti/logo_full.png
+  adaptive_icon_foreground: assets/images/xisti/app_launcher_foreground.png
+  remove_alpha_ios: true
 
 flutter_native_splash:
   color: "#0B0B0B"

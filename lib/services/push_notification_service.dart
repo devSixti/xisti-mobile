@@ -414,7 +414,7 @@ class PushNotificationService {
     );
 
     /// Configure Android initialization settings, including the app icon.
-    var initializationSettingsAndroid = const AndroidInitializationSettings('@mipmap/ic_launcher');
+    var initializationSettingsAndroid = const AndroidInitializationSettings('@mipmap/launcher_icon');
 
     /// Configure iOS initialization settings to request all permissions.
     var initializationSettingsIOS = DarwinInitializationSettings(requestSoundPermission: true, requestBadgePermission: true, requestAlertPermission: true);
@@ -567,7 +567,7 @@ class PushNotificationService {
   static Future<void> displayBackgroundNotification(Map<String, dynamic> notificationData) async {
     WidgetsFlutterBinding.ensureInitialized();
     final plugin = FlutterLocalNotificationsPlugin();
-    const androidInit = AndroidInitializationSettings('@mipmap/ic_launcher');
+    const androidInit = AndroidInitializationSettings('@mipmap/launcher_icon');
     const iosInit = DarwinInitializationSettings(requestSoundPermission: true, requestBadgePermission: true, requestAlertPermission: true);
     await plugin.initialize(settings: const InitializationSettings(android: androidInit, iOS: iosInit));
     final androidPlugin = plugin.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();

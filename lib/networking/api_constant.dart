@@ -32,6 +32,7 @@ class ApiConst {
 
   //Terms And Condition
   static const endPointTermsAndConditions = '/terms-and-conditions';
+  static const endPointPrivacyPolicy = '/privacy-policy';
 
   //Select Language And Currency
   static const endPointCountryCurrency = 'country-and-currency-list';

@@ -271,16 +271,59 @@ class _SignupScreenState extends State<SignupScreen> {
                                     style: bodyText(context: context, fontWeight: FontWeight.w300, fontSize: textSize16px),
                                     children: [
                                       TextSpan(
-                                        text: "\n${languages.termsCondition}",
-                                        style: bodyText(context: context, fontWeight: FontWeight.w600).copyWith(decoration: TextDecoration.underline),
-                                        recognizer:
-                                            TapGestureRecognizer()
-                                              ..onTap = () async {
-                                                openUrl(BaseUrl.domain + ApiConst.endPointTermsAndConditions, launchMode: LaunchMode.externalApplication);
-                                              },
+                                        text: ' ${languages.termsCondition}',
+                                        style: bodyText(context: context, fontWeight: FontWeight.w600, fontSize: textSize14px).copyWith(decoration: TextDecoration.underline),
+                                        recognizer: TapGestureRecognizer()
+                                          ..onTap = () async {
+                                            openUrl(legalCmsUrl(ApiConst.endPointTermsAndConditions), launchMode: LaunchMode.externalApplication);
+                                          },
+                                      ),
+                                      TextSpan(
+                                        text: ' ${languages.privacyPolicy}',
+                                        style: bodyText(context: context, fontWeight: FontWeight.w600, fontSize: textSize14px).copyWith(decoration: TextDecoration.underline),
+                                        recognizer: TapGestureRecognizer()
+                                          ..onTap = () async {
+                                            openUrl(legalCmsUrl(ApiConst.endPointPrivacyPolicy), launchMode: LaunchMode.externalApplication);
+                                          },
                                       ),
                                     ],
                                   ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Padding(
+                          padding: EdgeInsetsDirectional.only(top: 12.h),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              StreamBuilder<bool>(
+                                stream: _bloc?.acceptPlatformController,
+                                builder: (context, acceptPlatform) {
+                                  return Transform.scale(
+                                    scale: 1.2,
+                                    child: Checkbox(
+                                      visualDensity: const VisualDensity(vertical: VisualDensity.minimumDensity, horizontal: VisualDensity.minimumDensity),
+                                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5.r)),
+                                      side: BorderSide(color: getCurrentTheme(context).colorTextFieldBorder, width: 1.5.sp),
+                                      checkColor: getCurrentTheme(context).colorWhite,
+                                      activeColor: getCurrentTheme(context).colorPrimary,
+                                      value: acceptPlatform.data ?? false,
+                                      onChanged: (value) {
+                                        _bloc?.acceptPlatformController.add(value ?? false);
+                                        _bloc?.buttonHide();
+                                      },
+                                    ),
+                                  );
+                                },
+                              ),
+                              SizedBox(width: 10.w),
+                              Expanded(
+                                child: Text(
+                                  languages.platformConnectionNotice,
+                                  style: bodyText(context: context, fontWeight: FontWeight.w300, fontSize: textSize14px),
                                 ),
                               ),
                             ],

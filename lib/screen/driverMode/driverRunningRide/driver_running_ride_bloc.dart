@@ -219,8 +219,17 @@ class DriverRunningRideBloc extends Bloc {
             return;
           }
 
-          if (response.rideCancelledStatus == 1) {
-            message = languages.rideCancelByAdminMsg;
+          if (response.rideCancelledStatus == 1 || (response.rideStatus ?? 0) == DriverRideStatus.driverCancel) {
+            if (cancelContext?.mounted ?? false) {
+              Navigator.pop(cancelContext!);
+            }
+            message = (response.cancelBy ?? '').trim().isNotEmpty
+                ? (response.cancelBy ?? '')
+                : languages.rideCancelByAdminMsg;
+            if ((response.rideStatus ?? 0) == DriverRideStatus.driverCancel) {
+              changeRideStatusWiseLayout();
+              return;
+            }
             showRideCompleteCancelBottomSheet(languages.rideCancel, message);
             return;
           }
@@ -844,6 +853,9 @@ class DriverRunningRideBloc extends Bloc {
         return CancelRideBottomSheet(
           onSubmit: (String cancelReason) {
             if (cancelReason.trim().isNotEmpty) {
+              if (Navigator.canPop(context)) {
+                Navigator.pop(context);
+              }
               apiRideStatus = DriverRideStatus.driverCancel;
               callUpdateRideStatusApi(cancelReason: cancelReason);
             }

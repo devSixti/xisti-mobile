@@ -451,13 +451,24 @@ class _DriverHomeState extends State<DriverHome> with WidgetsBindingObserver {
   }
 
   Widget driverOnlineWidget() {
+    final bg = getCurrentTheme(context).colorScaffoldBg;
     return Expanded(
-      child: Column(
+      child: ColoredBox(
+        color: bg,
+        child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.center,
         mainAxisSize: MainAxisSize.min,
         children: [
-          lottie_animation.Lottie.asset(setLottieAnimationBasedOnTheme(context, "online.json"), alignment: AlignmentDirectional.center),
+          ColoredBox(
+            color: bg,
+            child: lottie_animation.Lottie.asset(
+              setLottieAnimationBasedOnTheme(context, "online.json"),
+              alignment: AlignmentDirectional.center,
+              backgroundLoading: false,
+              fit: BoxFit.contain,
+            ),
+          ),
           StreamBuilder<dynamic>(
             stream: _bloc?.selectDistanceSubject,
             builder: (context, snapSelectDistance) {
@@ -484,6 +495,7 @@ class _DriverHomeState extends State<DriverHome> with WidgetsBindingObserver {
             },
           ),
         ],
+        ),
       ),
     );
   }

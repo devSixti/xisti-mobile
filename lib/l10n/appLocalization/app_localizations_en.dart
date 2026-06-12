@@ -122,11 +122,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get update => 'Update';
 
   @override
-  String get locationMessageTitle => 'Disclosure';
+  String get locationMessageTitle => 'Location permissions and data processing';
 
   @override
   String get locationMessage =>
-      'This app collects location data to enable getting new taxi service rides (jobs), even when the app is closed or not in use.\n\nFeature: Transport Service App\n\nCollects location data of the driver to track real-time location of taxi ride. And when the app is closed this will use background location to get the driver\'s real-time position. So, they can get new ride requests.\n\nSo allow this app to \"Allow all the time\"';
+      'XISTI uses device location to connect users and independent drivers through the platform.\n\nWhen the app is active or in the background, location may be used to:\n\n• Show nearby requests.\n• Improve trip accuracy.\n• Help users and drivers locate each other.\n• Keep availability updated within the platform.\n\nFeature: Technology platform connecting users and independent drivers.\n\nInformation will be processed according to our Privacy Policy and Personal Data Processing Policy.\n\nPlease allow \"Always\" location access if you are an independent driver.';
 
   @override
   String get preferences => 'Preferences';
@@ -272,10 +272,32 @@ class AppLocalizationsEn extends AppLocalizations {
   String get invalidEmailAddress => 'Invalid Email Address';
 
   @override
-  String get byRegisterYouAgree => 'by registering you are agree with our';
+  String get byRegisterYouAgree => 'I have read and accept the';
 
   @override
-  String get termsCondition => 'Terms & Condition';
+  String get termsCondition => 'Terms and Conditions';
+
+  @override
+  String get privacyPolicy => 'Privacy and Personal Data Processing Policy';
+
+  @override
+  String get platformConnectionNotice =>
+      'I understand that XISTI is a technology platform connecting users with independent drivers, and does not provide transportation services or operate vehicles.';
+
+  @override
+  String get driverIndependentNotice =>
+      'I declare that I act as an independent driver and that using the XISTI platform does not create any employment, subordination, commercial representation, or exclusivity relationship with XISTI.';
+
+  @override
+  String get deliveryLegalNotice =>
+      'Deliveries are package handoffs managed between users through the platform. XISTI only facilitates the connection and does not provide passenger or freight transport services.';
+
+  @override
+  String get agreeAndContinue => 'Agree and continue';
+
+  @override
+  String get marketingOptIn =>
+      'I authorize receiving communications, news and promotions from XISTI.';
 
   @override
   String get account => 'Account';
@@ -284,7 +306,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get driverMode => 'Driver Mode';
 
   @override
-  String get passengerMode => 'Passenger Mode';
+  String get passengerMode => 'User Mode';
 
   @override
   String get rideHistory => 'Ride History';

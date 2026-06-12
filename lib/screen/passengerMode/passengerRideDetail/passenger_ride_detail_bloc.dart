@@ -15,10 +15,12 @@ import '../../../commonView/statusView/passenger_ride_status_view.dart';
 import '../../../constant/chat_constant.dart';
 import '../../../hive/hive_helper.dart';
 import '../../../networking/base_dl.dart';
+import '../../../services/active_ride_offline_service.dart';
 import '../../../services/push_notification_service.dart';
 import '../../../utils/map_curved_lines.dart';
 import '../../../utils/utils.dart';
 import '../../common/wallet/walletHome/wallet_home_dl.dart';
+import '../passengerHome/passenger_home.dart';
 import '../../common/wallet/walletHome/wallet_home_repo.dart';
 import '../offerRide/offer_ride_repo.dart';
 import '../passengerRunningRide/passenger_running_ride.dart';
@@ -68,6 +70,12 @@ class PassengerRideDetailBloc extends Bloc {
           putDataInSettingBox(hivePaymentTypeOnline, response.onlinePayment == 1);
           putDataInSettingBox(hivePaymentTypeWallet, response.walletPayment == 1);
           addressList = response.addressList ?? [];
+          if (response.rideStatus == 4) {
+            ActiveRideOfflineService.instance.clearRideSnapshot();
+            pushNotificationService.flutterLocalNotificationsPlugin.cancelAll();
+            openScreenWithClearPrevious(context, const PassengerHome());
+            return;
+          }
           setMarkers();
         } else {
           subjectRideDetail.sink.add(ApiResponse.error(message));
@@ -371,7 +379,12 @@ class PassengerRideDetailBloc extends Bloc {
       int orderStatus = int.parse((notificationData[NotificationConstant.rideStatus] ?? 0).toString());
       int orderId = int.parse((notificationData[NotificationConstant.rideId] ?? 0).toString());
       if (notificationType == 1 && orderId == rideId) {
-        if (orderStatus == passengerArrive || orderStatus == passengerRunning) {
+        if (orderStatus == 4) {
+          pushNotificationService.flutterLocalNotificationsPlugin.cancelAll();
+          ActiveRideOfflineService.instance.clearRideSnapshot();
+          if (!context.mounted) return;
+          openScreenWithClearPrevious(context, const PassengerHome());
+        } else if (orderStatus == passengerArrive || orderStatus == passengerRunning) {
           if (!context.mounted) return;
           openScreenWithClearPrevious(context, PassengerRunningRide(rideId: rideId, isFromNotification: true));
         } else {

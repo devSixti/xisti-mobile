@@ -30,6 +30,7 @@ import '../constant/dimensions.dart';
 import '../hive/hive_helper.dart';
 import '../l10n/appLocalization/app_localizations.dart';
 import '../main.dart';
+import '../networking/api_constant.dart';
 import '../networking/base_dl.dart';
 import '../screen/common/Login/login_dl.dart';
 import '../screen/common/otpVerify/otp_verify_screen.dart';
@@ -81,6 +82,14 @@ Future<void> openUrl(String url, {LaunchMode launchMode = LaunchMode.platformDef
   } else {
     debugPrint("Url Error : $url");
   }
+}
+
+/// Public CMS legal pages (terms, privacy) with user language for admin.xistiapp.com.
+String legalCmsUrl(String path) {
+  final lang = getLanguageFromUserPrefBox();
+  final code = lang.length >= 2 ? lang.substring(0, 2).toLowerCase() : 'es';
+  final uri = Uri.parse('${BaseUrl.domain}$path');
+  return uri.replace(queryParameters: {...uri.queryParameters, 'lang': code}).toString();
 }
 
 String getApiMsg(String? defaultMsg, [int? messageCode]) {

@@ -34,7 +34,7 @@ class RideRequestTypeChip extends StatelessWidget {
 
   (String, IconData, Color)? _resolveChip() {
     if (isEncomienda == 1 || serviceMode == ServiceModeKind.encomiendas) {
-      return ('Encomienda', Icons.shopping_bag_outlined, const Color(0xFF00838F));
+      return ('Envío', Icons.local_shipping_outlined, const Color(0xFF00838F));
     }
     if (serviceMode == ServiceModeKind.expreso) {
       return ('Expreso', Icons.bolt_outlined, const Color(0xFF6A1B9A));
@@ -48,7 +48,7 @@ class RideRequestTypeChip extends StatelessWidget {
     }
     switch (serviceId) {
       case ServiceType.taxi:
-        return ('Taxi', Icons.local_taxi_outlined, const Color(0xFF1565C0));
+        return ('Carro', Icons.directions_car_outlined, const Color(0xFF1565C0));
       case ServiceType.bike:
         return ('Moto', Icons.two_wheeler_outlined, const Color(0xFF2E7D32));
       case ServiceType.rickshaw:

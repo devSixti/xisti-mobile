@@ -15,6 +15,12 @@ export PATH="${FLUTTER_ROOT:-$HOME/flutter}/bin:${ANDROID_HOME:-$HOME/Android/Sd
 TARGET="${1:-celular}"
 OUT_NAME="xisti-debug-full-branding.apk"
 API_DOMAIN="${API_DOMAIN:-https://admin.xistiapp.com}"
+SCRIPTS_ROOT="$(cd "$(dirname "$0")/../.." && pwd)/scripts"
+QA_APP_KEY="${QA_APP_KEY:-}"
+if [[ -z "$QA_APP_KEY" && -x "$SCRIPTS_ROOT/xisti-api-auth.sh" ]]; then
+  QA_APP_KEY="$(ssh -o BatchMode=yes "${XISTI_SSH_HOST:-xisti-ec2}" \
+    "grep -E '^XISTI_APP_KEY=' ${XISTI_APP_DIR:-/var/www/xisti-admin}/.env | cut -d= -f2- | tr -d '\"'" 2>/dev/null || true)"
+fi
 
 case "$TARGET" in
   emulador|emulator)
@@ -38,12 +44,22 @@ rm -f "$DIST_DIR"/*.apk
 # Limpieza de layout antiguo (APK sueltos en dist/)
 rm -f dist/*.apk 2>/dev/null || true
 
+DART_DEFINES=(--dart-define=API_DOMAIN="$API_DOMAIN" --dart-define=DEMO_APP=true)
+if [[ -n "$QA_APP_KEY" ]]; then
+  DART_DEFINES+=(--dart-define=QA_APP_KEY="$QA_APP_KEY")
+  echo "QA_APP_KEY embedded for emulator auth fallback"
+fi
+
 echo "Building QA APK → $DIST_DIR (API_DOMAIN=$API_DOMAIN)..."
 flutter build apk --debug --split-per-abi \
   "${PLATFORM_ARGS[@]}" \
-  --dart-define=API_DOMAIN="$API_DOMAIN"
+  "${DART_DEFINES[@]}"
 
 SRC="build/app/outputs/flutter-apk/$SRC_ABI"
 cp -f "$SRC" "$DIST_DIR/$OUT_NAME"
+ARTIFACTS="$(cd "$ROOT/../artifacts" 2>/dev/null && pwd || echo "")"
+if [[ -n "$ARTIFACTS" ]]; then
+  cp -f "$SRC" "$ARTIFACTS/android-debug.apk"
+fi
 ls -lh "$DIST_DIR/$OUT_NAME"
 echo "Done: $DIST_DIR/$OUT_NAME"

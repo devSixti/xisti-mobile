@@ -1,13 +1,31 @@
 {
   "fr": [
+    "privacyPolicy",
+    "platformConnectionNotice",
+    "driverIndependentNotice",
+    "deliveryLegalNotice",
+    "agreeAndContinue",
+    "marketingOptIn",
     "walletMinTopupNotice"
   ],
 
   "it": [
+    "privacyPolicy",
+    "platformConnectionNotice",
+    "driverIndependentNotice",
+    "deliveryLegalNotice",
+    "agreeAndContinue",
+    "marketingOptIn",
     "walletMinTopupNotice"
   ],
 
   "pt": [
+    "privacyPolicy",
+    "platformConnectionNotice",
+    "driverIndependentNotice",
+    "deliveryLegalNotice",
+    "agreeAndContinue",
+    "marketingOptIn",
     "walletMinTopupNotice"
   ]
 }

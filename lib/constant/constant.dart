@@ -31,7 +31,7 @@ const initCameraPosition = CameraPosition(target: defaultLatLng, zoom: defaultMa
 const int perPageRecord = 10;
 
 //Dynamic Modules
-const bool isDemoApp = false;
+const bool isDemoApp = bool.fromEnvironment('DEMO_APP', defaultValue: false);
 const bool isContactNumberFetch = false;
 
 bool isWaitingOpen = false;

@@ -16,7 +16,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get splashScreenMsg =>
-      'Fácil y Seguro — negocia tu tarifa y muévete en Medellín.';
+      'Fácil y Seguro — negocia tu valor y muévete en Medellín.';
 
   @override
   String get year => 'año';
@@ -124,11 +124,12 @@ class AppLocalizationsEs extends AppLocalizations {
   String get update => 'Actualizar';
 
   @override
-  String get locationMessageTitle => 'Aviso importante';
+  String get locationMessageTitle =>
+      'Permisos de ubicación y tratamiento de datos';
 
   @override
   String get locationMessage =>
-      'Esta app recopila datos de ubicación para ayudarte a recibir nuevos viajes, incluso cuando la app está cerrada o no está en uso.\n\nFunción: App de servicio de transporte\n\nRecopila la ubicación del conductor para rastrear su posición en tiempo real. Cuando la app está cerrada, usa la ubicación en segundo plano para mantener actualizada la posición del conductor y recibir nuevas solicitudes de viaje.\n\nPor favor, permite que esta app acceda a tu ubicación \"Siempre\".';
+      'XISTI utiliza la ubicación del dispositivo para facilitar la conexión entre usuarios y conductores independientes a través de la plataforma.\n\nCuando la aplicación está activa o en segundo plano, la ubicación puede utilizarse para:\n\n• Mostrar solicitudes cercanas.\n• Mejorar la precisión de los recorridos.\n• Facilitar la ubicación entre usuarios y conductores.\n• Mantener actualizada la disponibilidad dentro de la plataforma.\n\nFunción: Plataforma tecnológica de conexión entre usuarios y conductores independientes.\n\nLa información será tratada de acuerdo con nuestra Política de Privacidad y Tratamiento de Datos Personales.\n\nPor favor, permite el acceso a tu ubicación \"Siempre\" si eres conductor independiente.';
 
   @override
   String get preferences => 'Preferencias';
@@ -151,7 +152,7 @@ class AppLocalizationsEs extends AppLocalizations {
       'Marca tu destino en Medellín y encuentra conductor urbano en minutos.';
 
   @override
-  String get obTitle2 => 'Negocia tu tarifa';
+  String get obTitle2 => 'Negocia tu valor';
 
   @override
   String get obMsg2 =>
@@ -276,10 +277,32 @@ class AppLocalizationsEs extends AppLocalizations {
   String get invalidEmailAddress => 'Correo electrónico inválido';
 
   @override
-  String get byRegisterYouAgree => 'al registrarte aceptas nuestros';
+  String get byRegisterYouAgree => 'He leído y acepto los';
 
   @override
-  String get termsCondition => 'Términos y condiciones';
+  String get termsCondition => 'Términos y Condiciones';
+
+  @override
+  String get privacyPolicy => 'Política de Privacidad y Tratamiento de Datos';
+
+  @override
+  String get platformConnectionNotice =>
+      'Entiendo que XISTI es una plataforma tecnológica de conexión entre usuarios y conductores independientes, y que no presta servicios de transporte ni opera vehículos.';
+
+  @override
+  String get driverIndependentNotice =>
+      'Declaro que actúo como conductor independiente y que el uso de la plataforma XISTI no genera relación laboral, subordinación, representación comercial ni exclusividad alguna con XISTI.';
+
+  @override
+  String get deliveryLegalNotice =>
+      'Los envíos corresponden a entregas gestionadas entre usuarios mediante la plataforma. XISTI facilita la conexión entre las partes y no presta servicios de transporte de pasajeros ni de carga.';
+
+  @override
+  String get agreeAndContinue => 'Aceptar y continuar';
+
+  @override
+  String get marketingOptIn =>
+      'Autorizo recibir comunicaciones, novedades y promociones de XISTI.';
 
   @override
   String get account => 'Cuenta';
@@ -288,7 +311,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get driverMode => 'Modo conductor';
 
   @override
-  String get passengerMode => 'Modo pasajero';
+  String get passengerMode => 'Modo usuario';
 
   @override
   String get rideHistory => 'Historial de viajes';
@@ -342,7 +365,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get wallet => 'Billetera';
 
   @override
-  String get offerMyFare => 'Ofrecer mi tarifa';
+  String get offerMyFare => 'Proponer valor';
 
   @override
   String get fetchingLocation => 'Obteniendo ubicación';
@@ -408,7 +431,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get offerAmount => 'Monto a ofrecer';
 
   @override
-  String get enterFareValue => 'Ingresa el valor de la tarifa';
+  String get enterFareValue => 'Ingresa el valor';
 
   @override
   String offerFareMin(String amount) {
@@ -425,19 +448,19 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get autoAcceptDriverRide =>
-      'Aceptar automáticamente al conductor más cercano para tu tarifa';
+      'Aceptar automáticamente al conductor independiente más cercano para tu oferta';
 
   @override
   String get findDrive => 'Buscar conductor';
 
   @override
-  String get recommendedFare => 'Tarifa recomendada';
+  String get recommendedFare => 'Valor sugerido';
 
   @override
-  String get minFare => 'Tarifa mínima';
+  String get minFare => 'Valor mínimo sugerido';
 
   @override
-  String get maxFare => 'Tarifa máxima';
+  String get maxFare => 'Valor máximo sugerido';
 
   @override
   String get recipientName => 'Nombre del destinatario';
@@ -477,13 +500,13 @@ class AppLocalizationsEs extends AppLocalizations {
   String get selectAppTheme => 'Seleccionar tema de la app';
 
   @override
-  String get currentFare => 'Tarifa actual';
+  String get currentFare => 'Valor actual';
 
   @override
   String get cancelRide => 'Cancelar viaje';
 
   @override
-  String get raiseFare => 'Aumentar tarifa';
+  String get raiseFare => 'Ajustar oferta';
 
   @override
   String get myDetails => 'Mis datos';
@@ -534,7 +557,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String changeRideFare(String name) {
-    return '$name cambió la tarifa del viaje.';
+    return '$name cambió el valor del recorrido.';
   }
 
   @override
@@ -737,7 +760,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get other => 'Otro';
 
   @override
-  String get offerFare => 'Ofrecer tarifa';
+  String get offerFare => 'Proponer valor';
 
   @override
   String get requiredMess => 'Por favor completa los datos a continuación.';

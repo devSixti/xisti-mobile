@@ -74,6 +74,7 @@ class SignUpBloc extends Bloc {
   final mobileController = TextEditingController();
   final formKey = GlobalKey<FormState>();
   final acceptTermsController = BehaviorSubject<bool>();
+  final acceptPlatformController = BehaviorSubject<bool>();
   final countryCodeController = BehaviorSubject<CountryCode>();
   final submitValid = BehaviorSubject<bool>();
   final subject = BehaviorSubject<ApiResponse<LoginPojo>>();
@@ -199,7 +200,9 @@ class SignUpBloc extends Bloc {
     String mobile = colombiaMobileNumberValidate(mobileController.text);
     String email = emailValidate(emailController.text);
 
-    if (fullName.isEmpty && mobile.isEmpty && email.isEmpty && (acceptTermsController.hasValue ? acceptTermsController.value : false)) {
+    if (fullName.isEmpty && mobile.isEmpty && email.isEmpty &&
+        (acceptTermsController.hasValue ? acceptTermsController.value : false) &&
+        (acceptPlatformController.hasValue ? acceptPlatformController.value : false)) {
       submitValid.add(true);
     } else {
       submitValid.add(false);
@@ -211,6 +214,7 @@ class SignUpBloc extends Bloc {
     countryCodeController.close();
     submitValid.close();
     acceptTermsController.close();
+    acceptPlatformController.close();
     imgFileController.close();
     fullNameController.clear();
     referralCodeController.clear();

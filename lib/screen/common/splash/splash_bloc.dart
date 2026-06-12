@@ -9,6 +9,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../blocs/bloc.dart';
 import '../../../bottomSheet/common_bottom_sheet.dart';
+import '../../../bottomSheet/location_disclosure_sheet.dart';
 import '../../../hive/hive_helper.dart';
 import '../../../utils/app_mobile_settings.dart';
 import '../../../utils/utils.dart';
@@ -117,7 +118,7 @@ class SplashBloc extends Bloc {
         openForceFullyUpdateDialog(versionName, forcefullyUpdate);
       });
     } else {
-      if (/*Platform.isAndroid && */!await checkLocationPermission() && !getBoolFromSettingBox(hiveDisclosureDialogOpen)) {
+      if (getStringFromSettingBox(hiveAuditConsentVersion) != currentAuditConsentVersion) {
         openDisclosureDialog();
       } else {
         splashAction();
@@ -133,13 +134,8 @@ class SplashBloc extends Bloc {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) {
-        return CommonBottomSheet(
-          title: languages.locationMessageTitle,
-          message: languages.locationMessage,
-          positiveButtonTxt: languages.agree,
-          cancelable: false,
-          onPositivePress: () async {
-            putDataInSettingBox(hiveDisclosureDialogOpen, true);
+        return LocationDisclosureSheet(
+          onAgree: () {
             Navigator.pop(context, true);
             splashAction();
           },
