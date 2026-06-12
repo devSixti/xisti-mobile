@@ -95,11 +95,26 @@ jobs:
           fi
           flutter build apk --debug --target-platform android-arm64 ${DEFINES}
 
+      - name: Resolve debug APK path
+        id: apk
+        run: |
+          set -euo pipefail
+          APK_DIR=build/app/outputs/flutter-apk
+          if [ -f "$APK_DIR/app-arm64-v8a-debug.apk" ]; then
+            echo "path=$APK_DIR/app-arm64-v8a-debug.apk" >> "$GITHUB_OUTPUT"
+          elif [ -f "$APK_DIR/app-debug.apk" ]; then
+            echo "path=$APK_DIR/app-debug.apk" >> "$GITHUB_OUTPUT"
+          else
+            echo "No debug APK found under $APK_DIR"
+            ls -la "$APK_DIR" || true
+            exit 1
+          fi
+
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: android-apk-debug-${{ steps.app_version.outputs.semver }}
-          path: build/app/outputs/flutter-apk/app-arm64-v8a-debug.apk
+          path: ${{ steps.apk.outputs.path }}
           if-no-files-found: error
           retention-days: 30
 
