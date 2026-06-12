@@ -236,17 +236,8 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: macos-latest
     environment: app-store-production
-    defaults:
-      run:
-        working-directory: ios
     steps:
       - uses: actions/checkout@v4
-
-      - uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: "3.2"
-          bundler-cache: true
-          working-directory: ios
 
       - uses: subosito/flutter-action@v2
         with:
@@ -255,16 +246,23 @@ jobs:
           cache: true
 
       - name: Install Flutter dependencies
-        working-directory: .
         run: flutter pub get
 
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.2"
+          bundler: "4.0.6"
+          bundler-cache: true
+          working-directory: ios
+
       - name: CocoaPods install
+        working-directory: ios
         run: |
-          bundle install
           bundle exec pod install --repo-update
-          echo "PATH=$(bundle exec ruby -e 'print Gem.bindir'):${PATH}" >> "$GITHUB_ENV"
+          echo "PATH=$(ruby -e 'print Gem.bindir'):${PATH}" >> "$GITHUB_ENV"
 
       - name: Preflight iOS CD secrets
+        working-directory: ios
         env:
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
           APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
@@ -292,10 +290,10 @@ jobs:
 
       - name: Read app version
         id: app_version
-        working-directory: .
         run: echo "semver=$(grep '^version:' pubspec.yaml | awk '{print $2}')" >> "$GITHUB_OUTPUT"
 
       - name: Deploy to App Store Connect (Fastlane)
+        working-directory: ios
         env:
           FLUTTER_ROOT: ${{ env.FLUTTER_ROOT }}
           PATH: ${{ env.PATH }}
