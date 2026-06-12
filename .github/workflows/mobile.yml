@@ -1,0 +1,306 @@
+name: Mobile CI/CD
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: mobile-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+env:
+  FLUTTER_VERSION: "3.41.2"
+  GRADLE_OPTS: "-Dorg.gradle.daemon=false -Dorg.gradle.caching=false -Dorg.gradle.parallel=false"
+  API_DOMAIN: "https://admin.xistiapp.com"
+  DART_DEFINES: "--dart-define=API_DOMAIN=https://admin.xistiapp.com --dart-define=DEMO_APP=true"
+
+jobs:
+  quality:
+    name: Analyze & Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Analyze
+        run: flutter analyze --no-fatal-infos
+
+      - name: Test
+        run: flutter test
+
+  build-android-apk:
+    name: Build Android APK (debug QA)
+    needs: quality
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Free disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android/sdk/ndk-bundle
+          sudo rm -rf /opt/ghc /opt/hostedtoolcache/CodeQL
+          sudo docker image prune --all --force || true
+          sudo apt-get clean
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: android-actions/setup-android@v3
+
+      - name: Accept licenses and install NDK
+        run: |
+          yes | sdkmanager --licenses >/dev/null
+          sdkmanager "ndk;29.0.13113456"
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Read app version
+        id: app_version
+        run: echo "semver=$(grep '^version:' pubspec.yaml | awk '{print $2}' | cut -d+ -f1)" >> "$GITHUB_OUTPUT"
+
+      - name: Build debug APK (arm64)
+        env:
+          QA_APP_KEY: ${{ secrets.QA_APP_KEY }}
+        run: |
+          set -euo pipefail
+          DEFINES="${{ env.DART_DEFINES }}"
+          if [ -n "${QA_APP_KEY:-}" ]; then
+            DEFINES="${DEFINES} --dart-define=QA_APP_KEY=${QA_APP_KEY}"
+          fi
+          flutter build apk --debug --target-platform android-arm64 ${DEFINES}
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-apk-debug-${{ steps.app_version.outputs.semver }}
+          path: build/app/outputs/flutter-apk/app-arm64-v8a-debug.apk
+          if-no-files-found: error
+          retention-days: 30
+
+  deploy-android-play-internal:
+    name: Android CD — AAB → Play (internal)
+    needs: quality
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: google-play-internal
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Free disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet /opt/ghc /opt/hostedtoolcache/CodeQL
+          sudo docker image prune --all --force || true
+          sudo apt-get clean
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: ndk;29.0.13113456
+          accept-android-sdk-licenses: true
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - run: flutter pub get
+
+      - name: Preflight Android CD secrets
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PATH_SECRET: ${{ secrets.ANDROID_KEYSTORE_PATH }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          GOOGLE_PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+        run: |
+          set -euo pipefail
+          missing=0
+          check() { if [ -z "${1:-}" ]; then echo "::error::Missing GitHub secret: $2"; missing=1; fi; }
+          if [ -z "${ANDROID_KEYSTORE_BASE64:-}" ] && [ -z "${ANDROID_KEYSTORE_PATH_SECRET:-}" ]; then
+            echo "::error::Missing ANDROID_KEYSTORE_BASE64 or ANDROID_KEYSTORE_PATH"
+            missing=1
+          fi
+          check "$ANDROID_KEYSTORE_PASSWORD" "ANDROID_KEYSTORE_PASSWORD"
+          check "$ANDROID_KEY_ALIAS" "ANDROID_KEY_ALIAS"
+          check "$ANDROID_KEY_PASSWORD" "ANDROID_KEY_PASSWORD"
+          check "$GOOGLE_PLAY_SERVICE_ACCOUNT_JSON" "GOOGLE_PLAY_SERVICE_ACCOUNT_JSON"
+          exit "$missing"
+
+      - name: Read app version
+        id: app_version
+        run: echo "semver=$(grep '^version:' pubspec.yaml | awk '{print $2}')" >> "$GITHUB_OUTPUT"
+
+      - name: Prepare Android keystore
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PATH_SECRET: ${{ secrets.ANDROID_KEYSTORE_PATH }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+        run: |
+          set -euo pipefail
+          if [ -n "${ANDROID_KEYSTORE_BASE64:-}" ]; then
+            KEYSTORE_FILE="$RUNNER_TEMP/xisti-release.keystore"
+            B64="$(printf '%s' "$ANDROID_KEYSTORE_BASE64" | tr -d '\n\r\t "')"
+            if ! printf '%s' "$B64" | base64 -d > "$KEYSTORE_FILE" 2>/dev/null; then
+              printf '%s' "$B64" | openssl base64 -d -A > "$KEYSTORE_FILE"
+            fi
+            test -s "$KEYSTORE_FILE"
+            echo "ANDROID_KEYSTORE_PATH=$KEYSTORE_FILE" >> "$GITHUB_ENV"
+          elif [ -n "${ANDROID_KEYSTORE_PATH_SECRET:-}" ]; then
+            echo "ANDROID_KEYSTORE_PATH=$ANDROID_KEYSTORE_PATH_SECRET" >> "$GITHUB_ENV"
+          else
+            echo "::error::Configure ANDROID_KEYSTORE_BASE64 or ANDROID_KEYSTORE_PATH"
+            exit 1
+          fi
+
+      - name: Build App Bundle (release)
+        env:
+          ANDROID_KEYSTORE_PATH: ${{ env.ANDROID_KEYSTORE_PATH }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          QA_APP_KEY: ${{ secrets.QA_APP_KEY }}
+        run: |
+          set -euo pipefail
+          DEFINES="${{ env.DART_DEFINES }}"
+          if [ -n "${QA_APP_KEY:-}" ]; then
+            DEFINES="${DEFINES} --dart-define=QA_APP_KEY=${QA_APP_KEY}"
+          fi
+          flutter build appbundle --release ${DEFINES}
+
+      - name: Upload AAB artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-release-aab-${{ steps.app_version.outputs.semver }}
+          path: build/app/outputs/bundle/release/app-release.aab
+          retention-days: 90
+
+      - name: Upload to Google Play (internal testing)
+        uses: r0adkll/upload-google-play@v1.1.3
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: com.app.xisti
+          releaseFiles: build/app/outputs/bundle/release/app-release.aab
+          track: internal
+          status: completed
+
+  deploy-ios-app-store:
+    name: iOS CD — Match, build IPA, App Store Connect
+    needs: quality
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: macos-latest
+    environment: app-store-production
+    defaults:
+      run:
+        working-directory: ios
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.2"
+          bundler-cache: true
+          working-directory: ios
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Install Flutter dependencies
+        working-directory: .
+        run: flutter pub get
+
+      - name: CocoaPods install
+        run: |
+          bundle install
+          bundle exec pod install --repo-update
+          echo "PATH=$(bundle exec ruby -e 'print Gem.bindir'):${PATH}" >> "$GITHUB_ENV"
+
+      - name: Preflight iOS CD secrets
+        env:
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          APP_STORE_CONNECT_API_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY }}
+          APP_STORE_CONNECT_API_KEY_P8: ${{ secrets.APP_STORE_CONNECT_API_KEY_P8 }}
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+          MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
+          MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
+        run: |
+          set -euo pipefail
+          missing=0
+          check() { if [ -z "${1:-}" ]; then echo "::error::Missing GitHub secret: $2"; missing=1; fi; }
+          check "$APPLE_TEAM_ID" "APPLE_TEAM_ID"
+          check "$APP_STORE_CONNECT_API_KEY_ID" "APP_STORE_CONNECT_API_KEY_ID"
+          check "$APP_STORE_CONNECT_ISSUER_ID" "APP_STORE_CONNECT_ISSUER_ID"
+          check "$MATCH_PASSWORD" "MATCH_PASSWORD"
+          check "$MATCH_GIT_URL" "MATCH_GIT_URL"
+          check "$MATCH_GIT_BASIC_AUTHORIZATION" "MATCH_GIT_BASIC_AUTHORIZATION"
+          if [ -z "${APP_STORE_CONNECT_API_KEY:-}" ] && [ -z "${APP_STORE_CONNECT_API_KEY_P8:-}" ]; then
+            echo "::error::Missing APP_STORE_CONNECT_API_KEY or APP_STORE_CONNECT_API_KEY_P8"
+            missing=1
+          fi
+          exit "$missing"
+
+      - name: Read app version
+        id: app_version
+        working-directory: .
+        run: echo "semver=$(grep '^version:' pubspec.yaml | awk '{print $2}')" >> "$GITHUB_OUTPUT"
+
+      - name: Deploy to App Store Connect (Fastlane)
+        env:
+          FLUTTER_ROOT: ${{ env.FLUTTER_ROOT }}
+          PATH: ${{ env.PATH }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          APP_STORE_CONNECT_API_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY }}
+          APP_STORE_CONNECT_API_KEY_P8: ${{ secrets.APP_STORE_CONNECT_API_KEY_P8 }}
+          APP_STORE_CONNECT_APP_ID: ${{ secrets.APP_STORE_CONNECT_APP_ID }}
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+          MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
+          MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
+          DART_DEFINES: ${{ env.DART_DEFINES }}
+        run: bundle exec fastlane deploy_app_store
+
+      - name: Upload IPA artifact (backup)
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-release-ipa-${{ steps.app_version.outputs.semver }}
+          path: build/ios/ipa/*.ipa
+          if-no-files-found: warn
+          retention-days: 90
