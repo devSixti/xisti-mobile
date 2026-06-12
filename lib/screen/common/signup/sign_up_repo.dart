@@ -4,7 +4,6 @@ import 'package:dio/dio.dart';
 
 import '../../../hive/hive_helper.dart';
 import '../../../networking/api_base_helper.dart';
-import '../../../utils/firebase_util.dart';
 import '../../../utils/utils.dart';
 
 class SignUpRepo {

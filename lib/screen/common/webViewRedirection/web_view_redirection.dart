@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
 import '../../../commonView/common_view.dart';
-import '../../../commonView/scaffold_with_safe_area.dart';
 import '../../../utils/utils.dart';
 
 class WebViewRedirectionScreen extends StatefulWidget {

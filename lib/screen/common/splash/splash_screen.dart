@@ -44,7 +44,7 @@ class _SplashScreenState extends State<SplashScreen> {
                   'assets/images/splash_bg.png',
                   fit: BoxFit.cover,
                   filterQuality: FilterQuality.medium,
-                  errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+                  errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
                 ),
               ),
               Container(
@@ -68,7 +68,7 @@ class _SplashScreenState extends State<SplashScreen> {
                   width: 280.w,
                   fit: BoxFit.contain,
                   filterQuality: FilterQuality.medium,
-                  errorBuilder: (_, __, ___) => Image.asset(
+                  errorBuilder: (context, error, stackTrace) => Image.asset(
                     'assets/images/xisti/logo_full.png',
                     width: 200.w,
                     fit: BoxFit.contain,

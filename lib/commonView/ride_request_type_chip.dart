@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../constant/constant.dart';
 import '../utils/service_mode_util.dart';
 import '../utils/utils.dart';
 

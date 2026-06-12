@@ -5,7 +5,6 @@ import 'dart:math';
 import 'package:crypto/crypto.dart';
 
 import '../constant/constant.dart';
-import '../hive/hive_constant.dart';
 import '../hive/hive_helper.dart';
 
 /// Syncs mobile config fields exposed by XISTI Admin API.
