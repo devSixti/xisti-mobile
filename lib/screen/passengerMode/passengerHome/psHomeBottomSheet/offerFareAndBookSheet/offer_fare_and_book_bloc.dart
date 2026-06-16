@@ -7,6 +7,7 @@ import '../../../../../utils/destination_payment_util.dart';
 import '../../../../../utils/phone_util.dart';
 import '../../../../../utils/utils.dart';
 import '../../passenger_home_dl.dart';
+import 'offer_payment_selection.dart';
 
 class OfferFareAndBookBloc extends Bloc {
   BuildContext context;
@@ -54,8 +55,12 @@ class OfferFareAndBookBloc extends Bloc {
     String packageLengthCm,
     int? selectedDeliveryVehicleServiceId,
   ) {
-    setPaymentTypeList(paymentType);
-    setDestinationPaymentList(destinationPaymentMethod);
+    if (isCourier || isEncomienda) {
+      setCourierPaymentList(paymentType, destinationPaymentMethod);
+    } else {
+      setPaymentTypeList(paymentType);
+      setDestinationPaymentList(destinationPaymentMethod);
+    }
     if (deliveryOptions.isNotEmpty) {
       final initial = selectedDeliveryVehicleServiceId ?? deliveryOptions.first.vehicleServiceId ?? 0;
       selectedDeliveryVehicleServiceIdSubject.add(initial > 0 ? initial : null);
@@ -80,6 +85,8 @@ class OfferFareAndBookBloc extends Bloc {
   final offerFareController = TextEditingController();
   final paymentListController = BehaviorSubject<List<PaymentTypeModel>>();
   final selectedPaymentController = BehaviorSubject<PaymentTypeModel?>();
+  final courierPaymentListController = BehaviorSubject<List<OfferPaymentSelection>>();
+  final selectedCourierPaymentController = BehaviorSubject<OfferPaymentSelection?>();
   final destinationPaymentListController = BehaviorSubject<List<DestinationPaymentOption>>();
   final selectedDestinationPaymentController = BehaviorSubject<DestinationPaymentOption?>();
   final showScheduleController = BehaviorSubject<bool>();
@@ -111,6 +118,85 @@ class OfferFareAndBookBloc extends Bloc {
       final index = paymentList.indexWhere((element) => element.type == paymentType);
       selectedPaymentController.sink.add(index >= 0 ? paymentList[index] : paymentList.first);
     }
+  }
+
+  List<OfferPaymentSelection> _buildCourierPaymentOptions() {
+    final isSpanish = getLanguageFromUserPrefBox().startsWith('es');
+    final destinationOptions = DestinationPaymentUtil.optionsForLocale(isSpanish);
+    final options = <OfferPaymentSelection>[];
+
+    if (getBoolFromSettingBox(hivePaymentTypeCash)) {
+      options.add(
+        OfferPaymentSelection(
+          label: languages.cash,
+          paymentType: PaymentType.cash,
+          destinationPaymentCode: DestinationPaymentUtil.cash,
+        ),
+      );
+    }
+
+    for (final destination in destinationOptions) {
+      if (destination.code == DestinationPaymentUtil.cash) {
+        continue;
+      }
+      options.add(
+        OfferPaymentSelection(
+          label: destination.label,
+          paymentType: PaymentType.cash,
+          destinationPaymentCode: destination.code,
+        ),
+      );
+    }
+
+    if (getBoolFromSettingBox(hivePaymentTypeWallet)) {
+      options.add(
+        OfferPaymentSelection(
+          label: languages.wallet,
+          paymentType: PaymentType.wallet,
+          destinationPaymentCode: DestinationPaymentUtil.cash,
+        ),
+      );
+    }
+
+    return options;
+  }
+
+  void setCourierPaymentList(int paymentType, String destinationPaymentCode) {
+    final options = _buildCourierPaymentOptions();
+    courierPaymentListController.sink.add(options);
+    if (options.isEmpty) {
+      return;
+    }
+
+    OfferPaymentSelection? selected;
+    if (paymentType == PaymentType.wallet) {
+      final walletOptions = options.where((o) => o.isWallet);
+      if (walletOptions.isNotEmpty) {
+        selected = walletOptions.first;
+      }
+    } else {
+      final normalizedCode = destinationPaymentCode.trim().toLowerCase();
+      for (final option in options) {
+        if (!option.isWallet && option.destinationPaymentCode == normalizedCode) {
+          selected = option;
+          break;
+        }
+      }
+      selected ??= options.firstWhere(
+        (o) => !o.isWallet && o.destinationPaymentCode == DestinationPaymentUtil.cash,
+        orElse: () => options.first,
+      );
+    }
+
+    applyCourierPaymentSelection(selected ?? options.first);
+  }
+
+  void applyCourierPaymentSelection(OfferPaymentSelection selection) {
+    selectedCourierPaymentController.sink.add(selection);
+    selectedPaymentController.sink.add(PaymentTypeModel(type: selection.paymentType, name: selection.label));
+    selectedDestinationPaymentController.sink.add(
+      DestinationPaymentOption(code: selection.destinationPaymentCode, label: selection.label),
+    );
   }
 
   void setDestinationPaymentList(String selectedCode) {
@@ -164,6 +250,8 @@ class OfferFareAndBookBloc extends Bloc {
     offerFareController.dispose();
     paymentListController.close();
     selectedPaymentController.close();
+    courierPaymentListController.close();
+    selectedCourierPaymentController.close();
     destinationPaymentListController.close();
     selectedDestinationPaymentController.close();
     showScheduleController.close();

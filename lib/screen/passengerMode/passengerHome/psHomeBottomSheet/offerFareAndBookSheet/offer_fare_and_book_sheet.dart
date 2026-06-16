@@ -11,11 +11,16 @@ import '../../../../../commonView/dropdown_button2.dart';
 import '../../../../../commonView/scaffold_with_safe_area.dart';
 import '../../../../../commonView/spinner_date_time_picker.dart';
 import '../../../../../hive/hive_helper.dart';
+import '../../../../../utils/app_mobile_settings.dart';
 import '../../../../../utils/destination_payment_util.dart';
+import '../../../../../commonView/xisti_bottom_sheet_shell.dart';
+import '../../../../../commonView/xisti_horizontal_payment_selector.dart';
+import '../../../../../utils/xisti_ui_tokens.dart';
 import '../../../../../utils/utils.dart';
 import '../../../../../utils/validator.dart';
 import '../../passenger_home_dl.dart';
 import 'offer_fare_and_book_bloc.dart';
+import 'offer_payment_selection.dart';
 
 class OfferFareAndBookSheet extends StatefulWidget {
   final double recommendedFare, minFare, maxFare;
@@ -120,42 +125,20 @@ class _OfferFareAndBookSheetState extends State<OfferFareAndBookSheet> {
       resizeToAvoidBottomInset: true,
       body: Align(
         alignment: AlignmentDirectional.bottomCenter,
-        child: Container(
-          width: double.infinity,
-          decoration: BoxDecoration(color: getCurrentTheme(context).colorScaffoldBg, borderRadius: bottomSheetBorderRadius30r),
-          padding: EdgeInsetsDirectional.only(start: commonHorizontalPadding, end: commonHorizontalPadding, bottom: getBottomMargin(), top: 25.h),
-          child: SingleChildScrollView(
-            child: Form(
+        child: XistiBottomSheetShell(
+          title: languages.offerAmount,
+          onClose: () => Navigator.pop(context),
+          children: [
+            Form(
               key: _bloc?.formKey,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Padding(
-                          padding: EdgeInsetsDirectional.only(bottom: 15.h),
-                          child: Text(
-                            languages.offerAmount,
-                            textAlign: TextAlign.start,
-                            style: bodyText(context: context, fontSize: textSize22px, fontWeight: FontWeight.w600),
-                          ),
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.pop(context);
-                        },
-                        child: Icon(CustomIcons.cancel, size: 25.sp, color: getCurrentTheme(context).colorIconCommon),
-                      ),
-                    ],
-                  ),
                   offerFare(),
                   Divider(height: 0, thickness: 2.h, color: getCurrentTheme(context).colorTextFieldBorder),
                   fareInfo(),
-                  paymentType(),
+                  if (widget.isCourier || widget.isEncomienda) courierPaymentMethod() else paymentType(),
                   if (widget.isCourier || widget.isEncomienda) ...[
                     if (widget.deliveryVehicleOptions.isNotEmpty) deliveryVehicleSection(),
                     if (widget.deliveryDisclaimer.isNotEmpty) deliveryDisclaimerBanner(),
@@ -166,11 +149,10 @@ class _OfferFareAndBookSheetState extends State<OfferFareAndBookSheet> {
                       encomiendaPriceCap(),
                     ] else ...[
                       estimatedPrice(),
-                      packageDimensions(),
+                      if (isCourierPackageDimensionsRequired()) packageDimensions(),
                       parcelNote(),
                     ],
                   ],
-                  // scheduleRide(),
                   autoAcceptView(),
                   CustomRoundedButton(context, languages.findDrive, () {
                     if (_bloc?.formKey.currentState!.validate() ?? false) {
@@ -180,7 +162,7 @@ class _OfferFareAndBookSheetState extends State<OfferFareAndBookSheet> {
                 ],
               ),
             ),
-          ),
+          ],
         ),
       ),
     );
@@ -192,13 +174,13 @@ class _OfferFareAndBookSheetState extends State<OfferFareAndBookSheet> {
       margin: EdgeInsetsDirectional.only(top: 12.h),
       padding: EdgeInsetsDirectional.all(12.w),
       decoration: BoxDecoration(
-        color: const Color(0xFFFFF3E0),
-        borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(color: const Color(0xFFE65100).withValues(alpha: 0.35)),
+        color: XistiBrand.legalOrangeBg,
+        borderRadius: BorderRadius.circular(XistiUiTokens.cardRadius),
+        border: Border.all(color: XistiBrand.legalOrange.withValues(alpha: 0.35)),
       ),
       child: Text(
         widget.deliveryDisclaimer,
-        style: bodyText(context: context, fontSize: textSize12px, textColor: const Color(0xFFE65100)),
+        style: bodyText(context: context, fontSize: textSize12px, textColor: XistiBrand.legalOrange),
       ),
     );
   }
@@ -539,6 +521,42 @@ class _OfferFareAndBookSheetState extends State<OfferFareAndBookSheet> {
                 ),
               ),
           ],
+        );
+      },
+    );
+  }
+
+  Widget courierPaymentMethod() {
+    return StreamBuilder<List<OfferPaymentSelection>>(
+      stream: _bloc?.courierPaymentListController,
+      builder: (context, snapList) {
+        final paymentList = snapList.data ?? [];
+        if (paymentList.isEmpty) return const SizedBox.shrink();
+        return Padding(
+          padding: EdgeInsetsDirectional.only(top: 16.h),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                languages.paymentMethod,
+                style: bodyText(context: context, fontWeight: FontWeight.w600),
+              ),
+              SizedBox(height: 10.h),
+              StreamBuilder<OfferPaymentSelection?>(
+                stream: _bloc?.selectedCourierPaymentController,
+                builder: (context, snapPayment) {
+                  return XistiHorizontalPaymentSelector<OfferPaymentSelection>(
+                    options: paymentList,
+                    selected: snapPayment.data ?? paymentList.first,
+                    onSelected: (value) => _bloc?.applyCourierPaymentSelection(value),
+                    labelOf: (e) => e.label,
+                    paymentTypeOf: (e) => e.paymentType,
+                    destinationCodeOf: (e) => e.destinationPaymentCode,
+                  );
+                },
+              ),
+            ],
+          ),
         );
       },
     );

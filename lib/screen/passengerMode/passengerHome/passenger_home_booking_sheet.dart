@@ -2,17 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../utils/utils.dart';
-import '../../../utils/xisti_home_ui_tokens.dart';
+import '../../../utils/xisti_ui_tokens.dart';
 
 /// Draggable bottom sheet shell for vehicles, encomiendas fields and CTA.
 class PassengerHomeBookingSheet extends StatelessWidget {
   final ScrollController scrollController;
   final List<Widget> children;
+  final double bottomInset;
 
   const PassengerHomeBookingSheet({
     super.key,
     required this.scrollController,
     required this.children,
+    this.bottomInset = 0,
   });
 
   @override
@@ -21,7 +23,7 @@ class PassengerHomeBookingSheet extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: theme.colorScaffoldBg,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(XistiHomeUiTokens.sheetRadius)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(XistiUiTokens.sheetRadius)),
         boxShadow: [
           BoxShadow(
             color: theme.colorBorder.withValues(alpha: 0.45),
@@ -32,7 +34,7 @@ class PassengerHomeBookingSheet extends StatelessWidget {
       ),
       child: ListView(
         controller: scrollController,
-        padding: EdgeInsetsDirectional.only(bottom: getBottomMargin()),
+        padding: EdgeInsetsDirectional.only(bottom: bottomInset + getBottomMargin()),
         children: [
           Center(
             child: Container(

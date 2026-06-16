@@ -1,26 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../../../../utils/utils.dart';
-import '../../../bottomSheet/vehicle_information_sheet.dart';
+import '../../../utils/utils.dart';
+import '../../../utils/xisti_ui_tokens.dart';
 import '../../../commonView/load_image_with_placeholder.dart';
+import '../../../bottomSheet/vehicle_information_sheet.dart';
 import 'passenger_home_dl.dart';
 
 class ItemVehicleType extends StatelessWidget {
   final ServiceTypeItem serviceTypeItem;
   final bool isSelected;
+  final String? serviceMode;
 
   const ItemVehicleType({
     super.key,
     required this.serviceTypeItem,
     this.isSelected = false,
+    this.serviceMode,
   });
 
   @override
   Widget build(BuildContext context) {
+    final theme = getCurrentTheme(context);
+    final accent = XistiUiTokens.accentForMode(serviceMode);
+
     return Container(
       alignment: AlignmentDirectional.center,
-      width: 96.w,
+      width: 100.w,
       margin: EdgeInsetsDirectional.only(end: 12.w),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -28,30 +34,29 @@ class ItemVehicleType extends StatelessWidget {
         children: [
           Stack(
             children: [
-              AspectRatio(
-                aspectRatio: 1.0,
-                child: Container(
-                  width: double.maxFinite,
-                  padding: EdgeInsetsDirectional.only(start: 12.w, end: 12.w, top: 8.h, bottom: 6.h),
-                  decoration: BoxDecoration(
-                    color: isSelected
-                        ? getCurrentTheme(context).colorSelectionPrimaryOpc
-                        : getCurrentTheme(context).colorScaffoldBg,
-                    borderRadius: BorderRadius.circular(15.r),
-                    border: Border.all(
-                      color: isSelected
-                          ? getCurrentTheme(context).colorPrimary
-                          : getCurrentTheme(context).colorBorder,
-                      width: isSelected ? 1.5.sp : 0.5.sp,
-                    ),
-                  ),
-                  child: LoadImageWithPlaceHolder(
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 220),
+                curve: Curves.easeOutCubic,
+                child: AspectRatio(
+                  aspectRatio: 1.0,
+                  child: Container(
                     width: double.maxFinite,
-                    height: double.maxFinite,
-                    imageFit: BoxFit.contain,
-                    image: serviceTypeItem.serviceIcon ?? "",
-                    defaultAssetImage: "assets/images/app_icon.png",
-                    borderRadius: BorderRadius.zero,
+                    padding: EdgeInsetsDirectional.only(start: 10.w, end: 10.w, top: 10.h, bottom: 8.h),
+                    decoration: XistiUiTokens.glassCard(
+                      background: theme.colorScaffoldBg,
+                      borderColor: theme.colorBorder,
+                      accent: accent,
+                      selected: isSelected,
+                      radius: 18.r,
+                    ),
+                    child: LoadImageWithPlaceHolder(
+                      width: double.maxFinite,
+                      height: double.maxFinite,
+                      imageFit: BoxFit.contain,
+                      image: serviceTypeItem.serviceIcon ?? "",
+                      defaultAssetImage: "assets/images/app_icon.png",
+                      borderRadius: BorderRadius.zero,
+                    ),
                   ),
                 ),
               ),
@@ -74,18 +79,19 @@ class ItemVehicleType extends StatelessWidget {
                       );
                     },
                     child: Container(
-                      margin: EdgeInsetsDirectional.only(top: 3.h, end: 5.w),
-                      child: Icon(
-                        CustomIcons.information,
-                        size: 15.sp,
-                        color: getCurrentTheme(context).colorIconCommon,
+                      margin: EdgeInsetsDirectional.only(top: 4.h, end: 4.w),
+                      padding: EdgeInsets.all(4.sp),
+                      decoration: BoxDecoration(
+                        color: theme.colorScaffoldBg.withValues(alpha: 0.9),
+                        shape: BoxShape.circle,
                       ),
+                      child: Icon(CustomIcons.information, size: 14.sp, color: accent),
                     ),
                   ),
                 ),
             ],
           ),
-          SizedBox(height: 4.h),
+          SizedBox(height: 6.h),
           Text(
             serviceTypeItem.serviceName ?? "-",
             textAlign: TextAlign.center,
@@ -93,8 +99,8 @@ class ItemVehicleType extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             style: bodyText(
               context: context,
-              textColor: getCurrentTheme(context).colorTextCommon,
-              fontWeight: FontWeight.w500,
+              textColor: isSelected ? accent : theme.colorTextCommon,
+              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
               fontSize: textSize13px,
             ),
           ),

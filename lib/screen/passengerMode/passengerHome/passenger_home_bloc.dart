@@ -24,6 +24,9 @@ import '../../common/splash/splash_repo.dart';
 import '../offerRide/offer_ride_screen.dart';
 import '../passengerRunningRide/passenger_running_ride.dart';
 import '../setRoute/set_route_screen.dart';
+import '../../../utils/xisti_ui_tokens.dart';
+import 'passenger_home_activity_dl.dart';
+import 'passenger_home_barrio_shortcuts.dart';
 import 'passenger_home_dl.dart';
 import 'passenger_home_repo.dart';
 import 'psHomeBottomSheet/offerFareAndBookSheet/offer_fare_and_book_sheet.dart';
@@ -100,6 +103,7 @@ class PassengerHomeBloc extends Bloc {
   String encomiendaPassengerDisclaimer = '';
   final selectedDeliveryVehicleServiceId = BehaviorSubject<int?>();
   final locationHistorySubject = BehaviorSubject<List<Map<String, dynamic>>>.seeded([]);
+  final activityHubSubject = BehaviorSubject<PassengerActivitySnapshot?>.seeded(null);
 
   Future<void> callPassengerRunningServiceApi() async {
     if (await isNetworkConnected(
@@ -178,6 +182,7 @@ class PassengerHomeBloc extends Bloc {
           }
           _applyHomeServices(response);
           await refreshLocationHistory();
+          await refreshActivityHub();
           subjectServiceData.add(ApiResponse.completed(response));
           putDataInSettingBox(hiveDriverStatus, response.isDriverStatus ?? 0);
           putDataInSettingBox(hiveDocumentStatus, response.driverDocStatus ?? 0);
@@ -286,15 +291,14 @@ class PassengerHomeBloc extends Bloc {
       rideBookSubject.add(ApiResponse.loading());
       try {
         final encomienda = isEncomiendasMode;
-        final legacyCourier = (subjectSelectedServiceData.valueOrNull?.serviceId ?? 0) == ServiceType.courier;
-        final courierLike = legacyCourier || encomienda;
-        final bookServiceId = encomienda
+        final deliveryLike = isCourierLikeBooking;
+        final bookServiceId = encomienda || isDeliveryMode
             ? (selectedDeliveryVehicleServiceId.valueOrNull ?? subjectSelectedServiceData.valueOrNull?.serviceId ?? 0)
             : (subjectSelectedServiceData.valueOrNull?.serviceId ?? 0);
 
         List<SearchedLocation> addressList = [];
         addressList.add(fromAddressController.value!);
-        if (!courierLike && (addStopAddressList.valueOrNull?.isNotEmpty ?? false)) {
+        if (!deliveryLike && (addStopAddressList.valueOrNull?.isNotEmpty ?? false)) {
           addressList.addAll(addStopAddressList.valueOrNull ?? []);
         }
         addressList.add(toAddressController.value!);
@@ -309,13 +313,15 @@ class PassengerHomeBloc extends Bloc {
             minFareAmount: minPriceSubject.valueOrNull ?? 0,
             maxFareAmount: maxPriceSubject.valueOrNull ?? 0,
             totalDistance: distanceController.valueOrNull ?? 0,
-            recipientName: courierLike ? recipientNameController.valueOrNull ?? "" : "",
-            recipientNumber: courierLike ? recipientNumberController.valueOrNull ?? "" : "",
-            itemDecs: courierLike ? itemDescController.valueOrNull ?? "" : "",
-            estimatePrice: courierLike
-                ? (itemEstimatedPriceController.valueOrNull ?? "").isNotEmpty
+            recipientName: deliveryLike ? recipientNameController.valueOrNull ?? "" : "",
+            recipientNumber: deliveryLike ? recipientNumberController.valueOrNull ?? "" : "",
+            itemDecs: deliveryLike ? itemDescController.valueOrNull ?? "" : "",
+            estimatePrice: deliveryLike
+                ? (encomienda
                       ? (itemEstimatedPriceController.valueOrNull ?? "").trim()
-                      : "0"
+                      : (itemEstimatedPriceController.valueOrNull ?? "").isNotEmpty
+                            ? (itemEstimatedPriceController.valueOrNull ?? "").trim()
+                            : "0")
                 : "",
             pickupDateTime: scheduleDateController.valueOrNull == null ? "" : convertTimeToServerTime(scheduleDateController.value!),
             autoAccept: autoAcceptController.valueOrNull ?? 0,
@@ -333,12 +339,12 @@ class PassengerHomeBloc extends Bloc {
             otherName: (bookForOtherController.valueOrNull ?? false) ? otherContactNameController.valueOrNull ?? "" : "",
             otherNumber: (bookForOtherController.valueOrNull ?? false) ? otherContactController.valueOrNull ?? "" : "",
             destinationPaymentMethod: destinationPaymentMethodController.valueOrNull ?? DestinationPaymentUtil.cash,
-            packageWeightKg: legacyCourier ? packageWeightController.valueOrNull ?? "" : "",
-            packageHeightCm: legacyCourier ? packageHeightController.valueOrNull ?? "" : "",
-            packageWidthCm: legacyCourier ? packageWidthController.valueOrNull ?? "" : "",
-            packageLengthCm: legacyCourier ? packageLengthController.valueOrNull ?? "" : "",
-            requestedVehicleServiceId: courierLike ? (selectedDeliveryVehicleServiceId.valueOrNull ?? 0) : 0,
-            errandType: encomienda ? 'encomienda' : (legacyCourier ? 'delivery' : ''),
+            packageWeightKg: deliveryLike && !encomienda ? packageWeightController.valueOrNull ?? "" : "",
+            packageHeightCm: deliveryLike && !encomienda ? packageHeightController.valueOrNull ?? "" : "",
+            packageWidthCm: deliveryLike && !encomienda ? packageWidthController.valueOrNull ?? "" : "",
+            packageLengthCm: deliveryLike && !encomienda ? packageLengthController.valueOrNull ?? "" : "",
+            requestedVehicleServiceId: deliveryLike ? (selectedDeliveryVehicleServiceId.valueOrNull ?? bookServiceId) : 0,
+            errandType: encomienda ? 'encomienda' : (deliveryLike ? 'delivery' : ''),
           ),
         );
         String message = getApiMsg(response.message, response.messageCode);
@@ -375,7 +381,7 @@ class PassengerHomeBloc extends Bloc {
         addressLong: "${fromAddressController.valueOrNull?.lng ?? 0}",
       ),
     );
-    if ((subjectSelectedServiceData.valueOrNull?.serviceId != ServiceType.courier) && (addStopAddressList.valueOrNull?.isNotEmpty ?? false)) {
+    if (!isCourierLikeBooking && (addStopAddressList.valueOrNull?.isNotEmpty ?? false)) {
       for (SearchedLocation addressItem in (addStopAddressList.valueOrNull ?? [])) {
         addressList.add(AddressListItem(address: addressItem.name ?? "", addressLat: "${addressItem.lat ?? 0}", addressLong: "${addressItem.lng ?? 0}"));
       }
@@ -392,14 +398,15 @@ class PassengerHomeBloc extends Bloc {
       OfferRideScreen(
         rideId: rideId,
         serviceType: subjectSelectedServiceData.valueOrNull?.serviceId ?? 0,
+        showCourierDetails: isCourierLikeBooking,
         addressList: addressList,
         fareAmount: offerFareAmountController.valueOrNull ?? "0",
-        itemDesc: (subjectSelectedServiceData.valueOrNull?.serviceId ?? 0) == ServiceType.courier ? itemDescController.valueOrNull ?? "" : "",
-        recipientName: (subjectSelectedServiceData.valueOrNull?.serviceId ?? 0) == ServiceType.courier ? recipientNameController.valueOrNull ?? "" : "",
-        recipientNumber: (subjectSelectedServiceData.valueOrNull?.serviceId ?? 0) == ServiceType.courier ? recipientNumberController.valueOrNull ?? "" : "",
+        itemDesc: isCourierLikeBooking ? itemDescController.valueOrNull ?? "" : "",
+        recipientName: isCourierLikeBooking ? recipientNameController.valueOrNull ?? "" : "",
+        recipientNumber: isCourierLikeBooking ? recipientNumberController.valueOrNull ?? "" : "",
         minFareAmount: minPriceSubject.valueOrNull ?? 0,
         maxFareAmount: maxPriceSubject.valueOrNull ?? 0,
-        estimatedPrice: (subjectSelectedServiceData.valueOrNull?.serviceId ?? 0) == ServiceType.courier
+        estimatedPrice: isCourierLikeBooking
             ? (itemEstimatedPriceController.valueOrNull ?? "").isNotEmpty
                   ? itemEstimatedPriceController.valueOrNull ?? ""
                   : "0"
@@ -457,14 +464,25 @@ class PassengerHomeBloc extends Bloc {
     } else {
       subjectSelectedServiceData.add(null);
     }
+    changePolylineColorPerTheme();
   }
 
   bool get isEncomiendasMode =>
       selectedServiceModeSubject.valueOrNull == ServiceModeKind.encomiendas;
 
-  bool get isCourierLikeBooking =>
-      (subjectSelectedServiceData.valueOrNull?.serviceId ?? 0) == ServiceType.courier ||
-      isEncomiendasMode;
+  bool get isDeliveryMode =>
+      (selectedServiceModeSubject.valueOrNull ?? ServiceModeKind.transport) == ServiceModeKind.delivery;
+
+  bool get isCourierLikeBooking {
+    final mode = selectedServiceModeSubject.valueOrNull ?? ServiceModeKind.transport;
+    if (mode == ServiceModeKind.transport) {
+      return false;
+    }
+    if (mode == ServiceModeKind.delivery || mode == ServiceModeKind.encomiendas) {
+      return true;
+    }
+    return (subjectSelectedServiceData.valueOrNull?.serviceId ?? 0) == ServiceType.courier;
+  }
 
   Future<void> refreshLocationHistory() async {
     final serviceId = subjectSelectedServiceData.valueOrNull?.serviceId ?? 0;
@@ -606,7 +624,7 @@ class PassengerHomeBloc extends Bloc {
       constraints: BoxConstraints(maxHeight: ScreenUtil().screenHeight * 0.9),
       builder: (context) {
         return OfferFareAndBookSheet(
-          isCourier: subjectSelectedServiceData.valueOrNull?.serviceId == ServiceType.courier,
+          isCourier: isCourierLikeBooking && !isEncomiendasMode,
           isEncomienda: isEncomiendasMode,
           deliveryVehicleOptions: deliveryVehicleOptions,
           deliveryDisclaimer: isEncomiendasMode ? encomiendaPassengerDisclaimer : deliveryPassengerDisclaimer,
@@ -820,12 +838,123 @@ class PassengerHomeBloc extends Bloc {
     markersListController.sink.add(markerList);
   }
 
+  Future<void> refreshActivityHub() async {
+    try {
+      final response = PassengerRunningPojo.fromJson(await _splashRepo.getPassengerRunningServiceApi());
+      if (!context.mounted) return;
+      if (response.status == 1 && (response.rideId ?? 0) > 0) {
+        final details = response.rideDetails;
+        final firstDetail = (details != null && details.isNotEmpty) ? details.first : null;
+        final addresses = firstDetail?.addressList;
+        final lastAddress = (addresses != null && addresses.isNotEmpty) ? addresses.last.address : null;
+        final statusLabel = _activityStatusLabel(response.rideStatus ?? 0);
+        activityHubSubject.add(
+          PassengerActivitySnapshot.active(
+            rideId: response.rideId ?? 0,
+            rideStatus: response.rideStatus ?? 0,
+            serviceId: firstDetail?.serviceId,
+            title: statusLabel,
+            subtitle: lastAddress ?? 'Viaje en curso',
+          ),
+        );
+        return;
+      }
+    } catch (_) {
+      // Hub is optional — fall through to recent trip.
+    }
+    final history = locationHistorySubject.valueOrNull ?? [];
+    if (history.isNotEmpty) {
+      final entry = history.first;
+      final dest = entry['destination_name']?.toString() ?? '';
+      if (dest.isNotEmpty) {
+        activityHubSubject.add(
+          PassengerActivitySnapshot.recent(
+            destinationName: dest,
+            destinationLat: getDoubleFromDynamic(entry['destination_lat']),
+            destinationLng: getDoubleFromDynamic(entry['destination_long']),
+            serviceLabel: entry['is_delivery'] == 1 ? 'envío' : 'viaje',
+          ),
+        );
+        return;
+      }
+    }
+    activityHubSubject.add(null);
+  }
+
+  String _activityStatusLabel(int rideStatus) {
+    switch (rideStatus) {
+      case 0:
+        return 'Buscando conductor';
+      case 1:
+      case 2:
+        return 'Viaje confirmado';
+      case 3:
+        return 'Conductor en camino';
+      case 5:
+        return 'Viaje en curso';
+      default:
+        return 'Actividad activa';
+    }
+  }
+
+  Future<void> openActivityHub() async {
+    final snapshot = activityHubSubject.valueOrNull;
+    if (snapshot == null) return;
+    if (snapshot.isActive) {
+      try {
+        final response = PassengerRunningPojo.fromJson(await _splashRepo.getPassengerRunningServiceApi());
+        if (!context.mounted || (response.rideId ?? 0) == 0) return;
+        if (response.rideStatus == 0 && (response.rideDetails ?? []).isNotEmpty) {
+          final rideDetail = response.rideDetails!.first;
+          openScreen(
+            context,
+            OfferRideScreen(
+              rideId: rideDetail.rideId ?? 0,
+              serviceType: rideDetail.serviceId ?? 0,
+              addressList: rideDetail.addressList ?? [],
+              fareAmount: '${rideDetail.offeredPrice ?? 0}',
+              itemDesc: rideDetail.itemDescription ?? '',
+              recipientName: rideDetail.recipientName ?? '',
+              recipientNumber: rideDetail.recipientContactNumber ?? '',
+              minFareAmount: rideDetail.minBargainAmt ?? 0,
+              maxFareAmount: rideDetail.maxBargainAmt ?? 0,
+              estimatedPrice: '${rideDetail.offeredPrice ?? 0}',
+            ),
+          );
+        } else {
+          openScreen(context, PassengerRunningRide(rideId: response.rideId ?? 0));
+        }
+      } catch (e) {
+        debugPrint(e.toString());
+      }
+      return;
+    }
+    if (snapshot.destinationName != null) {
+      applyRecentDestinationEntry({
+        'destination_name': snapshot.destinationName,
+        'destination_lat': snapshot.destinationLat,
+        'destination_long': snapshot.destinationLng,
+      });
+    }
+  }
+
+  Future<void> flyToBarrio(XistiBarrioShortcut barrio) async {
+    if (googleMapController == null) return;
+    await googleMapController!.animateCamera(
+      CameraUpdate.newCameraPosition(
+        CameraPosition(target: barrio.latLng, zoom: 14),
+      ),
+    );
+  }
+
   void changePolylineColorPerTheme() {
     Map<PolylineId, Polyline> polyLines = polyLinesController.valueOrNull ?? {};
     if (polyLines.isNotEmpty) {
+      final mode = selectedServiceModeSubject.valueOrNull;
+      final lineColor = XistiUiTokens.polylineColorForMode(mode);
       final oldPolyline = polyLines[PolylineId("poly")]!;
       final updatedPolyline = oldPolyline.copyWith(
-        colorParam: getCurrentTheme(context).colorPrimary,
+        colorParam: lineColor,
         widthParam: 5,
       );
       polyLines[PolylineId("poly")] = updatedPolyline;
@@ -889,7 +1018,7 @@ class PassengerHomeBloc extends Bloc {
 
       if ((addStopAddressList.valueOrNull?.isNotEmpty ?? false) &&
           ((addStopAddressList.valueOrNull?.length ?? 0) > 0) &&
-          (subjectSelectedServiceData.valueOrNull?.serviceId != ServiceType.courier)) {
+          !isCourierLikeBooking) {
         addStopAddressList.valueOrNull?.asMap().forEach((int index, SearchedLocation searchedLocation) async {
           int stopNumber = index + 1;
           int pos = markerList.indexWhere((item) => item.markerId == MarkerId("stop$stopNumber"));
@@ -998,6 +1127,7 @@ class PassengerHomeBloc extends Bloc {
     itemEstimatedPriceController.close();
     selectedDeliveryVehicleServiceId.close();
     locationHistorySubject.close();
+    activityHubSubject.close();
   }
 }
 

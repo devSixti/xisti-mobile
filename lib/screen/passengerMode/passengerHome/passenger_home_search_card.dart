@@ -3,7 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../utils/service_mode_util.dart';
 import '../../../utils/utils.dart';
-import '../../../utils/xisti_home_ui_tokens.dart';
+import '../../../utils/xisti_ui_tokens.dart';
 import 'passenger_home_dl.dart';
 
 String xistiHomeHeroSubtitleForMode(String? mode) {
@@ -48,21 +48,22 @@ class PassengerHomeSearchCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = getCurrentTheme(context);
+    final accent = XistiUiTokens.accentForMode(serviceMode);
     final pickupHint = serviceMode == ServiceModeKind.encomiendas ? 'Dónde comprar' : languages.pickUpLocation;
     final dropHint = serviceMode == ServiceModeKind.encomiendas ? 'Dónde entregar' : languages.dropLocation;
     final showRecents = (dropoff?.name ?? '').isEmpty && recentTrips.isNotEmpty;
 
     return Container(
       margin: EdgeInsetsDirectional.only(
-        start: XistiHomeUiTokens.overlayHorizontalPadding,
-        end: XistiHomeUiTokens.overlayHorizontalPadding + 48.w,
+        start: XistiUiTokens.overlayHorizontalPadding,
+        end: XistiUiTokens.overlayHorizontalPadding + 48.w,
       ),
       padding: EdgeInsetsDirectional.fromSTEB(14.w, 12.h, 14.w, 12.h),
       decoration: BoxDecoration(
         color: theme.colorScaffoldBg.withValues(alpha: 0.97),
-        borderRadius: BorderRadius.circular(XistiHomeUiTokens.searchCardRadius),
-        border: Border.all(color: theme.colorPrimary.withValues(alpha: 0.35), width: 1.sp),
-        boxShadow: XistiHomeUiTokens.floatingShadow(context, theme.colorBorder),
+        borderRadius: BorderRadius.circular(XistiUiTokens.searchCardRadius),
+        border: Border.all(color: accent.withValues(alpha: 0.45), width: 1.sp),
+        boxShadow: XistiUiTokens.floatingShadow(context, theme.colorBorder),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -72,15 +73,19 @@ class PassengerHomeSearchCard extends StatelessWidget {
             children: [
               Text(
                 'XISTI',
-                style: bodyText(context: context, fontSize: textSize14px, fontWeight: FontWeight.w800, textColor: theme.colorPrimary),
+                style: bodyText(context: context, fontSize: textSize14px, fontWeight: FontWeight.w800, textColor: XistiBrand.green),
               ),
               SizedBox(width: 8.w),
               Expanded(
-                child: Text(
-                  xistiHomeHeroSubtitleForMode(serviceMode),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: bodyText(context: context, fontSize: textSize12px, textColor: theme.colorTextLight),
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 280),
+                  child: Text(
+                    xistiHomeHeroSubtitleForMode(serviceMode),
+                    key: ValueKey(serviceMode ?? 'transport'),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: bodyText(context: context, fontSize: textSize12px, textColor: theme.colorTextLight),
+                  ),
                 ),
               ),
             ],
@@ -89,7 +94,7 @@ class PassengerHomeSearchCard extends StatelessWidget {
           _routeRow(
             context: context,
             icon: CustomIcons.pickupLocation,
-            iconColor: theme.colorPrimary,
+            iconColor: XistiBrand.green,
             label: pickup?.name ?? pickupHint,
             hasValue: (pickup?.name ?? '').isNotEmpty,
             onTap: onPickupTap,
@@ -102,7 +107,7 @@ class PassengerHomeSearchCard extends StatelessWidget {
           _routeRow(
             context: context,
             icon: CustomIcons.dropLocation,
-            iconColor: const Color(0xFF9333EA),
+            iconColor: XistiBrand.purple,
             label: dropoff?.name ?? dropHint,
             hasValue: (dropoff?.name ?? '').isNotEmpty,
             onTap: onDropoffTap,
@@ -112,28 +117,43 @@ class PassengerHomeSearchCard extends StatelessWidget {
           if (showRecents) ...[
             SizedBox(height: 10.h),
             SizedBox(
-              height: 32.h,
+              height: 36.h,
               child: ListView.separated(
                 scrollDirection: Axis.horizontal,
-                itemCount: recentTrips.length > 2 ? 2 : recentTrips.length,
+                itemCount: recentTrips.length > 3 ? 3 : recentTrips.length,
                 separatorBuilder: (_, _) => SizedBox(width: 6.w),
                 itemBuilder: (context, index) {
                   final entry = recentTrips[index];
                   final dest = entry['destination_name']?.toString() ?? '';
+                  final isDelivery = entry['is_delivery'] == 1 || entry['is_delivery'] == true;
                   return GestureDetector(
                     onTap: () => onRecentDestinationTap?.call(entry),
                     child: Container(
                       padding: EdgeInsetsDirectional.symmetric(horizontal: 10.w, vertical: 6.h),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(16.r),
-                        color: theme.colorPrimary.withValues(alpha: 0.1),
-                        border: Border.all(color: theme.colorPrimary.withValues(alpha: 0.4)),
+                        color: (isDelivery ? XistiBrand.purple : XistiBrand.green).withValues(alpha: 0.1),
+                        border: Border.all(color: (isDelivery ? XistiBrand.purple : XistiBrand.green).withValues(alpha: 0.4)),
                       ),
-                      child: Text(
-                        dest,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: bodyText(context: context, fontSize: textSize12px, fontWeight: FontWeight.w500),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            isDelivery ? CustomIcons.orderId : CustomIcons.hailRide,
+                            size: 14.sp,
+                            color: isDelivery ? XistiBrand.purple : XistiBrand.green,
+                          ),
+                          SizedBox(width: 6.w),
+                          ConstrainedBox(
+                            constraints: BoxConstraints(maxWidth: 120.w),
+                            child: Text(
+                              dest,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: bodyText(context: context, fontSize: textSize12px, fontWeight: FontWeight.w500),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   );

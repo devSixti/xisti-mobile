@@ -23,10 +23,13 @@ class OfferRideScreen extends StatefulWidget {
   final int rideId, serviceType;
   final dynamic minFareAmount, maxFareAmount;
 
+  final bool showCourierDetails;
+
   const OfferRideScreen({
     super.key,
     required this.rideId,
     required this.serviceType,
+    this.showCourierDetails = false,
     required this.addressList,
     required this.fareAmount,
     required this.itemDesc,
@@ -149,7 +152,7 @@ class _OfferRideScreenState extends State<OfferRideScreen> {
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
             addressDetails(),
-            if (widget.serviceType == ServiceType.courier) ...[
+            if (widget.showCourierDetails || widget.serviceType == ServiceType.courier) ...[
               Container(height: 1.h, margin: EdgeInsetsDirectional.only(bottom: 20.h), color: getCurrentTheme(context).colorIndicatorOff),
               CourierDetailView(
                 itemDesc: widget.itemDesc,

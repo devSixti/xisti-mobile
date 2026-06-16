@@ -12,7 +12,10 @@ import '../../../networking/api_response.dart';
 import '../../../utils/app_mobile_settings.dart';
 import '../../../utils/map_style_hot_reload.dart';
 import '../../../utils/utils.dart';
-import '../../../utils/xisti_home_ui_tokens.dart';
+import '../../../utils/xisti_ui_tokens.dart';
+import 'passenger_home_activity_hub.dart';
+import 'passenger_home_barrio_shortcuts_ui.dart';
+import 'passenger_home_mode_banner.dart';
 import '../../common/account/account_screen.dart';
 import 'item_vehicle_type.dart';
 import 'passenger_home_bloc.dart';
@@ -94,6 +97,7 @@ class _PassengerHomeState extends State<PassengerHome> {
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
               serviceModeSelector(),
+              deliveryLegalNoticeBanner(),
               serviceData(),
               encomiendaFields(),
               addressSelection(),
@@ -106,114 +110,299 @@ class _PassengerHomeState extends State<PassengerHome> {
   }
 
   Widget _modernBody() {
-    final sheetInitial = XistiHomeUiTokens.sheetInitialSize(context);
-    final sheetMin = XistiHomeUiTokens.sheetMinSize(context);
-    final sheetMax = XistiHomeUiTokens.sheetMaxSize(context);
+    if (XistiUiTokens.isTabletOrLandscape(context)) {
+      return _modernBodyTablet();
+    }
+    return _modernBodyPortrait();
+  }
+
+  Widget _modernMapStack() {
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        googleMap(),
+        _mapCenterPin(legacyOffset: false),
+      ],
+    );
+  }
+
+  Widget _modernMapOverlayColumn({required double topInset}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        StreamBuilder<String>(
+          stream: _bloc?.selectedServiceModeSubject,
+          builder: (context, modeSnap) {
+            return StreamBuilder<SearchedLocation?>(
+              stream: _bloc?.fromAddressController,
+              builder: (context, fromSnap) {
+                return StreamBuilder<SearchedLocation?>(
+                  stream: _bloc?.toAddressController,
+                  builder: (context, toSnap) {
+                    return StreamBuilder<List<Map<String, dynamic>>>(
+                      stream: _bloc?.locationHistorySubject,
+                      builder: (context, historySnap) {
+                        return PassengerHomeSearchCard(
+                          serviceMode: modeSnap.data,
+                          pickup: fromSnap.data,
+                          dropoff: toSnap.data,
+                          recentTrips: historySnap.data ?? [],
+                          onPickupTap: () => _bloc?.selectAddress(selectedIndex: 1),
+                          onDropoffTap: () => _bloc?.selectAddress(selectedIndex: 2),
+                          onClearPickup: () => _bloc?.fromAddressController.sink.add(null),
+                          onClearDropoff: () {
+                            _bloc?.toAddressController.sink.add(null);
+                            _bloc?.clearMapData();
+                          },
+                          onRecentDestinationTap: (entry) => _bloc?.applyRecentDestinationEntry(entry),
+                        );
+                      },
+                    );
+                  },
+                );
+              },
+            );
+          },
+        ),
+        StreamBuilder<String>(
+          stream: _bloc?.selectedServiceModeSubject,
+          builder: (context, snap) => PassengerHomeModeBanner(serviceMode: snap.data),
+        ),
+        SizedBox(height: 6.h),
+        StreamBuilder<String>(
+          stream: _bloc?.selectedServiceModeSubject,
+          builder: (context, snapMode) {
+            return StreamBuilder<ApiResponse<ServiceTypeModel>>(
+              stream: _bloc?.subjectServiceData,
+              builder: (context, snapHome) {
+                final groups = snapHome.data?.data?.serviceModes ??
+                    ServiceModeKind.groupsFromFlatServices(snapHome.data?.data?.services ?? []);
+                return PassengerHomeServiceChipsBar(
+                  selectedMode: snapMode.data ?? ServiceModeKind.transport,
+                  groups: groups,
+                  onModeSelected: (mode) => _bloc?.selectServiceMode(mode),
+                );
+              },
+            );
+          },
+        ),
+        SizedBox(height: 6.h),
+        PassengerHomeBarrioShortcuts(onBarrioSelected: (b) => _bloc?.flyToBarrio(b)),
+      ],
+    );
+  }
+
+  List<Widget> _modernBookingSheetChildren() => [
+        activityHubCard(),
+        deliveryLegalNoticeBanner(),
+        serviceData(),
+        encomiendaFields(),
+      ];
+
+  Widget activityHubCard() => StreamBuilder(
+        stream: _bloc?.activityHubSubject,
+        builder: (context, snap) {
+          return PassengerHomeActivityHub(
+            snapshot: snap.data,
+            onTap: () => _bloc?.openActivityHub(),
+          );
+        },
+      );
+
+  Widget _modernBodyPortrait() {
+    final sheetInitial = XistiUiTokens.sheetInitialSize(context);
+    final sheetMin = XistiUiTokens.sheetMinSize(context);
+    final sheetMax = XistiUiTokens.sheetMaxSize(context);
     final topInset = MediaQuery.paddingOf(context).top;
+    final ctaReserve = 88.h + getBottomMargin();
 
     return Stack(
       children: [
-        Positioned.fill(child: googleMap()),
-        _mapCenterPin(legacyOffset: false),
+        Positioned.fill(child: _modernMapStack()),
         Positioned(
           top: topInset + 8.h,
           left: 0,
           right: 0,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              StreamBuilder<String>(
-                stream: _bloc?.selectedServiceModeSubject,
-                builder: (context, modeSnap) {
-                  return StreamBuilder<SearchedLocation?>(
-                    stream: _bloc?.fromAddressController,
-                    builder: (context, fromSnap) {
-                      return StreamBuilder<SearchedLocation?>(
-                        stream: _bloc?.toAddressController,
-                        builder: (context, toSnap) {
-                          return StreamBuilder<List<Map<String, dynamic>>>(
-                            stream: _bloc?.locationHistorySubject,
-                            builder: (context, historySnap) {
-                              return PassengerHomeSearchCard(
-                                serviceMode: modeSnap.data,
-                                pickup: fromSnap.data,
-                                dropoff: toSnap.data,
-                                recentTrips: historySnap.data ?? [],
-                                onPickupTap: () => _bloc?.selectAddress(selectedIndex: 1),
-                                onDropoffTap: () => _bloc?.selectAddress(selectedIndex: 2),
-                                onClearPickup: () => _bloc?.fromAddressController.sink.add(null),
-                                onClearDropoff: () {
-                                  _bloc?.toAddressController.sink.add(null);
-                                  _bloc?.clearMapData();
-                                },
-                                onRecentDestinationTap: (entry) => _bloc?.applyRecentDestinationEntry(entry),
-                              );
-                            },
-                          );
-                        },
-                      );
-                    },
-                  );
-                },
-              ),
-              SizedBox(height: 8.h),
-              StreamBuilder<String>(
-                stream: _bloc?.selectedServiceModeSubject,
-                builder: (context, snapMode) {
-                  return StreamBuilder<ApiResponse<ServiceTypeModel>>(
-                    stream: _bloc?.subjectServiceData,
-                    builder: (context, snapHome) {
-                      final groups = snapHome.data?.data?.serviceModes ??
-                          ServiceModeKind.groupsFromFlatServices(snapHome.data?.data?.services ?? []);
-                      return PassengerHomeServiceChipsBar(
-                        selectedMode: snapMode.data ?? ServiceModeKind.transport,
-                        groups: groups,
-                        onModeSelected: (mode) => _bloc?.selectServiceMode(mode),
-                      );
-                    },
-                  );
-                },
-              ),
-            ],
-          ),
+          child: _modernMapOverlayColumn(topInset: topInset),
         ),
         accountBtn(topOffset: topInset + 8.h),
         Positioned(
+          left: 0,
+          right: 0,
+          top: 0,
+          bottom: ctaReserve,
+          child: DraggableScrollableSheet(
+            initialChildSize: sheetInitial,
+            minChildSize: sheetMin,
+            maxChildSize: sheetMax,
+            snap: true,
+            snapSizes: [sheetMin, sheetInitial, sheetMax],
+            builder: (context, scrollController) {
+              return StreamBuilder<String>(
+                stream: _bloc?.selectedServiceModeSubject,
+                builder: (context, modeSnap) {
+                  return AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 280),
+                    child: PassengerHomeBookingSheet(
+                      key: ValueKey(modeSnap.data ?? ServiceModeKind.transport),
+                      scrollController: scrollController,
+                      children: _modernBookingSheetChildren(),
+                    ),
+                  );
+                },
+              );
+            },
+          ),
+        ),
+        Positioned(
           right: commonHorizontalPadding,
-          bottom: MediaQuery.sizeOf(context).height * sheetInitial + 12.h,
+          bottom: ctaReserve + 12.h,
           child: GestureDetector(
             onTap: () => _bloc?.focusCurrentPosition(),
             child: Container(
               decoration: BoxDecoration(
                 color: getCurrentTheme(context).colorWhite,
                 borderRadius: BorderRadiusDirectional.all(Radius.circular(50.r)),
-                boxShadow: XistiHomeUiTokens.floatingShadow(context, getCurrentTheme(context).colorBorder),
+                boxShadow: XistiUiTokens.floatingShadow(context, getCurrentTheme(context).colorBorder),
               ),
               padding: EdgeInsetsDirectional.all(10.sp),
               child: Icon(CustomIcons.pickupLocation, size: 28.sp, color: getCurrentTheme(context).colorIconCommon),
             ),
           ),
         ),
-        DraggableScrollableSheet(
-          initialChildSize: sheetInitial,
-          minChildSize: sheetMin,
-          maxChildSize: sheetMax,
-          snap: true,
-          snapSizes: [sheetMin, sheetInitial, sheetMax],
-          builder: (context, scrollController) {
-            return PassengerHomeBookingSheet(
-              scrollController: scrollController,
-              children: [
-                serviceData(),
-                encomiendaFields(),
-                confirmBtnAndOtherOption(),
+        Positioned(
+          left: 0,
+          right: 0,
+          bottom: 0,
+          child: Container(
+            decoration: BoxDecoration(
+              color: getCurrentTheme(context).colorScaffoldBg,
+              boxShadow: [
+                BoxShadow(
+                  color: getCurrentTheme(context).colorBorder.withValues(alpha: 0.35),
+                  blurRadius: 12,
+                  offset: const Offset(0, -4),
+                ),
               ],
-            );
-          },
+            ),
+            child: confirmBtnAndOtherOption(),
+          ),
         ),
       ],
     );
   }
+
+  Widget _modernBodyTablet() {
+    final topInset = MediaQuery.paddingOf(context).top;
+
+    return Row(
+      children: [
+        Expanded(
+          flex: 55,
+          child: Stack(
+            children: [
+              _modernMapStack(),
+              Positioned(
+                top: topInset + 8.h,
+                left: 0,
+                right: 0,
+                child: _modernMapOverlayColumn(topInset: topInset),
+              ),
+              accountBtn(topOffset: topInset + 8.h),
+              Positioned(
+                right: commonHorizontalPadding,
+                bottom: 16.h,
+                child: GestureDetector(
+                  onTap: () => _bloc?.focusCurrentPosition(),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: getCurrentTheme(context).colorWhite,
+                      borderRadius: BorderRadiusDirectional.all(Radius.circular(50.r)),
+                      boxShadow: XistiUiTokens.floatingShadow(context, getCurrentTheme(context).colorBorder),
+                    ),
+                    padding: EdgeInsetsDirectional.all(10.sp),
+                    child: Icon(CustomIcons.pickupLocation, size: 28.sp, color: getCurrentTheme(context).colorIconCommon),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        Expanded(
+          flex: 45,
+          child: Container(
+            decoration: BoxDecoration(
+              color: getCurrentTheme(context).colorScaffoldBg,
+              border: Border(
+                left: BorderSide(color: getCurrentTheme(context).colorDarkBorder.withValues(alpha: 0.5)),
+              ),
+            ),
+            child: Column(
+              children: [
+                Expanded(
+                  child: StreamBuilder<String>(
+                    stream: _bloc?.selectedServiceModeSubject,
+                    builder: (context, modeSnap) {
+                      return AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 280),
+                        child: ListView(
+                          key: ValueKey(modeSnap.data ?? ServiceModeKind.transport),
+                          padding: EdgeInsetsDirectional.only(top: 12.h, bottom: 8.h),
+                          children: _modernBookingSheetChildren(),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                Container(
+                  decoration: BoxDecoration(
+                    boxShadow: [
+                      BoxShadow(
+                        color: getCurrentTheme(context).colorBorder.withValues(alpha: 0.35),
+                        blurRadius: 12,
+                        offset: const Offset(0, -4),
+                      ),
+                    ],
+                  ),
+                  child: confirmBtnAndOtherOption(),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget deliveryLegalNoticeBanner() => StreamBuilder<String>(
+    stream: _bloc?.selectedServiceModeSubject,
+    builder: (context, snap) {
+      final mode = snap.data ?? ServiceModeKind.transport;
+      final showNotice = mode == ServiceModeKind.delivery || mode == ServiceModeKind.encomiendas;
+      if (!showNotice) return const SizedBox.shrink();
+      return Padding(
+        padding: EdgeInsetsDirectional.only(
+          start: commonHorizontalPadding,
+          end: commonHorizontalPadding,
+          top: 4.h,
+          bottom: 4.h,
+        ),
+        child: Container(
+          width: double.infinity,
+          padding: EdgeInsetsDirectional.all(12.w),
+          decoration: BoxDecoration(
+            color: XistiBrand.legalOrangeBg,
+            borderRadius: BorderRadius.circular(XistiUiTokens.cardRadius),
+            border: Border.all(color: XistiBrand.legalOrange.withValues(alpha: 0.35)),
+          ),
+          child: Text(
+            languages.deliveryLegalNotice,
+            style: bodyText(context: context, fontSize: textSize12px, textColor: XistiBrand.legalOrange),
+          ),
+        ),
+      );
+    },
+  );
 
   Widget _legacyMapChrome() {
     return Stack(
@@ -323,10 +512,12 @@ class _PassengerHomeState extends State<PassengerHome> {
       stream: _bloc?.subjectSelectedServiceData,
       builder: (context, snapService) {
         ServiceTypeItem? selectedService = snapService.data;
+        final deliveryLike = ServiceModeKind.isDeliveryLikeMode(_bloc?.selectedServiceModeSubject.valueOrNull) ||
+            (selectedService?.serviceId == ServiceType.courier);
         return StreamBuilder<List<SearchedLocation>>(
           stream: _bloc?.addStopAddressList,
           builder: (context, addStopAddressList) {
-            return (((addStopAddressList.data?.length ?? 0) > 0) && (selectedService?.serviceId != ServiceType.courier))
+            return (((addStopAddressList.data?.length ?? 0) > 0) && !deliveryLike)
                 ? Column(
                     children: [
                       SizedBox(height: 15.h),
@@ -640,7 +831,10 @@ class _PassengerHomeState extends State<PassengerHome> {
     },
   );
 
-  Widget serviceData() => StreamBuilder<List<ServiceTypeItem>>(
+  Widget serviceData() => StreamBuilder<String>(
+    stream: _bloc?.selectedServiceModeSubject,
+    builder: (context, modeSnap) {
+      return StreamBuilder<List<ServiceTypeItem>>(
     stream: _bloc?.filteredServicesSubject,
     builder: (context, snapFiltered) {
       return StreamBuilder<ApiResponse<ServiceTypeModel>>(
@@ -651,7 +845,7 @@ class _PassengerHomeState extends State<PassengerHome> {
       return isLoading
           ? getServiceDataShimmer()
           : SizedBox(
-              height: 134.h,
+              height: 140.h,
               child: ListView.builder(
                 shrinkWrap: true,
                 scrollDirection: Axis.horizontal,
@@ -670,6 +864,7 @@ class _PassengerHomeState extends State<PassengerHome> {
                         return ItemVehicleType(
                           serviceTypeItem: item,
                           isSelected: item.matchesSelection(selected),
+                          serviceMode: modeSnap.data,
                         );
                       },
                     ),
@@ -679,6 +874,8 @@ class _PassengerHomeState extends State<PassengerHome> {
             );
         },
       );
+    },
+  );
     },
   );
 
@@ -756,7 +953,7 @@ class _PassengerHomeState extends State<PassengerHome> {
             color: getCurrentTheme(context).colorScaffoldBg.withValues(alpha: topOffset != null ? 0.94 : 1),
             borderRadius: BorderRadius.circular(15.r),
             border: Border.all(width: 1.w, color: getCurrentTheme(context).colorDarkBorder),
-            boxShadow: topOffset != null ? XistiHomeUiTokens.floatingShadow(context, getCurrentTheme(context).colorBorder) : null,
+            boxShadow: topOffset != null ? XistiUiTokens.floatingShadow(context, getCurrentTheme(context).colorBorder) : null,
           ),
           child: Icon(CustomIcons.menu, color: getCurrentTheme(context).colorIconCommon),
         ),
