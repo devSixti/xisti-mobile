@@ -456,6 +456,7 @@ class PassengerHomeBloc extends Bloc {
     var groups = (response?.serviceModes ?? []).isNotEmpty
         ? response!.serviceModes!
         : ServiceModeKind.groupsFromFlatServices(response?.services ?? []);
+    groups = ServiceModeKind.filterServiceModeGroupsForFeatureFlags(groups);
     groups = ServiceModeKind.enrichFlaggedModeGroups(groups, response?.services ?? []);
     _refreshFilteredServices(groups, mode);
     final filtered = filteredServicesSubject.valueOrNull ?? [];
@@ -463,6 +464,12 @@ class PassengerHomeBloc extends Bloc {
       vehicleSelect(0);
     } else {
       subjectSelectedServiceData.add(null);
+    }
+    if (mode != ServiceModeKind.delivery) {
+      packageWeightController.add('');
+      packageHeightController.add('');
+      packageWidthController.add('');
+      packageLengthController.add('');
     }
     changePolylineColorPerTheme();
   }
@@ -514,11 +521,20 @@ class PassengerHomeBloc extends Bloc {
         break;
       }
     }
-    var list = matched?.services ?? ServiceModeKind.filterByMode(
-      subjectServiceData.valueOrNull?.data?.services ?? [],
-      mode,
-    );
-    list = List<ServiceTypeItem>.from(list)..sort(_serviceDisplayOrder);
+    var list = List<ServiceTypeItem>.from(matched?.services ?? []);
+    if (list.isEmpty) {
+      list = ServiceModeKind.filterByMode(
+        subjectServiceData.valueOrNull?.data?.services ?? [],
+        mode,
+      );
+    }
+    if (list.isEmpty && mode == ServiceModeKind.transport) {
+      list = (subjectServiceData.valueOrNull?.data?.services ?? [])
+          .where((s) => !ServiceModeKind.isDeliveryServiceId(s.serviceId))
+          .where((s) => s.serviceId != ServiceType.rickshaw)
+          .toList();
+    }
+    list.sort(_serviceDisplayOrder);
     filteredServicesSubject.add(list);
   }
 

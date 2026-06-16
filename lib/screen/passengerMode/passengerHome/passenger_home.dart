@@ -23,6 +23,7 @@ import 'passenger_home_dl.dart';
 import 'passenger_home_search_card.dart';
 import 'passenger_home_service_chips_bar.dart';
 import 'encomienda_quick_fields.dart';
+import 'delivery_quick_fields.dart';
 import '../../../utils/service_mode_util.dart';
 import 'service_mode_selector.dart';
 
@@ -98,6 +99,7 @@ class _PassengerHomeState extends State<PassengerHome> {
               serviceModeSelector(),
               deliveryLegalNoticeBanner(),
               serviceData(),
+              deliveryFields(),
               encomiendaFields(),
               addressSelection(),
               confirmBtnAndOtherOption(),
@@ -185,13 +187,14 @@ class _PassengerHomeState extends State<PassengerHome> {
   }
 
   List<Widget> _modernBookingSheetChildren() => [
-        activityHubCard(),
         Padding(
           padding: EdgeInsetsDirectional.only(bottom: 8.h),
           child: PassengerHomeBarrioShortcuts(onBarrioSelected: (b) => _bloc?.flyToBarrio(b)),
         ),
         serviceData(),
+        deliveryFields(),
         encomiendaFields(),
+        activityHubCard(),
         confirmBtnAndOtherOption(),
       ];
 
@@ -206,64 +209,51 @@ class _PassengerHomeState extends State<PassengerHome> {
       );
 
   Widget _modernBodyPortrait() {
-    final sheetInitial = XistiUiTokens.sheetInitialSize(context);
-    final sheetMin = XistiUiTokens.sheetMinSize(context);
-    final sheetMax = XistiUiTokens.sheetMaxSize(context);
     final topInset = MediaQuery.paddingOf(context).top;
 
-    return Stack(
+    return Column(
       children: [
-        Positioned.fill(child: _modernMapStack()),
-        Positioned(
-          top: topInset + 8.h,
-          left: 0,
-          right: 0,
-          child: _modernMapOverlayColumn(topInset: topInset),
-        ),
-        accountBtn(topOffset: topInset + 8.h),
-        Positioned(
-          left: 0,
-          right: 0,
-          top: 0,
-          bottom: 0,
-          child: DraggableScrollableSheet(
-            initialChildSize: sheetInitial,
-            minChildSize: sheetMin,
-            maxChildSize: sheetMax,
-            snap: true,
-            snapSizes: [sheetMin, sheetInitial, sheetMax],
-            builder: (context, scrollController) {
-              return StreamBuilder<String>(
-                stream: _bloc?.selectedServiceModeSubject,
-                builder: (context, modeSnap) {
-                  return AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 280),
-                    child: PassengerHomeBookingSheet(
-                      key: ValueKey(modeSnap.data ?? ServiceModeKind.transport),
-                      scrollController: scrollController,
-                      children: _modernBookingSheetChildren(),
-                    ),
-                  );
-                },
-              );
-            },
-          ),
-        ),
-        Positioned(
-          right: commonHorizontalPadding,
-          bottom: 120.h + getBottomMargin(),
-          child: GestureDetector(
-            onTap: () => _bloc?.focusCurrentPosition(),
-            child: Container(
-              decoration: BoxDecoration(
-                color: getCurrentTheme(context).colorWhite,
-                borderRadius: BorderRadiusDirectional.all(Radius.circular(50.r)),
-                boxShadow: XistiUiTokens.floatingShadow(context, getCurrentTheme(context).colorBorder),
+        Expanded(
+          child: Stack(
+            children: [
+              _modernMapStack(),
+              Positioned(
+                top: topInset + 8.h,
+                left: 0,
+                right: 0,
+                child: _modernMapOverlayColumn(topInset: topInset),
               ),
-              padding: EdgeInsetsDirectional.all(10.sp),
-              child: Icon(CustomIcons.pickupLocation, size: 28.sp, color: getCurrentTheme(context).colorIconCommon),
-            ),
+              accountBtn(topOffset: topInset + 8.h),
+              Positioned(
+                right: commonHorizontalPadding,
+                bottom: 16.h,
+                child: GestureDetector(
+                  onTap: () => _bloc?.focusCurrentPosition(),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: getCurrentTheme(context).colorWhite,
+                      borderRadius: BorderRadiusDirectional.all(Radius.circular(50.r)),
+                      boxShadow: XistiUiTokens.floatingShadow(context, getCurrentTheme(context).colorBorder),
+                    ),
+                    padding: EdgeInsetsDirectional.all(10.sp),
+                    child: Icon(CustomIcons.pickupLocation, size: 28.sp, color: getCurrentTheme(context).colorIconCommon),
+                  ),
+                ),
+              ),
+            ],
           ),
+        ),
+        StreamBuilder<String>(
+          stream: _bloc?.selectedServiceModeSubject,
+          builder: (context, modeSnap) {
+            return AnimatedSwitcher(
+              duration: const Duration(milliseconds: 280),
+              child: PassengerHomeBookingSheet(
+                key: ValueKey(modeSnap.data ?? ServiceModeKind.transport),
+                children: _modernBookingSheetChildren(),
+              ),
+            );
+          },
         ),
       ],
     );
@@ -448,6 +438,43 @@ class _PassengerHomeState extends State<PassengerHome> {
       return EncomiendaQuickFields(
         purchaseDescriptionController: _bloc!.purchaseDescriptionTEC,
         priceCapController: _bloc!.priceCapTEC,
+      );
+    },
+  );
+
+  Widget deliveryFields() => StreamBuilder<String>(
+    stream: _bloc?.selectedServiceModeSubject,
+    builder: (context, snap) {
+      if (snap.data != ServiceModeKind.delivery) return const SizedBox.shrink();
+      return StreamBuilder<String>(
+        stream: _bloc?.packageWeightController,
+        builder: (context, weightSnap) {
+          return StreamBuilder<String>(
+            stream: _bloc?.packageHeightController,
+            builder: (context, heightSnap) {
+              return StreamBuilder<String>(
+                stream: _bloc?.packageWidthController,
+                builder: (context, widthSnap) {
+                  return StreamBuilder<String>(
+                    stream: _bloc?.packageLengthController,
+                    builder: (context, lengthSnap) {
+                      return DeliveryQuickFields(
+                        weightKg: weightSnap.data ?? '',
+                        heightCm: heightSnap.data ?? '',
+                        widthCm: widthSnap.data ?? '',
+                        lengthCm: lengthSnap.data ?? '',
+                        onWeightChanged: (v) => _bloc?.packageWeightController.sink.add(v),
+                        onHeightChanged: (v) => _bloc?.packageHeightController.sink.add(v),
+                        onWidthChanged: (v) => _bloc?.packageWidthController.sink.add(v),
+                        onLengthChanged: (v) => _bloc?.packageLengthController.sink.add(v),
+                      );
+                    },
+                  );
+                },
+              );
+            },
+          );
+        },
       );
     },
   );
@@ -794,49 +821,78 @@ class _PassengerHomeState extends State<PassengerHome> {
     stream: _bloc?.selectedServiceModeSubject,
     builder: (context, modeSnap) {
       return StreamBuilder<List<ServiceTypeItem>>(
-    stream: _bloc?.filteredServicesSubject,
-    builder: (context, snapFiltered) {
-      return StreamBuilder<ApiResponse<ServiceTypeModel>>(
-        stream: _bloc?.subjectServiceData,
-        builder: (context, snap) {
-      var isLoading = snap.hasData && snap.data?.status == Status.loading;
-      List<ServiceTypeItem> serviceTypeList = snapFiltered.data ?? [];
-      return isLoading
-          ? getServiceDataShimmer()
-          : SizedBox(
-              height: 140.h,
-              child: ListView.builder(
-                shrinkWrap: true,
-                scrollDirection: Axis.horizontal,
-                padding: EdgeInsetsDirectional.only(bottom: 4.h, start: commonHorizontalPadding, top: 4.h),
-                itemCount: serviceTypeList.length,
-                itemBuilder: (BuildContext context, position) {
-                  return GestureDetector(
-                    onTap: () {
-                      _bloc?.vehicleSelect(position);
-                    },
-                    child: StreamBuilder<ServiceTypeItem?>(
-                      stream: _bloc?.subjectSelectedServiceData,
-                      builder: (context, snapSelectedService) {
-                        final selected = snapSelectedService.data;
-                        final item = serviceTypeList[position];
-                        return ItemVehicleType(
-                          serviceTypeItem: item,
-                          isSelected: item.matchesSelection(selected),
-                          serviceMode: modeSnap.data,
-                        );
-                      },
-                    ),
-                  );
-                },
-              ),
-            );
+        stream: _bloc?.filteredServicesSubject,
+        builder: (context, snapFiltered) {
+          return StreamBuilder<ApiResponse<ServiceTypeModel>>(
+            stream: _bloc?.subjectServiceData,
+            builder: (context, snap) {
+              final isLoading = snap.hasData && snap.data?.status == Status.loading;
+              final serviceTypeList = snapFiltered.data ?? [];
+              if (isLoading) {
+                return getServiceDataShimmer();
+              }
+              if (serviceTypeList.isEmpty) {
+                return Padding(
+                  padding: EdgeInsetsDirectional.symmetric(horizontal: commonHorizontalPadding, vertical: 12.h),
+                  child: Text(
+                    'No hay vehículos disponibles para este modo.',
+                    style: bodyText(context: context, fontSize: textSize12px, textColor: getCurrentTheme(context).colorTextLight),
+                    textAlign: TextAlign.center,
+                  ),
+                );
+              }
+              return Padding(
+                padding: EdgeInsetsDirectional.only(
+                  start: commonHorizontalPadding,
+                  end: commonHorizontalPadding,
+                  top: 4.h,
+                  bottom: 4.h,
+                ),
+                child: SizedBox(
+                  height: 118.h,
+                  child: serviceTypeList.length <= 2
+                      ? Row(
+                          children: [
+                            for (var position = 0; position < serviceTypeList.length; position++) ...[
+                              if (position > 0) SizedBox(width: 12.w),
+                              Expanded(
+                                child: _vehicleTile(serviceTypeList, position, modeSnap.data),
+                              ),
+                            ],
+                          ],
+                        )
+                      : ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: serviceTypeList.length,
+                          itemBuilder: (context, position) => _vehicleTile(serviceTypeList, position, modeSnap.data),
+                        ),
+                ),
+              );
+            },
+          );
         },
       );
     },
   );
-    },
-  );
+
+  Widget _vehicleTile(List<ServiceTypeItem> serviceTypeList, int position, String? serviceMode) {
+    return GestureDetector(
+      onTap: () => _bloc?.vehicleSelect(position),
+      child: StreamBuilder<ServiceTypeItem?>(
+        stream: _bloc?.subjectSelectedServiceData,
+        builder: (context, snapSelectedService) {
+          final selected = snapSelectedService.data;
+          final item = serviceTypeList[position];
+          return ItemVehicleType(
+            serviceTypeItem: item,
+            isSelected: item.matchesSelection(selected),
+            serviceMode: serviceMode,
+            expanded: serviceTypeList.length <= 2,
+          );
+        },
+      ),
+    );
+  }
 
   Shimmer getServiceDataShimmer() => Shimmer.fromColors(
     baseColor: getCurrentTheme(context).colorShimmerBg,

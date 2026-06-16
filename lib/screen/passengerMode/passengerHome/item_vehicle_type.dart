@@ -11,12 +11,14 @@ class ItemVehicleType extends StatelessWidget {
   final ServiceTypeItem serviceTypeItem;
   final bool isSelected;
   final String? serviceMode;
+  final bool expanded;
 
   const ItemVehicleType({
     super.key,
     required this.serviceTypeItem,
     this.isSelected = false,
     this.serviceMode,
+    this.expanded = false,
   });
 
   @override
@@ -26,8 +28,8 @@ class ItemVehicleType extends StatelessWidget {
 
     return Container(
       alignment: AlignmentDirectional.center,
-      width: 100.w,
-      margin: EdgeInsetsDirectional.only(end: 12.w),
+      width: expanded ? double.infinity : 100.w,
+      margin: EdgeInsetsDirectional.only(end: expanded ? 0 : 12.w),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
