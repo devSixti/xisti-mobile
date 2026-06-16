@@ -35,7 +35,7 @@ abstract final class XistiUiTokens {
     return h < 700 ? 0.30 : 0.26;
   }
 
-  static double sheetMinSize(BuildContext context) => isTabletOrLandscape(context) ? 0.28 : 0.22;
+  static double sheetMinSize(BuildContext context) => isTabletOrLandscape(context) ? 0.28 : 0.24;
 
   static double sheetMaxSize(BuildContext context) {
     if (isTabletOrLandscape(context)) return 0.85;

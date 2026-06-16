@@ -140,6 +140,7 @@ class _OfferFareAndBookSheetState extends State<OfferFareAndBookSheet> {
                   fareInfo(),
                   if (widget.isCourier || widget.isEncomienda) courierPaymentMethod() else paymentType(),
                   if (widget.isCourier || widget.isEncomienda) ...[
+                    deliveryLegalNoticeCompact(),
                     if (widget.deliveryVehicleOptions.isNotEmpty) deliveryVehicleSection(),
                     if (widget.deliveryDisclaimer.isNotEmpty) deliveryDisclaimerBanner(),
                     recipientName(),
@@ -164,6 +165,18 @@ class _OfferFareAndBookSheetState extends State<OfferFareAndBookSheet> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget deliveryLegalNoticeCompact() {
+    return Padding(
+      padding: EdgeInsetsDirectional.only(top: 12.h),
+      child: Text(
+        languages.deliveryLegalNotice,
+        maxLines: 3,
+        overflow: TextOverflow.ellipsis,
+        style: bodyText(context: context, fontSize: textSize10px, textColor: getCurrentTheme(context).colorTextLight),
       ),
     );
   }

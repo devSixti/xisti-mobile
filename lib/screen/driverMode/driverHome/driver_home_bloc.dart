@@ -74,6 +74,9 @@ class DriverHomeBloc extends Bloc {
   final rideListItemSubject = BehaviorSubject<RideList?>();
   final showHailRideSubject = BehaviorSubject<bool>();
   final driverPriceSuggestionSubject = BehaviorSubject<double>();
+  final mapStyleSubject = BehaviorSubject<String>.seeded('');
+  final currentLocationSubject = BehaviorSubject<LatLng?>();
+  GoogleMapController? googleMapController;
   List<RideList> _filterRidesByAvailability(List<RideList>? rides) {
     if (rides == null) return [];
     return rides.where((ride) {
@@ -269,9 +272,16 @@ class DriverHomeBloc extends Bloc {
   }
 
   Future<void> getCurrentLocation() async {
+    mapStyleSubject.add(getCurrentTheme(context).mapStyle);
     getLocationUtils.getLocationUtils(
       (locationData) {
         currentLaLng = LatLng(locationData.latitude, locationData.longitude);
+        currentLocationSubject.add(currentLaLng);
+        if (googleMapController != null) {
+          googleMapController!.animateCamera(
+            CameraUpdate.newLatLngZoom(currentLaLng!, 15),
+          );
+        }
         if (iFromLogin) {
           callDriverRunningServiceApi();
         } else {
@@ -466,8 +476,17 @@ class DriverHomeBloc extends Bloc {
     });
   }
 
+  void onDriverMapCreated(GoogleMapController controller) {
+    googleMapController = controller;
+    final loc = currentLaLng;
+    if (loc != null) {
+      controller.animateCamera(CameraUpdate.newLatLngZoom(loc, 15));
+    }
+  }
+
   @override
   void dispose() {
+    googleMapController?.dispose();
     stopTimer();
     availableRideSubject.close();
     driverHomeSubject.close();
@@ -477,5 +496,7 @@ class DriverHomeBloc extends Bloc {
     rideListItemSubject.close();
     showHailRideSubject.close();
     driverPriceSuggestionSubject.close();
+    mapStyleSubject.close();
+    currentLocationSubject.close();
   }
 }

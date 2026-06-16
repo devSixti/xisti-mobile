@@ -15,7 +15,6 @@ import '../../../utils/utils.dart';
 import '../../../utils/xisti_ui_tokens.dart';
 import 'passenger_home_activity_hub.dart';
 import 'passenger_home_barrio_shortcuts_ui.dart';
-import 'passenger_home_mode_banner.dart';
 import '../../common/account/account_screen.dart';
 import 'item_vehicle_type.dart';
 import 'passenger_home_bloc.dart';
@@ -166,11 +165,6 @@ class _PassengerHomeState extends State<PassengerHome> {
         ),
         StreamBuilder<String>(
           stream: _bloc?.selectedServiceModeSubject,
-          builder: (context, snap) => PassengerHomeModeBanner(serviceMode: snap.data),
-        ),
-        SizedBox(height: 6.h),
-        StreamBuilder<String>(
-          stream: _bloc?.selectedServiceModeSubject,
           builder: (context, snapMode) {
             return StreamBuilder<ApiResponse<ServiceTypeModel>>(
               stream: _bloc?.subjectServiceData,
@@ -186,17 +180,19 @@ class _PassengerHomeState extends State<PassengerHome> {
             );
           },
         ),
-        SizedBox(height: 6.h),
-        PassengerHomeBarrioShortcuts(onBarrioSelected: (b) => _bloc?.flyToBarrio(b)),
       ],
     );
   }
 
   List<Widget> _modernBookingSheetChildren() => [
         activityHubCard(),
-        deliveryLegalNoticeBanner(),
+        Padding(
+          padding: EdgeInsetsDirectional.only(bottom: 8.h),
+          child: PassengerHomeBarrioShortcuts(onBarrioSelected: (b) => _bloc?.flyToBarrio(b)),
+        ),
         serviceData(),
         encomiendaFields(),
+        confirmBtnAndOtherOption(),
       ];
 
   Widget activityHubCard() => StreamBuilder(
@@ -214,7 +210,6 @@ class _PassengerHomeState extends State<PassengerHome> {
     final sheetMin = XistiUiTokens.sheetMinSize(context);
     final sheetMax = XistiUiTokens.sheetMaxSize(context);
     final topInset = MediaQuery.paddingOf(context).top;
-    final ctaReserve = 88.h + getBottomMargin();
 
     return Stack(
       children: [
@@ -230,7 +225,7 @@ class _PassengerHomeState extends State<PassengerHome> {
           left: 0,
           right: 0,
           top: 0,
-          bottom: ctaReserve,
+          bottom: 0,
           child: DraggableScrollableSheet(
             initialChildSize: sheetInitial,
             minChildSize: sheetMin,
@@ -256,7 +251,7 @@ class _PassengerHomeState extends State<PassengerHome> {
         ),
         Positioned(
           right: commonHorizontalPadding,
-          bottom: ctaReserve + 12.h,
+          bottom: 120.h + getBottomMargin(),
           child: GestureDetector(
             onTap: () => _bloc?.focusCurrentPosition(),
             child: Container(
@@ -268,24 +263,6 @@ class _PassengerHomeState extends State<PassengerHome> {
               padding: EdgeInsetsDirectional.all(10.sp),
               child: Icon(CustomIcons.pickupLocation, size: 28.sp, color: getCurrentTheme(context).colorIconCommon),
             ),
-          ),
-        ),
-        Positioned(
-          left: 0,
-          right: 0,
-          bottom: 0,
-          child: Container(
-            decoration: BoxDecoration(
-              color: getCurrentTheme(context).colorScaffoldBg,
-              boxShadow: [
-                BoxShadow(
-                  color: getCurrentTheme(context).colorBorder.withValues(alpha: 0.35),
-                  blurRadius: 12,
-                  offset: const Offset(0, -4),
-                ),
-              ],
-            ),
-            child: confirmBtnAndOtherOption(),
           ),
         ),
       ],
@@ -337,36 +314,18 @@ class _PassengerHomeState extends State<PassengerHome> {
                 left: BorderSide(color: getCurrentTheme(context).colorDarkBorder.withValues(alpha: 0.5)),
               ),
             ),
-            child: Column(
-              children: [
-                Expanded(
-                  child: StreamBuilder<String>(
-                    stream: _bloc?.selectedServiceModeSubject,
-                    builder: (context, modeSnap) {
-                      return AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 280),
-                        child: ListView(
-                          key: ValueKey(modeSnap.data ?? ServiceModeKind.transport),
-                          padding: EdgeInsetsDirectional.only(top: 12.h, bottom: 8.h),
-                          children: _modernBookingSheetChildren(),
-                        ),
-                      );
-                    },
+            child: StreamBuilder<String>(
+              stream: _bloc?.selectedServiceModeSubject,
+              builder: (context, modeSnap) {
+                return AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 280),
+                  child: ListView(
+                    key: ValueKey(modeSnap.data ?? ServiceModeKind.transport),
+                    padding: EdgeInsetsDirectional.only(top: 12.h, bottom: getBottomMargin()),
+                    children: _modernBookingSheetChildren(),
                   ),
-                ),
-                Container(
-                  decoration: BoxDecoration(
-                    boxShadow: [
-                      BoxShadow(
-                        color: getCurrentTheme(context).colorBorder.withValues(alpha: 0.35),
-                        blurRadius: 12,
-                        offset: const Offset(0, -4),
-                      ),
-                    ],
-                  ),
-                  child: confirmBtnAndOtherOption(),
-                ),
-              ],
+                );
+              },
             ),
           ),
         ),

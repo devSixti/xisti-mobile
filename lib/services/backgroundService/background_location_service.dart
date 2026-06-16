@@ -19,14 +19,14 @@ class BackgroundLocationService {
       config: BackgroundLocationTrackerConfig(
         loggingEnabled: true,
         androidConfig: AndroidConfig(
-            notificationIcon: '@drawable/ic_notification',
-            channelName: "high_importance_channel",
+            notificationIcon: 'ic_notification',
+            channelName: 'XISTI',
             trackingInterval: const Duration(seconds: 4),
             distanceFilterMeters: 2,
-            cancelTrackingActionText: "",
+            cancelTrackingActionText: '',
             enableCancelTrackingAction: false,
             enableNotificationLocationUpdates: false,
-            notificationBody: languages.trackLocationInBackground),
+            notificationBody: 'XISTI · ${languages.trackLocationInBackground}'),
         iOSConfig: const IOSConfig(
           activityType: ActivityType.NAVIGATION,
           distanceFilterMeters: 2,

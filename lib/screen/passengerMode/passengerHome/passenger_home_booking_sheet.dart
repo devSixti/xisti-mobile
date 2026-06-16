@@ -32,23 +32,34 @@ class PassengerHomeBookingSheet extends StatelessWidget {
           ),
         ],
       ),
-      child: ListView(
-        controller: scrollController,
-        padding: EdgeInsetsDirectional.only(bottom: bottomInset + getBottomMargin()),
-        children: [
-          Center(
-            child: Container(
-              margin: EdgeInsetsDirectional.only(top: 10.h, bottom: 8.h),
-              width: 48.w,
-              height: 4.h,
-              decoration: BoxDecoration(
-                color: theme.colorIndicatorOff,
-                borderRadius: BorderRadius.circular(4.r),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          return ListView(
+            controller: scrollController,
+            padding: EdgeInsetsDirectional.only(bottom: bottomInset + getBottomMargin()),
+            children: [
+              Center(
+                child: Container(
+                  margin: EdgeInsetsDirectional.only(top: 10.h, bottom: 8.h),
+                  width: 48.w,
+                  height: 4.h,
+                  decoration: BoxDecoration(
+                    color: theme.colorIndicatorOff,
+                    borderRadius: BorderRadius.circular(4.r),
+                  ),
+                ),
               ),
-            ),
-          ),
-          ...children,
-        ],
+              ConstrainedBox(
+                constraints: BoxConstraints(minHeight: constraints.maxHeight - 24.h),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: children,
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }

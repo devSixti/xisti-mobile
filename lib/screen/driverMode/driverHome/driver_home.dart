@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:focus_detector_v2/focus_detector_v2.dart';
 import 'package:app_xisti/hive/hive_helper.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:lottie/lottie.dart' as lottie_animation;
 
 import '../../../blocs/bloc.dart';
 import '../../../commonView/common_view.dart';
 import '../../../commonView/custom_rounded_button.dart';
 import '../../../commonView/driver_status_button.dart';
-import '../../../commonView/load_image_with_placeholder.dart';
 import '../../../commonView/no_record_found.dart';
 import '../../../commonView/ride_request_type_chip.dart';
 import '../../../utils/utils.dart';
@@ -30,11 +30,6 @@ class _DriverHomeState extends State<DriverHome> with WidgetsBindingObserver {
   DriverHomeBloc? _bloc;
 
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
   void didChangeDependencies() {
     _bloc ??= DriverHomeBloc(context, widget.isFromLogin);
     super.didChangeDependencies();
@@ -49,181 +44,104 @@ class _DriverHomeState extends State<DriverHome> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     return FocusDetector(
-      onForegroundGained: () {
-        _bloc?.getCurrentLocation();
-      },
+      onForegroundGained: () => _bloc?.getCurrentLocation(),
       child: ScaffoldWithSafeArea(
         appBar: CommonAppBar(toolbarHeight: 0),
         body: Stack(
           children: [
-            RefreshIndicator(
-              backgroundColor: getCurrentTheme(context).colorStaticWhite,
-              triggerMode: RefreshIndicatorTriggerMode.onEdge,
-              notificationPredicate: (ScrollNotification notification) {
-                return true;
-              },
-              onRefresh: () async {
-                _bloc?.callAvailableRideApi(isLoading: true);
-              },
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  SizedBox(height: 10.h),
-                  Padding(
-                    padding: EdgeInsetsDirectional.only(start: commonHorizontalPadding, end: commonHorizontalPadding, bottom: 30.h),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        StreamBuilder(
-                          stream: _bloc?.selectDistanceSubject,
-                          builder: (context, snapSelectDistance) {
-                            dynamic selectDistance = snapSelectDistance.data ?? 0;
-                            return StreamBuilder<ApiResponse<DriverHomePojo>>(
-                              stream: _bloc?.driverHomeSubject,
-                              builder: (context, snapDriverHome) {
-                                var isLoading = snapDriverHome.hasData && snapDriverHome.data?.status == Status.loading;
-                                var isError = snapDriverHome.hasData && snapDriverHome.data?.status == Status.error;
-                                List<SearchRadius>? searchRadius = snapDriverHome.data?.data?.searchRadius ?? [];
-                                return searchRadius.isNotEmpty
-                                    ? GestureDetector(
-                                  onTap: (isLoading || isError)
-                                      ? null
-                                      : () {
-                                    _bloc?.openManageDistanceBottomSheet();
-                                  },
-                                  child: Stack(
-                                    children: [
-                                      Container(
-                                        padding: EdgeInsetsDirectional.all(10.sp),
-                                        decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(15.r),
-                                          border: Border.all(color: getCurrentTheme(context).colorBorder),
-                                        ),
-                                        child: Icon(CustomIcons.radiusFilter, color: getCurrentTheme(context).colorIconCommon, size: 20.sp),
-                                      ),
-                                      if (selectDistance > 0)
-                                        Positioned.fill(
-                                          child: Align(
-                                            alignment: AlignmentDirectional.topEnd,
-                                            child: Container(
-                                              margin: EdgeInsetsDirectional.only(top: 2.h),
-                                              width: 7.sp,
-                                              height: 7.sp,
-                                              decoration: BoxDecoration(color: getCurrentTheme(context).colorIconCommon, shape: BoxShape.circle),
-                                            ),
-                                          ),
-                                        ),
-                                    ],
-                                  ),
-                                )
-                                    : Container(width: 40.w);
-                              },
-                            );
-                          },
-                        ),
-
-                        StreamBuilder<bool>(
-                          stream: _bloc?.statusSwitchSubject,
-                          builder: (context, snapStatus) {
-                            bool status = snapStatus.data ?? getIntFromSettingBox(hiveDriverCurrentStatus) == 1;
-                            debugPrint("home status 1: ${snapStatus.data}");
-                            return StreamBuilder<ApiResponse<UpdateCurrentStatusPojo>>(
-                              stream: _bloc?.currentStatusSubject,
-                              builder: (context, snapCurrentStatus) {
-                                var isLoading = snapCurrentStatus.hasData && snapCurrentStatus.data?.status == Status.loading;
-                                debugPrint("home status 2: ${snapStatus.data}");
-                                return DriverStatusButton(
-                                  isLoading: isLoading,
-                                  defaultSelected: status,
-                                  onSelect: (value) {
-                                    openRequiredInfoBottomSheet(context, () {
-                                      _bloc?.callUpdateCurrentStatusApi(updateStatus: value ? 1 : 0);
-                                    });
-                                  },
-                                );
-                              },
-                            );
-                          },
-                        ),
-                        GestureDetector(
-                          onTap: () {
-                            openScreen(context, AccountScreen());
-                          },
-                          child: Container(
-                            padding: EdgeInsetsDirectional.all(10.sp),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(15.r),
-                              border: Border.all(color: getCurrentTheme(context).colorBorder),
-                            ),
-                            child: Icon(CustomIcons.menu, color: getCurrentTheme(context).colorIconCommon, size: 20.sp),
-                          ),
-                        ),
-                      ],
+            StreamBuilder<bool>(
+              stream: _bloc?.statusSwitchSubject,
+              builder: (context, snapOnline) {
+                final online = snapOnline.data ?? false;
+                if (!online) {
+                  return Positioned.fill(
+                    child: ColoredBox(
+                      color: getCurrentTheme(context).colorScaffoldBg,
+                      child: lottie_animation.Lottie.asset(
+                        setLottieAnimationBasedOnTheme(context, 'offline.json'),
+                        alignment: AlignmentDirectional.center,
+                      ),
                     ),
+                  );
+                }
+                return Positioned.fill(child: _driverMap());
+              },
+            ),
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              child: SafeArea(
+                bottom: false,
+                child: Padding(
+                  padding: EdgeInsetsDirectional.only(
+                    start: commonHorizontalPadding,
+                    end: commonHorizontalPadding,
+                    top: 8.h,
+                    bottom: 8.h,
                   ),
-                  StreamBuilder<bool>(
-                    stream: _bloc?.statusSwitchSubject,
-                    builder: (context, snapStatus) {
-                      bool status = snapStatus.data ?? false;
-                      if (status) {
-                        return Expanded(
-                          child: StreamBuilder<ApiResponse<AvailableRidePojo>>(
-                            stream: _bloc?.availableRideSubject,
-                            builder: (context, snapshot) {
-                              List<RideList> rideList = snapshot.data?.data?.rideList ?? [];
-                              return switch (snapshot.data?.status ?? Status.loading) {
-                                Status.loading => driverOnlineWidget(),
-                                Status.completed => rideListWidget(rideList: rideList),
-                                Status.error => errorWidget(message: snapshot.data?.message ?? ""),
-                              };
-                            },
-                          ),
-                        );
-                      } else {
-                        return Expanded(
-                          child: lottie_animation.Lottie.asset(setLottieAnimationBasedOnTheme(context, "offline.json"), alignment: AlignmentDirectional.center),
-                        );
-                      }
-                    },
-                  ),
-                ],
+                  child: _driverHeaderRow(),
+                ),
               ),
             ),
-
+            StreamBuilder<bool>(
+              stream: _bloc?.statusSwitchSubject,
+              builder: (context, snapOnline) {
+                if (!(snapOnline.data ?? false)) return const SizedBox.shrink();
+                return StreamBuilder<ApiResponse<AvailableRidePojo>>(
+                  stream: _bloc?.availableRideSubject,
+                  builder: (context, snapshot) {
+                    final rideList = snapshot.data?.data?.rideList ?? [];
+                    final status = snapshot.data?.status ?? Status.loading;
+                    if (status == Status.error) {
+                      return _driverBottomOverlay(
+                        child: errorWidget(message: snapshot.data?.message ?? ''),
+                      );
+                    }
+                    if (status == Status.loading) {
+                      return _driverBottomOverlay(child: _searchingCompactBanner());
+                    }
+                    if (rideList.isEmpty) {
+                      return _driverBottomOverlay(child: _searchingCompactBanner());
+                    }
+                    return _driverBottomOverlay(
+                      child: rideListPanel(rideList: rideList),
+                      expanded: true,
+                    );
+                  },
+                );
+              },
+            ),
             StreamBuilder<bool>(
               stream: _bloc?.showHailRideSubject,
               builder: (context, snapShowHailRide) {
-                bool showHailRide = snapShowHailRide.data ?? false;
-                if (showHailRide) {
-                  return StreamBuilder<bool>(
-                    stream: _bloc?.statusSwitchSubject,
-                    builder: (context, snapSwitch) {
-                      bool status = snapSwitch.hasData ? snapSwitch.data ?? false : false;
-                      return Align(
-                        alignment: AlignmentDirectional.bottomEnd,
-                        child: GestureDetector(
-                          onTap: () {
-                            if (status) {
-                              openRequiredInfoBottomSheet(context, () {
-                                openScreen(context, SelectLocation(showFilledLocation: false, isHailRide: true));
-                              });
-                            } else {
-                              openSimpleSnackbar(context, languages.hailModule);
-                            }
-                          },
-                          child: Container(
-                            margin: EdgeInsetsDirectional.only(end: commonHorizontalPadding, bottom: 16.h),
-                            decoration: BoxDecoration(shape: BoxShape.circle, color: getCurrentTheme(context).colorPrimary),
-                            padding: EdgeInsetsDirectional.all(13.sp),
-                            child: Icon(CustomIcons.hailRide, color: getCurrentTheme(context).colorHailIcon, size: 35.sp),
-                          ),
+                if (!(snapShowHailRide.data ?? false)) return const SizedBox.shrink();
+                return StreamBuilder<bool>(
+                  stream: _bloc?.statusSwitchSubject,
+                  builder: (context, snapSwitch) {
+                    final online = snapSwitch.data ?? false;
+                    return Align(
+                      alignment: AlignmentDirectional.bottomEnd,
+                      child: GestureDetector(
+                        onTap: () {
+                          if (online) {
+                            openRequiredInfoBottomSheet(context, () {
+                              openScreen(context, SelectLocation(showFilledLocation: false, isHailRide: true));
+                            });
+                          } else {
+                            openSimpleSnackbar(context, languages.hailModule);
+                          }
+                        },
+                        child: Container(
+                          margin: EdgeInsetsDirectional.only(end: commonHorizontalPadding, bottom: 16.h),
+                          decoration: BoxDecoration(shape: BoxShape.circle, color: getCurrentTheme(context).colorPrimary),
+                          padding: EdgeInsetsDirectional.all(13.sp),
+                          child: Icon(CustomIcons.hailRide, color: getCurrentTheme(context).colorHailIcon, size: 35.sp),
                         ),
-                      );
-                    },
-                  );
-                } else {
-                  return Container();
-                }
+                      ),
+                    );
+                  },
+                );
               },
             ),
           ],
@@ -232,270 +150,258 @@ class _DriverHomeState extends State<DriverHome> with WidgetsBindingObserver {
     );
   }
 
-  Widget rideListWidget({required List<RideList> rideList}) {
-    if (rideList.isNotEmpty) {
-      return Expanded(
-        child: ListView.separated(
-          padding: EdgeInsetsDirectional.only(start: commonHorizontalPadding, end: commonHorizontalPadding, bottom: 90.h),
-          itemBuilder: (context, index) {
-            RideList rideListItem = rideList[index];
-            return GestureDetector(
-              onTap: () {
-                _bloc?.rideListItemSubject.sink.add(rideListItem);
-                _bloc?.openAcceptRequestBottomSheet(rideListItem: rideListItem);
-              },
-              child: Container(
-                color: Colors.transparent,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Container(
-                          padding: EdgeInsetsDirectional.symmetric(horizontal: 10.w, vertical: 8.h),
-                          decoration: BoxDecoration(
-                            border: Border.all(color: getCurrentTheme(context).colorContainerBorder, width: 0.5.sp),
-                            borderRadius: BorderRadius.circular(17.5.r),
-                          ),
-                          child: Row(
+  Widget _driverMap() {
+    return StreamBuilder<String>(
+      stream: _bloc?.mapStyleSubject,
+      builder: (context, styleSnap) {
+        return StreamBuilder<LatLng?>(
+          stream: _bloc?.currentLocationSubject,
+          builder: (context, locSnap) {
+            final loc = locSnap.data ?? const LatLng(6.2476, -75.5658);
+            return GoogleMap(
+              zoomControlsEnabled: false,
+              myLocationEnabled: true,
+              myLocationButtonEnabled: false,
+              compassEnabled: false,
+              mapType: MapType.normal,
+              style: styleSnap.data,
+              initialCameraPosition: CameraPosition(target: loc, zoom: 15),
+              onMapCreated: (c) => _bloc?.onDriverMapCreated(c),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _driverHeaderRow() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        StreamBuilder(
+          stream: _bloc?.selectDistanceSubject,
+          builder: (context, snapSelectDistance) {
+            final selectDistance = snapSelectDistance.data ?? 0;
+            return StreamBuilder<ApiResponse<DriverHomePojo>>(
+              stream: _bloc?.driverHomeSubject,
+              builder: (context, snapDriverHome) {
+                final isLoading = snapDriverHome.hasData && snapDriverHome.data?.status == Status.loading;
+                final isError = snapDriverHome.hasData && snapDriverHome.data?.status == Status.error;
+                final searchRadius = snapDriverHome.data?.data?.searchRadius ?? [];
+                return searchRadius.isNotEmpty
+                    ? GestureDetector(
+                        onTap: (isLoading || isError) ? null : () => _bloc?.openManageDistanceBottomSheet(),
+                        child: _floatingIconButton(
+                          child: Stack(
                             children: [
-                              Padding(
-                                padding: EdgeInsetsDirectional.only(end: 8.w),
-                                child: Icon(CustomIcons.locationRadius, size: 20.sp, color: getCurrentTheme(context).colorIconCommon),
-                              ),
-                              Text(
-                                languages.kmAway(rideListItem.distance.toString()),
-                                style: bodyText(context: context, fontWeight: FontWeight.w600, textColor: getCurrentTheme(context).colorTextCommon),
-                              ),
+                              Icon(CustomIcons.radiusFilter, color: getCurrentTheme(context).colorIconCommon, size: 20.sp),
+                              if (selectDistance > 0)
+                                Positioned(
+                                  top: 0,
+                                  right: 0,
+                                  child: Container(
+                                    width: 7.sp,
+                                    height: 7.sp,
+                                    decoration: BoxDecoration(color: getCurrentTheme(context).colorPrimary, shape: BoxShape.circle),
+                                  ),
+                                ),
                             ],
                           ),
                         ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            RideRequestTypeChip(
-                              serviceId: rideListItem.serviceId,
-                              serviceMode: rideListItem.serviceMode,
-                              isDelivery: rideListItem.isDelivery,
-                              isEncomienda: rideListItem.isEncomienda,
-                            ),
-                            SizedBox(height: 6.h),
-                            Text(
-                              getAmountWithCurrency(rideListItem.offeredPrice),
-                              style: bodyText(context: context, fontWeight: FontWeight.w600, textColor: getCurrentTheme(context).colorPrimary),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                    Padding(
-                      padding: EdgeInsetsDirectional.only(top: 15.h),
-                      child: Row(
-                        children: [
-                          Padding(
-                            padding: EdgeInsetsDirectional.only(end: 10.w),
-                            child: Icon(CustomIcons.pickupLocation, size: 20.sp, color: getCurrentTheme(context).colorIconCommon),
-                          ),
-                          Expanded(
-                            child: Text(
-                              rideListItem.addressList.first.address,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: bodyText(context: context, fontWeight: FontWeight.w400, textColor: getCurrentTheme(context).colorTextCommon),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Padding(
-                      padding: EdgeInsetsDirectional.only(top: 15.h),
-                      child: Row(
-                        children: [
-                          Padding(
-                            padding: EdgeInsetsDirectional.only(end: 10.w),
-                            child: Icon(CustomIcons.dropLocation, size: 20.sp, color: getCurrentTheme(context).colorIconCommon),
-                          ),
-                          Expanded(
-                            child: Text(
-                              rideListItem.addressList.last.address,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: bodyText(context: context, fontWeight: FontWeight.w400, textColor: getCurrentTheme(context).colorTextCommon),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    if (rideListItem.scheduleDate.isNotEmpty && rideListItem.rideType == 1) ...[
-                      Padding(
-                        padding: EdgeInsetsDirectional.only(top: 20.h),
-                        child: Row(
-                          children: [
-                            Text(
-                              "${languages.schedule} : ",
-                              style: bodyText(context: context, fontWeight: FontWeight.w600),
-                            ),
-                            Expanded(
-                              child: Text(
-                                getDateTime(rideListItem.scheduleDate, returnFormat: "dd MMM, yyyy hh:mm aa"),
-                                style: bodyText(context: context, fontWeight: FontWeight.w600),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+                      )
+                    : SizedBox(width: 40.w);
+              },
+            );
+          },
+        ),
+        StreamBuilder<bool>(
+          stream: _bloc?.statusSwitchSubject,
+          builder: (context, snapStatus) {
+            final status = snapStatus.data ?? getIntFromSettingBox(hiveDriverCurrentStatus) == 1;
+            return StreamBuilder<ApiResponse<UpdateCurrentStatusPojo>>(
+              stream: _bloc?.currentStatusSubject,
+              builder: (context, snapCurrentStatus) {
+                final isLoading = snapCurrentStatus.hasData && snapCurrentStatus.data?.status == Status.loading;
+                return DriverStatusButton(
+                  isLoading: isLoading,
+                  defaultSelected: status,
+                  onSelect: (value) {
+                    openRequiredInfoBottomSheet(context, () {
+                      _bloc?.callUpdateCurrentStatusApi(updateStatus: value ? 1 : 0);
+                    });
+                  },
+                );
+              },
+            );
+          },
+        ),
+        GestureDetector(
+          onTap: () => openScreen(context, AccountScreen()),
+          child: _floatingIconButton(child: Icon(CustomIcons.menu, color: getCurrentTheme(context).colorIconCommon, size: 20.sp)),
+        ),
+      ],
+    );
+  }
+
+  Widget _floatingIconButton({required Widget child}) {
+    return Container(
+      padding: EdgeInsetsDirectional.all(10.sp),
+      decoration: BoxDecoration(
+        color: getCurrentTheme(context).colorScaffoldBg.withValues(alpha: 0.94),
+        borderRadius: BorderRadius.circular(15.r),
+        border: Border.all(color: getCurrentTheme(context).colorBorder),
+        boxShadow: [
+          BoxShadow(color: getCurrentTheme(context).colorBorder.withValues(alpha: 0.25), blurRadius: 8, offset: const Offset(0, 2)),
+        ],
+      ),
+      child: child,
+    );
+  }
+
+  Widget _driverBottomOverlay({required Widget child, bool expanded = false}) {
+    return Positioned(
+      left: 0,
+      right: 0,
+      bottom: 0,
+      child: Container(
+        constraints: BoxConstraints(maxHeight: expanded ? MediaQuery.sizeOf(context).height * 0.52 : 120.h),
+        decoration: BoxDecoration(
+          color: getCurrentTheme(context).colorScaffoldBg,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+          boxShadow: [
+            BoxShadow(color: getCurrentTheme(context).colorBorder.withValues(alpha: 0.35), blurRadius: 12, offset: const Offset(0, -4)),
+          ],
+        ),
+        child: child,
+      ),
+    );
+  }
+
+  Widget _searchingCompactBanner() {
+    return StreamBuilder<dynamic>(
+      stream: _bloc?.selectDistanceSubject,
+      builder: (context, snapSelectDistance) {
+        final selectDistance = snapSelectDistance.data ?? 0;
+        return Padding(
+          padding: EdgeInsetsDirectional.symmetric(horizontal: commonHorizontalPadding, vertical: 16.h),
+          child: Row(
+            children: [
+              SizedBox(
+                width: 28.w,
+                height: 28.w,
+                child: CircularProgressIndicator(strokeWidth: 2.sp, color: getCurrentTheme(context).colorPrimary),
+              ),
+              SizedBox(width: 12.w),
+              Expanded(
+                child: RichText(
+                  text: TextSpan(
+                    style: bodyText(context: context, fontWeight: FontWeight.w600, fontSize: textSize14px),
+                    children: [
+                      TextSpan(text: languages.searchingForRideRequests.trim()),
+                      if (selectDistance > 0) TextSpan(text: languages.distanceKm(getDoubleFromDynamic(selectDistance).toString())),
                     ],
-                    Padding(
-                      padding: EdgeInsetsDirectional.only(top: 20.h),
-                      child: Row(
-                        children: [
-                          LoadImageWithPlaceHolder(
-                            width: 70.sp,
-                            height: 70.sp,
-                            borderRadius: BorderRadius.circular(15.r),
-                            image: rideListItem.profileImage,
-                            defaultAssetImage: setImagesBasedOnTheme(context, "avatar.png"),
-                          ),
-                          Expanded(
-                            child: Padding(
-                              padding: EdgeInsetsDirectional.only(top: 3.h, bottom: 3.h, start: 10.w),
-                              child: Column(
-                                children: [
-                                  Row(
-                                    children: [
-                                      Expanded(
-                                        child: Padding(
-                                          padding: EdgeInsetsDirectional.only(end: 1.w),
-                                          child: Text(
-                                            rideListItem.userName,
-                                            maxLines: 2,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: bodyText(context: context, fontWeight: FontWeight.w600, textColor: getCurrentTheme(context).colorTextCommon),
-                                          ),
-                                        ),
-                                      ),
-                                      Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Icon(CustomIcons.rating, size: 20.sp, color: getCurrentTheme(context).colorRating),
-                                          Text(
-                                            rideListItem.rating > 0 ? "${rideListItem.rating} (${rideListItem.totalRatings})" : "--",
-                                            style: bodyText(context: context, fontWeight: FontWeight.w400, textColor: getCurrentTheme(context).colorTextCommon),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                  Padding(
-                                    padding: EdgeInsetsDirectional.only(top: 10.h),
-                                    child: Row(
-                                      children: [
-                                        Icon(CustomIcons.time, size: 20.sp, color: getCurrentTheme(context).colorIconCommon),
-                                        Padding(
-                                          padding: EdgeInsetsDirectional.only(start: 5.w),
-                                          child: Text(
-                                            rideListItem.orderTime,
-                                            style: bodyText(
-                                              context: context,
-                                              fontWeight: FontWeight.w400,
-                                              textColor: getCurrentTheme(context).colorTextCommon,
-                                              fontSize: textSize14px,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget rideListPanel({required List<RideList> rideList}) {
+    return ListView.separated(
+      padding: EdgeInsetsDirectional.only(start: commonHorizontalPadding, end: commonHorizontalPadding, top: 12.h, bottom: 90.h),
+      itemCount: rideList.length,
+      separatorBuilder: (_, _) => Padding(
+        padding: EdgeInsetsDirectional.symmetric(vertical: 16.h),
+        child: Divider(height: 0, thickness: 1.sp, color: getCurrentTheme(context).colorDivider),
+      ),
+      itemBuilder: (context, index) => _rideListTile(rideList[index]),
+    );
+  }
+
+  Widget _rideListTile(RideList rideListItem) {
+    return GestureDetector(
+      onTap: () {
+        _bloc?.rideListItemSubject.sink.add(rideListItem);
+        _bloc?.openAcceptRequestBottomSheet(rideListItem: rideListItem);
+      },
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                padding: EdgeInsetsDirectional.symmetric(horizontal: 10.w, vertical: 8.h),
+                decoration: BoxDecoration(
+                  border: Border.all(color: getCurrentTheme(context).colorContainerBorder, width: 0.5.sp),
+                  borderRadius: BorderRadius.circular(17.5.r),
+                ),
+                child: Row(
+                  children: [
+                    Icon(CustomIcons.locationRadius, size: 20.sp, color: getCurrentTheme(context).colorIconCommon),
+                    SizedBox(width: 8.w),
+                    Text(languages.kmAway(rideListItem.distance.toString()), style: bodyText(context: context, fontWeight: FontWeight.w600)),
                   ],
                 ),
               ),
-            );
-          },
-          separatorBuilder: (context, index) {
-            return Padding(
-              padding: EdgeInsetsDirectional.symmetric(vertical: 20.h),
-              child: Divider(height: 0, thickness: 1.sp, color: getCurrentTheme(context).colorDivider),
-            );
-          },
-          itemCount: rideList.length,
-        ),
-      );
-    } else {
-      return driverOnlineWidget();
-    }
-  }
-
-  Widget errorWidget({required String message}) {
-    return Expanded(
-      child: Column(
-        mainAxisSize: MainAxisSize.max,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          NoRecordFound(message: message),
-          CustomRoundedButton(context, languages.retry, () {
-            _bloc?.callAvailableRideApi(isLoading: true);
-          }, margin: EdgeInsetsDirectional.only(bottom: 10.h, top: 10.h, start: commonHorizontalPadding, end: commonHorizontalPadding)),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  RideRequestTypeChip(
+                    serviceId: rideListItem.serviceId,
+                    serviceMode: rideListItem.serviceMode,
+                    isDelivery: rideListItem.isDelivery,
+                    isEncomienda: rideListItem.isEncomienda,
+                  ),
+                  SizedBox(height: 6.h),
+                  Text(
+                    getAmountWithCurrency(rideListItem.offeredPrice),
+                    style: bodyText(context: context, fontWeight: FontWeight.w600, textColor: getCurrentTheme(context).colorPrimary),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          Padding(
+            padding: EdgeInsetsDirectional.only(top: 12.h),
+            child: Row(
+              children: [
+                Icon(CustomIcons.pickupLocation, size: 20.sp, color: getCurrentTheme(context).colorIconCommon),
+                SizedBox(width: 10.w),
+                Expanded(child: Text(rideListItem.addressList.first.address, maxLines: 2, overflow: TextOverflow.ellipsis)),
+              ],
+            ),
+          ),
+          Padding(
+            padding: EdgeInsetsDirectional.only(top: 10.h),
+            child: Row(
+              children: [
+                Icon(CustomIcons.dropLocation, size: 20.sp, color: getCurrentTheme(context).colorIconCommon),
+                SizedBox(width: 10.w),
+                Expanded(child: Text(rideListItem.addressList.last.address, maxLines: 2, overflow: TextOverflow.ellipsis)),
+              ],
+            ),
+          ),
         ],
       ),
     );
   }
 
-  Widget driverOnlineWidget() {
-    final bg = getCurrentTheme(context).colorScaffoldBg;
-    return Expanded(
-      child: ColoredBox(
-        color: bg,
-        child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.center,
+  Widget errorWidget({required String message}) {
+    return Padding(
+      padding: EdgeInsetsDirectional.all(commonHorizontalPadding),
+      child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          ColoredBox(
-            color: bg,
-            child: lottie_animation.Lottie.asset(
-              setLottieAnimationBasedOnTheme(context, "online.json"),
-              alignment: AlignmentDirectional.center,
-              backgroundLoading: false,
-              fit: BoxFit.contain,
-            ),
-          ),
-          StreamBuilder<dynamic>(
-            stream: _bloc?.selectDistanceSubject,
-            builder: (context, snapSelectDistance) {
-              dynamic selectDistance = snapSelectDistance.data ?? 0;
-              return Padding(
-                padding: EdgeInsetsDirectional.symmetric(horizontal: commonHorizontalPadding),
-                child: RichText(
-                  textAlign: TextAlign.center,
-
-                  text: TextSpan(
-                    style: bodyText(
-                      context: context,
-                      fontWeight: FontWeight.w600,
-                      fontSize: textSize18px,
-                      textColor: getCurrentTheme(context).colorStaticGreyText,
-                    ),
-                    children: <TextSpan>[
-                      TextSpan(text: languages.searchingForRideRequests),
-                      if (selectDistance > 0) TextSpan(text: languages.distanceKm(getDoubleFromDynamic(selectDistance).toString())),
-                    ],
-                  ),
-                ),
-              );
-            },
-          ),
+          NoRecordFound(message: message),
+          CustomRoundedButton(context, languages.retry, () => _bloc?.callAvailableRideApi(isLoading: true)),
         ],
-        ),
       ),
     );
   }
