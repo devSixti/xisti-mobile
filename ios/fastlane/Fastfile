@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "base64"
+require "fileutils"
 
 default_platform(:ios)
 
@@ -45,23 +46,67 @@ platform :ios do
       code_sign_identity: "Apple Distribution",
       targets: ["Runner"]
     )
+
+    profile_name
   end
 
   desc "Build release IPA with Flutter"
   lane :build_flutter_ipa do
-    sync_signing
+    profile_name = sync_signing
 
     dart_defines = ENV.fetch("DART_DEFINES", "").strip
     flutter_args = ["flutter", "build", "ipa", "--release", "--export-method", "app-store"]
     flutter_args.concat(dart_defines.split) unless dart_defines.empty?
 
     Dir.chdir("..") do
-      # Pods already resolved in CI; pub get is done before Fastlane.
-      # Re-running pub get here invalidates Pods and triggers a second pod install.
+      sh("flutter", "pub", "get")
+      sh("flutter", "precache", "--ios")
+    end
+
+    # Resolve pods once here (same cwd as CI). Flutter build should skip or finish quickly.
+    ENV["COCOAPODS_DISABLE_STATS"] = "true"
+    sh("bundle", "exec", "pod", "install", "--verbose")
+
+    Dir.chdir("..") do
       sh(*flutter_args)
     end
 
     ipa = Dir[File.expand_path("../build/ios/ipa/*.ipa", __dir__)].first
+    unless ipa
+      archive = File.expand_path("../build/ios/archive/Runner.xcarchive", __dir__)
+      if File.directory?(archive)
+        UI.important("flutter build ipa did not produce IPA; exporting archive with xcodebuild…")
+        export_dir = File.expand_path("../build/ios/ipa", __dir__)
+        FileUtils.mkdir_p(export_dir)
+        export_plist = File.join(__dir__, "ExportOptions.plist")
+        unless File.exist?(export_plist)
+          File.write(
+            export_plist,
+            <<~PLIST
+              <?xml version="1.0" encoding="UTF-8"?>
+              <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+              <plist version="1.0"><dict>
+                <key>method</key><string>app-store</string>
+                <key>signingStyle</key><string>manual</string>
+                <key>teamID</key><string>#{ENV.fetch("APPLE_TEAM_ID")}</string>
+                <key>provisioningProfiles</key><dict>
+                  <key>#{BUNDLE_ID}</key><string>#{profile_name}</string>
+                </dict>
+                <key>uploadSymbols</key><true/>
+              </dict></plist>
+            PLIST
+          )
+        end
+        sh(
+          "xcodebuild", "-exportArchive",
+          "-archivePath", archive,
+          "-exportPath", export_dir,
+          "-exportOptionsPlist", export_plist,
+          "-allowProvisioningUpdates"
+        )
+        ipa = Dir[File.join(export_dir, "*.ipa")].first
+      end
+    end
     UI.user_error!("IPA not found under build/ios/ipa") unless ipa
 
     ipa
@@ -97,7 +142,6 @@ end
 
 def match_git_auth
   raw = ENV.fetch("MATCH_GIT_BASIC_AUTHORIZATION").strip
-  # Accept either base64(user:token) or plain user:token
   return raw if raw.match?(/\A[A-Za-z0-9+\/]+=*\z/) && !raw.include?(":")
 
   Base64.strict_encode64(raw)

@@ -247,7 +247,9 @@ jobs:
           cache: true
 
       - name: Install Flutter dependencies
-        run: flutter pub get
+        run: |
+          flutter pub get
+          flutter precache --ios
 
       - uses: ruby/setup-ruby@v1
         with:
@@ -256,27 +258,14 @@ jobs:
           bundler-cache: true
           working-directory: ios
 
-      - name: Cache CocoaPods
-        uses: actions/cache@v4
-        with:
-          path: |
-            ios/Pods
-            ~/Library/Caches/CocoaPods
-            ~/.cocoapods
-          key: pods-${{ runner.os }}-${{ hashFiles('ios/Podfile.lock', 'ios/Podfile', 'pubspec.lock') }}
-          restore-keys: |
-            pods-${{ runner.os }}-
-
-      - name: CocoaPods install
+      - name: CocoaPods install (preflight)
         working-directory: ios
         env:
           COCOAPODS_DISABLE_STATS: "true"
         run: |
           set -euo pipefail
-          # Avoid --repo-update in CI (can hang for hours on trunk CDN).
           bundle exec pod install --verbose
           test -f Podfile.lock
-          test -d Pods
           echo "PATH=$(ruby -e 'print Gem.bindir'):${PATH}" >> "$GITHUB_ENV"
 
       - name: Preflight iOS CD secrets
