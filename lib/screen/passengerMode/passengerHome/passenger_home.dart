@@ -9,12 +9,17 @@ import 'package:shimmer/shimmer.dart';
 import '../../../commonView/common_view.dart';
 import '../../../commonView/custom_rounded_button.dart';
 import '../../../networking/api_response.dart';
+import '../../../utils/app_mobile_settings.dart';
 import '../../../utils/map_style_hot_reload.dart';
 import '../../../utils/utils.dart';
+import '../../../utils/xisti_home_ui_tokens.dart';
 import '../../common/account/account_screen.dart';
 import 'item_vehicle_type.dart';
 import 'passenger_home_bloc.dart';
+import 'passenger_home_booking_sheet.dart';
 import 'passenger_home_dl.dart';
+import 'passenger_home_search_card.dart';
+import 'passenger_home_service_chips_bar.dart';
 import 'encomienda_quick_fields.dart';
 import '../../../utils/service_mode_util.dart';
 import 'service_mode_selector.dart';
@@ -61,106 +66,229 @@ class _PassengerHomeState extends State<PassengerHome> {
       resizeToAvoidBottomInset: false,
       extendBodyBehindAppBar: true,
       appBar: CommonAppBar(backgroundColor: Colors.transparent, toolbarHeight: 0),
-      body: Column(
-        children: [
-          Expanded(
-            child: Stack(
-              children: [
-                googleMap(),
-                accountBtn(),
-                Align(
-                  alignment: AlignmentDirectional.bottomCenter,
-                  child: Container(
-                    alignment: AlignmentDirectional.center,
-                    height: 25.h,
-                    decoration: BoxDecoration(
-                      color: getCurrentTheme(context).colorScaffoldBg,
-                      borderRadius: BorderRadius.only(topLeft: Radius.circular(20.r), topRight: Radius.circular(20.r)),
-                      border: Border.all(width: 0, color: Colors.transparent),
-                      boxShadow: [
-                        BoxShadow(color: getCurrentTheme(context).colorBorder.withValues(alpha: 0.5), blurRadius: 6, spreadRadius: 0.8, offset: Offset(0, 0)),
-                      ],
-                    ),
-                    child: Container(width: 80.w, height: 4.h, color: getCurrentTheme(context).colorIndicatorOff),
-                  ),
-                ),
-                Align(
-                  alignment: AlignmentDirectional.bottomCenter,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      GestureDetector(
-                        onTap: () {
-                          _bloc?.focusCurrentPosition();
-                        },
-                        child: Container(
-                          alignment: AlignmentDirectional.bottomEnd,
-                          margin: EdgeInsetsDirectional.only(end: commonHorizontalPadding, bottom: 40.h),
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: getCurrentTheme(context).colorWhite,
-                              borderRadius: BorderRadiusDirectional.all(Radius.circular(50.r)),
-                            ),
-                            padding: EdgeInsetsDirectional.all(10.sp),
-                            child: Icon(CustomIcons.pickupLocation, size: 30.sp, color: getCurrentTheme(context).colorIconCommon),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Align(
-                  alignment: AlignmentDirectional.center,
-                  child: StreamBuilder<SearchedLocation?>(
+      body: isXistiNewHomeLayoutEnabled() ? _modernBody() : _legacyBody(),
+    );
+  }
+
+  Widget _legacyBody() {
+    return Column(
+      children: [
+        Expanded(
+          child: Stack(
+            children: [
+              googleMap(),
+              accountBtn(),
+              _legacyMapChrome(),
+              _mapCenterPin(legacyOffset: true),
+            ],
+          ),
+        ),
+        Container(
+          decoration: BoxDecoration(
+            color: getCurrentTheme(context).colorScaffoldBg,
+            border: Border.all(width: 0, color: Colors.transparent),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              serviceModeSelector(),
+              serviceData(),
+              encomiendaFields(),
+              addressSelection(),
+              confirmBtnAndOtherOption(),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _modernBody() {
+    final sheetInitial = XistiHomeUiTokens.sheetInitialSize(context);
+    final sheetMin = XistiHomeUiTokens.sheetMinSize(context);
+    final sheetMax = XistiHomeUiTokens.sheetMaxSize(context);
+    final topInset = MediaQuery.paddingOf(context).top;
+
+    return Stack(
+      children: [
+        Positioned.fill(child: googleMap()),
+        _mapCenterPin(legacyOffset: false),
+        Positioned(
+          top: topInset + 8.h,
+          left: 0,
+          right: 0,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              StreamBuilder<String>(
+                stream: _bloc?.selectedServiceModeSubject,
+                builder: (context, modeSnap) {
+                  return StreamBuilder<SearchedLocation?>(
                     stream: _bloc?.fromAddressController,
-                    builder: (context, snapFrom) {
+                    builder: (context, fromSnap) {
                       return StreamBuilder<SearchedLocation?>(
                         stream: _bloc?.toAddressController,
-                        builder: (context, snapTo) {
-                          bool isDataAvailable = ((snapFrom.data?.name ?? "").isNotEmpty && (snapTo.data?.name ?? "").isNotEmpty);
-                          return isDataAvailable
-                              ? Container()
-                              : StreamBuilder<bool>(
-                                  stream: _bloc?.mapLoadController,
-                                  builder: (context, snapshot) {
-                                    bool isLoading = snapshot.data == null ? false : snapshot.data ?? false;
-                                    return Opacity(
-                                      opacity: isLoading ? 0.4 : 1,
-                                      child: Container(
-                                        alignment: Alignment.center,
-                                        margin: EdgeInsetsDirectional.only(bottom: 35.h),
-                                        child: Image.asset(setImagesBasedOnTheme(context, "map_pointer.png"), width: 35.sp, height: 35.sp),
-                                      ),
-                                    );
-                                  },
-                                );
+                        builder: (context, toSnap) {
+                          return StreamBuilder<List<Map<String, dynamic>>>(
+                            stream: _bloc?.locationHistorySubject,
+                            builder: (context, historySnap) {
+                              return PassengerHomeSearchCard(
+                                serviceMode: modeSnap.data,
+                                pickup: fromSnap.data,
+                                dropoff: toSnap.data,
+                                recentTrips: historySnap.data ?? [],
+                                onPickupTap: () => _bloc?.selectAddress(selectedIndex: 1),
+                                onDropoffTap: () => _bloc?.selectAddress(selectedIndex: 2),
+                                onClearPickup: () => _bloc?.fromAddressController.sink.add(null),
+                                onClearDropoff: () {
+                                  _bloc?.toAddressController.sink.add(null);
+                                  _bloc?.clearMapData();
+                                },
+                                onRecentDestinationTap: (entry) => _bloc?.applyRecentDestinationEntry(entry),
+                              );
+                            },
+                          );
                         },
                       );
                     },
-                  ),
-                ),
-              ],
+                  );
+                },
+              ),
+              SizedBox(height: 8.h),
+              StreamBuilder<String>(
+                stream: _bloc?.selectedServiceModeSubject,
+                builder: (context, snapMode) {
+                  return StreamBuilder<ApiResponse<ServiceTypeModel>>(
+                    stream: _bloc?.subjectServiceData,
+                    builder: (context, snapHome) {
+                      final groups = snapHome.data?.data?.serviceModes ??
+                          ServiceModeKind.groupsFromFlatServices(snapHome.data?.data?.services ?? []);
+                      return PassengerHomeServiceChipsBar(
+                        selectedMode: snapMode.data ?? ServiceModeKind.transport,
+                        groups: groups,
+                        onModeSelected: (mode) => _bloc?.selectServiceMode(mode),
+                      );
+                    },
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+        accountBtn(topOffset: topInset + 8.h),
+        Positioned(
+          right: commonHorizontalPadding,
+          bottom: MediaQuery.sizeOf(context).height * sheetInitial + 12.h,
+          child: GestureDetector(
+            onTap: () => _bloc?.focusCurrentPosition(),
+            child: Container(
+              decoration: BoxDecoration(
+                color: getCurrentTheme(context).colorWhite,
+                borderRadius: BorderRadiusDirectional.all(Radius.circular(50.r)),
+                boxShadow: XistiHomeUiTokens.floatingShadow(context, getCurrentTheme(context).colorBorder),
+              ),
+              padding: EdgeInsetsDirectional.all(10.sp),
+              child: Icon(CustomIcons.pickupLocation, size: 28.sp, color: getCurrentTheme(context).colorIconCommon),
             ),
           ),
-          Container(
-            decoration: BoxDecoration(
-              color: getCurrentTheme(context).colorScaffoldBg,
-              border: Border.all(width: 0, color: Colors.transparent),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.start,
+        ),
+        DraggableScrollableSheet(
+          initialChildSize: sheetInitial,
+          minChildSize: sheetMin,
+          maxChildSize: sheetMax,
+          snap: true,
+          snapSizes: [sheetMin, sheetInitial, sheetMax],
+          builder: (context, scrollController) {
+            return PassengerHomeBookingSheet(
+              scrollController: scrollController,
               children: [
-                serviceModeSelector(),
                 serviceData(),
                 encomiendaFields(),
-                addressSelection(),
                 confirmBtnAndOtherOption(),
               ],
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _legacyMapChrome() {
+    return Stack(
+      children: [
+        Align(
+          alignment: AlignmentDirectional.bottomCenter,
+          child: Container(
+            alignment: AlignmentDirectional.center,
+            height: 25.h,
+            decoration: BoxDecoration(
+              color: getCurrentTheme(context).colorScaffoldBg,
+              borderRadius: BorderRadius.only(topLeft: Radius.circular(20.r), topRight: Radius.circular(20.r)),
+              border: Border.all(width: 0, color: Colors.transparent),
+              boxShadow: [
+                BoxShadow(color: getCurrentTheme(context).colorBorder.withValues(alpha: 0.5), blurRadius: 6, spreadRadius: 0.8, offset: Offset(0, 0)),
+              ],
             ),
+            child: Container(width: 80.w, height: 4.h, color: getCurrentTheme(context).colorIndicatorOff),
           ),
-        ],
+        ),
+        Align(
+          alignment: AlignmentDirectional.bottomCenter,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              GestureDetector(
+                onTap: () => _bloc?.focusCurrentPosition(),
+                child: Container(
+                  alignment: AlignmentDirectional.bottomEnd,
+                  margin: EdgeInsetsDirectional.only(end: commonHorizontalPadding, bottom: 40.h),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: getCurrentTheme(context).colorWhite,
+                      borderRadius: BorderRadiusDirectional.all(Radius.circular(50.r)),
+                    ),
+                    padding: EdgeInsetsDirectional.all(10.sp),
+                    child: Icon(CustomIcons.pickupLocation, size: 30.sp, color: getCurrentTheme(context).colorIconCommon),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _mapCenterPin({required bool legacyOffset}) {
+    return Align(
+      alignment: AlignmentDirectional.center,
+      child: StreamBuilder<SearchedLocation?>(
+        stream: _bloc?.fromAddressController,
+        builder: (context, snapFrom) {
+          return StreamBuilder<SearchedLocation?>(
+            stream: _bloc?.toAddressController,
+            builder: (context, snapTo) {
+              final isDataAvailable = ((snapFrom.data?.name ?? "").isNotEmpty && (snapTo.data?.name ?? "").isNotEmpty);
+              if (isDataAvailable) return const SizedBox.shrink();
+              return StreamBuilder<bool>(
+                stream: _bloc?.mapLoadController,
+                builder: (context, snapshot) {
+                  final isLoading = snapshot.data ?? false;
+                  return Opacity(
+                    opacity: isLoading ? 0.4 : 1,
+                    child: Container(
+                      alignment: Alignment.center,
+                      margin: EdgeInsetsDirectional.only(bottom: legacyOffset ? 35.h : 0),
+                      child: Image.asset(setImagesBasedOnTheme(context, "map_pointer.png"), width: 35.sp, height: 35.sp),
+                    ),
+                  );
+                },
+              );
+            },
+          );
+        },
       ),
     );
   }
@@ -612,7 +740,7 @@ class _PassengerHomeState extends State<PassengerHome> {
     ),
   );
 
-  Widget accountBtn() {
+  Widget accountBtn({double? topOffset}) {
     return Align(
       alignment: AlignmentDirectional.topEnd,
       child: GestureDetector(
@@ -623,11 +751,12 @@ class _PassengerHomeState extends State<PassengerHome> {
           width: 40.sp,
           height: 40.sp,
           alignment: AlignmentDirectional.center,
-          margin: EdgeInsetsDirectional.only(top: 40.h, end: commonHorizontalPadding),
+          margin: EdgeInsetsDirectional.only(top: topOffset ?? 40.h, end: commonHorizontalPadding),
           decoration: BoxDecoration(
-            color: getCurrentTheme(context).colorScaffoldBg,
+            color: getCurrentTheme(context).colorScaffoldBg.withValues(alpha: topOffset != null ? 0.94 : 1),
             borderRadius: BorderRadius.circular(15.r),
             border: Border.all(width: 1.w, color: getCurrentTheme(context).colorDarkBorder),
+            boxShadow: topOffset != null ? XistiHomeUiTokens.floatingShadow(context, getCurrentTheme(context).colorBorder) : null,
           ),
           child: Icon(CustomIcons.menu, color: getCurrentTheme(context).colorIconCommon),
         ),

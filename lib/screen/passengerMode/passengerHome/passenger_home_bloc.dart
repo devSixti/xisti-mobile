@@ -99,6 +99,7 @@ class PassengerHomeBloc extends Bloc {
   String deliveryPassengerDisclaimer = '';
   String encomiendaPassengerDisclaimer = '';
   final selectedDeliveryVehicleServiceId = BehaviorSubject<int?>();
+  final locationHistorySubject = BehaviorSubject<List<Map<String, dynamic>>>.seeded([]);
 
   Future<void> callPassengerRunningServiceApi() async {
     if (await isNetworkConnected(
@@ -176,6 +177,7 @@ class PassengerHomeBloc extends Bloc {
             selectedDeliveryVehicleServiceId.add(deliveryVehicleOptions.first.vehicleServiceId);
           }
           _applyHomeServices(response);
+          await refreshLocationHistory();
           subjectServiceData.add(ApiResponse.completed(response));
           putDataInSettingBox(hiveDriverStatus, response.isDriverStatus ?? 0);
           putDataInSettingBox(hiveDocumentStatus, response.driverDocStatus ?? 0);
@@ -351,6 +353,7 @@ class PassengerHomeBloc extends Bloc {
               pickup: pickup,
               destination: drop,
             );
+            await refreshLocationHistory();
           }
           rideBookSubject.add(ApiResponse.completed(response));
           openOfferRideScreen(response.rideId ?? 0);
@@ -421,8 +424,14 @@ class PassengerHomeBloc extends Bloc {
     groups = ServiceModeKind.enrichFlaggedModeGroups(groups, allServices);
     response.serviceModes = groups;
     var mode = selectedServiceModeSubject.valueOrNull ?? ServiceModeKind.transport;
+    final savedMode = userPrefBox.get(hivePassengerLastServiceMode, defaultValue: '')?.toString() ?? '';
+    if (savedMode.isNotEmpty && groups.any((g) => g.mode == savedMode)) {
+      mode = savedMode;
+    }
     if (groups.every((g) => g.mode != mode)) {
       mode = groups.isNotEmpty ? groups.first.mode : ServiceModeKind.transport;
+    }
+    if (selectedServiceModeSubject.valueOrNull != mode) {
       selectedServiceModeSubject.add(mode);
     }
     _refreshFilteredServices(groups, mode);
@@ -435,6 +444,7 @@ class PassengerHomeBloc extends Bloc {
   void selectServiceMode(String mode) {
     if (selectedServiceModeSubject.valueOrNull == mode) return;
     selectedServiceModeSubject.add(mode);
+    putDataInUserPrefBox(hivePassengerLastServiceMode, mode);
     final response = subjectServiceData.valueOrNull?.data;
     var groups = (response?.serviceModes ?? []).isNotEmpty
         ? response!.serviceModes!
@@ -455,6 +465,20 @@ class PassengerHomeBloc extends Bloc {
   bool get isCourierLikeBooking =>
       (subjectSelectedServiceData.valueOrNull?.serviceId ?? 0) == ServiceType.courier ||
       isEncomiendasMode;
+
+  Future<void> refreshLocationHistory() async {
+    final serviceId = subjectSelectedServiceData.valueOrNull?.serviceId ?? 0;
+    final trips = await PassengerLocationHistoryService.recentTripsForBooking(serviceId);
+    locationHistorySubject.add(trips);
+  }
+
+  /// Fills destination only from a recent trip (keeps current pickup).
+  void applyRecentDestinationEntry(Map<String, dynamic> entry) {
+    final destination = PassengerLocationHistoryService.destinationFromEntry(entry);
+    toAddressController.add(destination);
+    setMarkers();
+    mapApiCall();
+  }
 
   void _refreshFilteredServices(List<ServiceModeGroup> groups, String mode) {
     if (ServiceModeKind.isDeliveryLikeMode(mode) && deliveryVehicleOptions.isNotEmpty) {
@@ -768,6 +792,7 @@ class PassengerHomeBloc extends Bloc {
           debugPrint("my map data is : $duration $distance");
           mapApiSubject.sink.add(false);
           polyLinesController.sink.add(polyLines);
+          changePolylineColorPerTheme();
           timeController.sink.add((duration / 60).round());
           distanceController.sink.add(getDoubleFromDynamic((distance / 1000).toStringAsFixed(2)));
           if (googleMapController != null) {
@@ -799,7 +824,10 @@ class PassengerHomeBloc extends Bloc {
     Map<PolylineId, Polyline> polyLines = polyLinesController.valueOrNull ?? {};
     if (polyLines.isNotEmpty) {
       final oldPolyline = polyLines[PolylineId("poly")]!;
-      final updatedPolyline = oldPolyline.copyWith(colorParam: getCurrentTheme(context).colorBlack);
+      final updatedPolyline = oldPolyline.copyWith(
+        colorParam: getCurrentTheme(context).colorPrimary,
+        widthParam: 5,
+      );
       polyLines[PolylineId("poly")] = updatedPolyline;
     }
     polyLinesController.sink.add(polyLines);
@@ -969,6 +997,7 @@ class PassengerHomeBloc extends Bloc {
     recipientNumberController.close();
     itemEstimatedPriceController.close();
     selectedDeliveryVehicleServiceId.close();
+    locationHistorySubject.close();
   }
 }
 

@@ -1,4 +1,3 @@
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import '../googleApi/google_api_repo.dart';
@@ -31,13 +30,14 @@ class GetRoutesUtils {
           }
         }
         PolylineId id = PolylineId("poly");
+        final theme = getCurrentTheme(navigatorKey.currentContext!);
         Polyline polyline = Polyline(
           polylineId: id,
-          color: getCurrentTheme(navigatorKey.currentContext!).colorBlack,
+          color: theme.colorPrimary,
           points: polylineCoordinates,
           startCap: Cap.roundCap,
           endCap: Cap.roundCap,
-          width: 2.w.toInt(),
+          width: 5,
         );
         polyLines[id] = polyline;
 

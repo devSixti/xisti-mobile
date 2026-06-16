@@ -60,6 +60,9 @@ void applyAppMobileSettingsFromJson(dynamic json) {
       _toInt(map['require_courier_package_dimensions'], 0),
     );
   }
+  if (map.containsKey('enable_xisti_new_home_layout')) {
+    putDataInSettingBox(hiveXistiNewHomeLayout, _toInt(map['enable_xisti_new_home_layout'], 1));
+  }
 }
 
 /// Injected at build time for QA APKs: `--dart-define=QA_APP_KEY=...`
@@ -95,6 +98,7 @@ void applyBootstrapDefaultsWhenApiUnavailable() {
   putDataInSettingBox(hiveEnableExpresoMobile, 0);
   putDataInSettingBox(hiveEnableEncomiendasMobile, 1);
   putDataInSettingBox(hiveRequireCourierPackageDimensions, 0);
+  putDataInSettingBox(hiveXistiNewHomeLayout, 1);
 }
 
 /// Persists social-login toggles from app-version-check (with safe defaults when admin has them off).
@@ -131,6 +135,10 @@ bool isEncomiendasMobileEnabled() =>
 
 bool isCourierPackageDimensionsRequired() =>
     getIntFromSettingBox(hiveRequireCourierPackageDimensions) == 1;
+
+/// New multiservice home layout (map + floating search + draggable sheet). Default on.
+bool isXistiNewHomeLayoutEnabled() =>
+    getIntFromSettingBox(hiveXistiNewHomeLayout, defaultValue: 1) == 1;
 
 bool isColombiaCurrencySelected() {
   final currency = getStringFromSettingBox(hiveSelectedCurrency, defaultValue: defaultCurrency).toUpperCase();

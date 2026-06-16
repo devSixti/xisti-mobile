@@ -60,9 +60,11 @@ const String hiveDestinationPaymentMethods = "destinationPaymentMethods";
 const String hiveEnableExpresoMobile = "enableExpresoMobile";
 const String hiveEnableEncomiendasMobile = "enableEncomiendasMobile";
 const String hiveRequireCourierPackageDimensions = "requireCourierPackageDimensions";
+const String hiveXistiNewHomeLayout = "xistiNewHomeLayout";
 
 ///keys for [userPrefBox]
 const String hiveSelectedLanguageCode = "SelectedLanguageCode";
+const String hivePassengerLastServiceMode = "passengerLastServiceMode";
 
 ///keys for [userInfoBox]
 const String hiveUserId = "UserId";
