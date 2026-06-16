@@ -53,7 +53,7 @@ class ProfileBloc extends Bloc {
       context,
       FaceVerificationView(
         onVerified: (image, rotation) async {
-          File compressFile = await compressImage(image);
+          File compressFile = await prepareProfileImageFile(image);
           imgFileController.sink.add(compressFile);
           buttonHide();
         },

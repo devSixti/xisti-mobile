@@ -94,65 +94,90 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _userProfileImage() {
+    final photoSize = 100.sp;
+    final editButtonSize = 40.sp;
+
     return GestureDetector(
       onTap: () {
         _bloc?.addProfileImage();
       },
       child: StreamBuilder<File?>(
         stream: _bloc?.imgFileController,
-        builder: (context, snap) {
-          return SizedBox(
-            width: 100.sp,
-            height: 120.sp,
-            child: Stack(
-              alignment: AlignmentDirectional.topCenter,
-              children: [
-                AspectRatio(
-                  aspectRatio: 1,
-                  child: Container(
-                    clipBehavior: Clip.antiAlias,
-                    decoration: BoxDecoration(
-                      color: getCurrentTheme(context).colorScaffoldBg,
-                      borderRadius: BorderRadius.circular(20.r),
-                    ),
-                    child:
-                        snap.data != null
-                            ? Image.file(snap.data!, width: 100.sp, height: 100.sp, fit: BoxFit.contain)
-                            : StreamBuilder<String>(
-                              stream: _bloc?.profileImgController,
-                              builder: (context, snap) {
-                                return LoadImageWithPlaceHolder(
-                                  width: 100.sp,
-                                  height: 100.sp,
-                                  image: snap.data ?? "",
-                                  defaultAssetImage: setImagesBasedOnTheme(context, "avatar.png"),
-                                  borderRadius: BorderRadius.circular(20.r),
-                                  imageFit: BoxFit.contain,
-                                );
-                              },
-                            ),
-                  ),
-                ),
-                Align(
-                  alignment: Alignment.bottomCenter,
-                  child: SizedBox(
-                    width: 40.sp,
-                    height: 40.sp,
-                    child: AspectRatio(
+        builder: (context, localSnap) {
+          return StreamBuilder<String>(
+            stream: _bloc?.profileImgController,
+            builder: (context, networkSnap) {
+              return SizedBox(
+                width: photoSize,
+                height: photoSize + (editButtonSize / 2),
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  alignment: Alignment.topCenter,
+                  children: [
+                    AspectRatio(
                       aspectRatio: 1,
-                      child: Container(
-                        padding: EdgeInsetsDirectional.all(10.sp),
-                        decoration: BoxDecoration(color: getCurrentTheme(context).colorPrimary, borderRadius: BorderRadius.all(Radius.circular(15.r))),
-                        child: Icon(CustomIcons.edit, color: getCurrentTheme(context).colorWhite, size: 20.sp),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(20.r),
+                        child: _profileAvatarContent(
+                          context: context,
+                          photoSize: photoSize,
+                          localFile: localSnap.data,
+                          networkUrl: networkSnap.data ?? "",
+                        ),
                       ),
                     ),
-                  ),
+                    Positioned(
+                      bottom: 0,
+                      child: SizedBox(
+                        width: editButtonSize,
+                        height: editButtonSize,
+                        child: Container(
+                          padding: EdgeInsetsDirectional.all(10.sp),
+                          decoration: BoxDecoration(
+                            color: getCurrentTheme(context).colorPrimary,
+                            borderRadius: BorderRadius.all(Radius.circular(15.r)),
+                          ),
+                          child: Icon(CustomIcons.edit, color: getCurrentTheme(context).colorWhite, size: 20.sp),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              );
+            },
           );
         },
       ),
+    );
+  }
+
+  Widget _profileAvatarContent({
+    required BuildContext context,
+    required double photoSize,
+    required File? localFile,
+    required String networkUrl,
+  }) {
+    if (localFile != null) {
+      return ColoredBox(
+        color: getCurrentTheme(context).colorScaffoldBg,
+        child: Image.file(
+          localFile,
+          width: photoSize,
+          height: photoSize,
+          fit: BoxFit.cover,
+          alignment: Alignment.center,
+          filterQuality: FilterQuality.high,
+        ),
+      );
+    }
+
+    return LoadImageWithPlaceHolder(
+      width: photoSize,
+      height: photoSize,
+      image: networkUrl,
+      defaultAssetImage: setImagesBasedOnTheme(context, "avatar.png"),
+      borderRadius: BorderRadius.zero,
+      imageFit: BoxFit.cover,
     );
   }
 

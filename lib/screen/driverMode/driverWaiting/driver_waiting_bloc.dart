@@ -109,7 +109,7 @@ class DriverWaitingBloc extends Bloc {
       int orderId = int.parse((notificationData[NotificationConstant.rideId] ?? 0).toString());
       int rideType = int.parse((notificationData[NotificationConstant.rideType] ?? 0).toString());
       if (notificationType == 1 && orderId == rideId) {
-        pushNotificationService.flutterLocalNotificationsPlugin.cancelAll();
+        pushNotificationService.dismissRideNotification(rideId);
         if (rideType == 1) {
           if (!context.mounted) return;
           openScreenWithClearPrevious(context, DriverRideHistory());

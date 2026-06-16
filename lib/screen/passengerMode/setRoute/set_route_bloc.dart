@@ -9,6 +9,7 @@ import '../../../utils/utils.dart';
 import '../../common/manageAdress/manage_address_dl.dart';
 import '../../common/manageAdress/manage_address_repo.dart';
 import '../../common/selectLocation/select_location.dart';
+import '../../../services/passenger_location_history_service.dart';
 import '../passengerHome/passenger_home_dl.dart';
 
 class SetRouteBloc extends Bloc {
@@ -21,6 +22,7 @@ class SetRouteBloc extends Bloc {
   final ManageAddressRepo _manageAddressRepo = ManageAddressRepo();
   final Function(SearchedLocation? fromAddress, SearchedLocation? toAddress, List<SearchedLocation>? stopAddressList) onConfirmLocation;
   int selectedIndex;
+  final int serviceId;
   static const String tag = "SetRouteTag>>>";
   int maxAddressLimit = 0;
   int addressListLength = 0;
@@ -33,6 +35,7 @@ class SetRouteBloc extends Bloc {
     List<SearchedLocation>? stopAddressList,
     bool isAddStopAddress,
     this.selectedIndex,
+    this.serviceId,
     this.onConfirmLocation,
   ) {
     if (fromAddress != null) {
@@ -53,7 +56,10 @@ class SetRouteBloc extends Bloc {
     }
     getAddressList();
     selectedIndexController.sink.add(selectedIndex);
+    refreshLocationHistory();
   }
+
+  final locationHistorySubject = BehaviorSubject<List<Map<String, dynamic>>>.seeded([]);
 
   final fromAddressController = BehaviorSubject<SearchedLocation?>();
   final toAddressController = BehaviorSubject<SearchedLocation?>();
@@ -141,6 +147,21 @@ class SetRouteBloc extends Bloc {
     isSearched = false;
   }
 
+  Future<void> refreshLocationHistory() async {
+    final trips = await PassengerLocationHistoryService.recentTripsForBooking(serviceId);
+    locationHistorySubject.add(trips);
+  }
+
+  /// Xisti: al tocar un reciente solo se rellena el destino (no origen).
+  void applyLocationHistoryEntry(Map<String, dynamic> entry) {
+    final destination = PassengerLocationHistoryService.destinationFromEntry(entry);
+    dropLocationTEC.text = destination.name ?? '';
+    toAddressController.sink.add(destination);
+    selectedIndexController.sink.add(2);
+    changeLocationSearch();
+    FocusManager.instance.primaryFocus?.unfocus();
+  }
+
   void selectFromMap() {
     openScreenWithResult(context, SelectLocation(showFilledLocation: true)).then((value) {
       if (value != null) {
@@ -208,6 +229,7 @@ class SetRouteBloc extends Bloc {
     addStopAddressListController.close();
     selectedIndexController.close();
     placesListController.close();
+    locationHistorySubject.close();
     subjectManageAddress.close();
   }
 }

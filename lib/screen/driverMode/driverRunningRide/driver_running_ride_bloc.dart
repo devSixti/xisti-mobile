@@ -46,7 +46,7 @@ class DriverRunningRideBloc extends Bloc {
   AddressListItem? dropAddressItem;
 
   DriverRunningRideBloc({required this.context, required this.rideId, required this.serviceId}) {
-    pushNotificationService.flutterLocalNotificationsPlugin.cancelAll();
+    pushNotificationService.dismissRideNotification(rideId);
     manageNotification();
     setDriverMarker(serviceId);
   }
@@ -321,7 +321,7 @@ class DriverRunningRideBloc extends Bloc {
         openRideCompletedBottomSheet();
         break;
       case DriverRideStatus.driverCompleted:
-        pushNotificationService.flutterLocalNotificationsPlugin.cancelAll();
+        pushNotificationService.dismissRideNotification(rideId);
         openScreenWithClearPrevious(context, DriverHome());
         break;
       default:
@@ -483,7 +483,7 @@ class DriverRunningRideBloc extends Bloc {
       String notificationMessage = notificationData[NotificationConstant.message] ?? "";
       String notificationTitle = notificationData[NotificationConstant.title] ?? "";
       if (notificationType == 2 && orderId == rideId) {
-        pushNotificationService.flutterLocalNotificationsPlugin.cancelAll();
+        pushNotificationService.dismissRideNotification(rideId);
         showRideCompleteCancelBottomSheet(notificationTitle, notificationMessage);
       } else if (orderId == rideId) {
         callRideDetailsApi(isLoading: false);
@@ -819,7 +819,7 @@ class DriverRunningRideBloc extends Bloc {
       return;
     }
     FirebaseDatabase.instance.ref().child(ChatConstant.chat).child(ChatConstant.rides).child((_rideDetails.bookingNo).toString()).remove();
-    pushNotificationService.flutterLocalNotificationsPlugin.cancelAll();
+    pushNotificationService.dismissRideNotification(rideId);
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -970,7 +970,7 @@ class DriverRunningRideBloc extends Bloc {
           message: "",
           positiveButtonTxt: languages.ok,
           onPositivePress: () async {
-            pushNotificationService.flutterLocalNotificationsPlugin.cancelAll();
+            pushNotificationService.dismissRideNotification(rideId);
             finishChatWithUser();
             openScreenWithReplacePrevious(context, DriverHome());
           },

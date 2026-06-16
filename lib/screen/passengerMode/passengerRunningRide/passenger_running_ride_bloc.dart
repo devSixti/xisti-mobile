@@ -186,7 +186,7 @@ class PassengerRunningRideBloc extends Bloc {
         if (!context.mounted) return;
         if (isApiStatus(context, response.status, message, true)) {
           subjectRating.sink.add(ApiResponse.completed(response));
-          pushNotificationService.flutterLocalNotificationsPlugin.cancelAll();
+          pushNotificationService.dismissRideNotification(rideId);
           getRideDetailApi();
         } else {
           subjectRating.sink.add(ApiResponse.error(message));
@@ -491,7 +491,7 @@ class PassengerRunningRideBloc extends Bloc {
       return;
     }
     FirebaseDatabase.instance.ref().child(ChatConstant.chat).child(ChatConstant.rides).child((subjectRideDetail.value.data?.bookingNo ?? "").toString()).remove();
-    pushNotificationService.flutterLocalNotificationsPlugin.cancelAll();
+    pushNotificationService.dismissRideNotification(rideId);
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -521,7 +521,7 @@ class PassengerRunningRideBloc extends Bloc {
       return;
     }
     FirebaseDatabase.instance.ref().child(ChatConstant.chat).child(ChatConstant.rides).child((subjectRideDetail.value.data?.bookingNo ?? "").toString()).remove();
-    pushNotificationService.flutterLocalNotificationsPlugin.cancelAll();
+    pushNotificationService.dismissRideNotification(rideId);
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -582,7 +582,7 @@ class PassengerRunningRideBloc extends Bloc {
       int messageCode = int.parse((notificationData[NotificationConstant.messageCode] ?? 0).toString());
       String notificationMessage = notificationData[NotificationConstant.message] ?? "";
       if (notificationType == 1 && orderId == rideId) {
-        pushNotificationService.flutterLocalNotificationsPlugin.cancelAll();
+        pushNotificationService.dismissRideNotification(rideId);
         rideStatus = orderStatus;
         PassengerRunningRidePojo? data = subjectRideDetail.value.data;
         if (orderStatus == 3) {

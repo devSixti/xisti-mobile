@@ -21,7 +21,7 @@ class AcceptRequestBottomSheetBloc extends Bloc {
   List<int> rideIdList;
 
   AcceptRequestBottomSheetBloc(this.context, this.rideListItem, this.isNearestRide, this.rideIdList) {
-    pushNotificationService.flutterLocalNotificationsPlugin.cancelAll();
+    pushNotificationService.dismissRideNotification(rideListItem.rideId);
   }
 
   final DriverNewRequestRepo _repo = DriverNewRequestRepo();

@@ -41,6 +41,30 @@ class PassengerLocationHistoryService {
     await putDataInUserPrefBox(_boxKey(serviceId), jsonEncode(filtered));
   }
 
+  /// Envíos usan varios `service_id`; une historial para la pantalla Definir ruta.
+  static Future<List<Map<String, dynamic>>> recentTripsForBooking(int serviceId) async {
+    const deliveryServiceIds = {1, 3, 4, 5};
+    if (!deliveryServiceIds.contains(serviceId)) {
+      return recentTrips(serviceId);
+    }
+
+    final merged = <Map<String, dynamic>>[];
+    final seen = <String>{};
+    for (final id in deliveryServiceIds) {
+      for (final entry in await recentTrips(id)) {
+        final key = '${entry['pickup_name']}|${entry['destination_name']}';
+        if (seen.add(key)) {
+          merged.add(entry);
+        }
+        if (merged.length >= maxEntriesPerService) {
+          return merged;
+        }
+      }
+    }
+
+    return merged;
+  }
+
   static Future<List<Map<String, dynamic>>> recentTrips(int serviceId) async {
     if (serviceId <= 0) return [];
     final raw = userPrefBox.get(_boxKey(serviceId), defaultValue: '')?.toString() ?? '';

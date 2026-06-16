@@ -27,6 +27,7 @@ import '../screen/passengerMode/offerRide/offer_ride_screen.dart';
 import '../screen/passengerMode/passengerRideDetail/passenger_ride_detail.dart';
 import '../screen/passengerMode/passengerRunningRide/passenger_running_ride.dart';
 import '../utils/alert_feedback_util.dart';
+import '../utils/notification_payload_util.dart';
 import '../utils/utils.dart';
 
 bool isChatNotificationData(Map<String, dynamic> notificationData) {
@@ -73,6 +74,18 @@ class PushNotificationService {
   final StreamController<NotificationResponse> pushNotificationStream = StreamController<NotificationResponse>.broadcast();
   final LanguageAndCurrencyRepo _selectLanguageAndCurrencyRepo = LanguageAndCurrencyRepo();
 
+  Future<void> dismissRideNotification(int? rideId) async {
+    if (rideId != null && rideId > 0) {
+      await flutterLocalNotificationsPlugin.cancel(id: rideId);
+    }
+  }
+
+  Future<void> dismissNotificationsForRideIds(Iterable<int> rideIds) async {
+    for (final rideId in rideIds) {
+      await dismissRideNotification(rideId);
+    }
+  }
+
   Future<void> pushNotificationInitialise() async {
     if (await isNetworkConnected()) {
       await _firebaseNotificationPermissions();
@@ -116,6 +129,7 @@ class PushNotificationService {
   }
 
   Future<void> showNotification(Map<String, dynamic> notificationData, {bool isFromForeground = true}) async {
+    notificationData = normalizeNotificationDataMap(notificationData);
     if (shouldVibrateForNotificationData(notificationData)) {
       unawaited(triggerRideAlertFeedback());
     }
@@ -207,7 +221,7 @@ class PushNotificationService {
     }
     if (isShowNotification) {
       createNotification(
-        notificationId: notificationId,
+        notificationId: notificationId ?? notificationIdForData(notificationData),
         title: title,
         message: message,
         androidNotificationChannel: androidNotificationChannel,
@@ -378,7 +392,7 @@ class PushNotificationService {
       debugPrint("onMessage -------->>>>>>>>>>>> ${message.data}");
       //Added this condition due to Firebase messaging(14.7.10) lib issue. It's call with empty data when clear notification
       if (message.data.isNotEmpty) {
-        Map<String, dynamic> notificationData = message.data;
+        Map<String, dynamic> notificationData = normalizeNotificationPayload(message);
         showNotification(notificationData);
       }
     });
@@ -386,7 +400,7 @@ class PushNotificationService {
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage? message) async {
       debugPrint("onMessageOpenedApp -------->>>>>>>>>>>> ${message?.data}");
       if (message != null) {
-        Map<String, dynamic> notificationData = message.data;
+        Map<String, dynamic> notificationData = normalizeNotificationPayload(message);
         await handleNotificationClick(notificationData: notificationData, isClearPrevious: false);
       }
     });
@@ -394,7 +408,7 @@ class PushNotificationService {
     FirebaseMessaging.instance.getInitialMessage().then((RemoteMessage? message) async {
       debugPrint("getInitialMessage -------->>>>>>>>>>>> ${message?.data}");
       if (message != null) {
-        Map<String, dynamic> notificationData = message.data;
+        Map<String, dynamic> notificationData = normalizeNotificationPayload(message);
         await handleNotificationClick(notificationData: notificationData, isClearPrevious: true);
       }
     });
@@ -564,7 +578,8 @@ class PushNotificationService {
 
   /// Background FCM: show heads-up + payload for tap (v1.0.1 compat).
   @pragma('vm:entry-point')
-  static Future<void> displayBackgroundNotification(Map<String, dynamic> notificationData) async {
+  static Future<void> displayBackgroundNotification(Map<String, dynamic> rawNotificationData) async {
+    final notificationData = normalizeNotificationDataMap(rawNotificationData);
     WidgetsFlutterBinding.ensureInitialized();
     final plugin = FlutterLocalNotificationsPlugin();
     const androidInit = AndroidInitializationSettings('@mipmap/launcher_icon');
@@ -607,7 +622,7 @@ class PushNotificationService {
     final soundIos = isRideAlert ? 'new_request.wav' : null;
     final androidChannel = type == 7 ? newRequestChannel : (isRideAlert ? rideAlertChannel : highChannel);
     await plugin.show(
-      id: notificationData.hashCode,
+      id: notificationIdForData(notificationData),
       title: title,
       body: body,
       notificationDetails: NotificationDetails(

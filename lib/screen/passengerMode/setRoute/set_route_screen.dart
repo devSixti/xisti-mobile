@@ -22,6 +22,7 @@ class SetRouteScreen extends StatefulWidget {
   final List<SearchedLocation>? stopAddressList;
   final bool isAddStopAddress;
   final int selectedIndex;
+  final int serviceId;
   final Function(SearchedLocation? fromAddress, SearchedLocation? toAddress, List<SearchedLocation>? stopAddressList) onConfirmLocation;
 
   const SetRouteScreen({
@@ -30,6 +31,7 @@ class SetRouteScreen extends StatefulWidget {
     this.toAddress,
     this.stopAddressList,
     required this.selectedIndex,
+    required this.serviceId,
     required this.isAddStopAddress,
     required this.onConfirmLocation,
   });
@@ -50,6 +52,7 @@ class _SetRouteScreenState extends State<SetRouteScreen> {
       widget.stopAddressList,
       widget.isAddStopAddress,
       widget.selectedIndex,
+      widget.serviceId,
       widget.onConfirmLocation,
     );
     super.didChangeDependencies();
@@ -79,7 +82,7 @@ class _SetRouteScreenState extends State<SetRouteScreen> {
           SingleChildScrollView(
             controller: _bloc?.scrollController,
             padding: EdgeInsetsDirectional.only(start: commonHorizontalPadding, end: commonHorizontalPadding, bottom: 50.h, top: 10.h),
-            child: Column(children: [fromAddress(), SizedBox(height: 20.h), multiStopAddress(), toAddress(), setOnMap(), placesList(), savedAddresses()]),
+            child: Column(children: [fromAddress(), SizedBox(height: 20.h), multiStopAddress(), toAddress(), setOnMap(), placesList(), recentLocationHistory(), savedAddresses()]),
           ),
           Align(
             alignment: AlignmentDirectional.bottomCenter,
@@ -155,6 +158,72 @@ class _SetRouteScreenState extends State<SetRouteScreen> {
           },
         )
         : Container();
+  }
+
+  Widget recentLocationHistory() {
+    return StreamBuilder<int>(
+      stream: _bloc?.selectedIndexController,
+      builder: (context, indexSnap) {
+        final index = indexSnap.data ?? 0;
+        if (index != 2) return const SizedBox.shrink();
+
+        return StreamBuilder<List<Suggestions>>(
+          stream: _bloc?.placesListController,
+          builder: (context, placesSnap) {
+            final searching = (placesSnap.data ?? []).isNotEmpty;
+            if (searching) return const SizedBox.shrink();
+
+            return StreamBuilder<List<Map<String, dynamic>>>(
+              stream: _bloc?.locationHistorySubject,
+              builder: (context, snap) {
+                final trips = snap.data ?? [];
+                if (trips.isEmpty) return const SizedBox.shrink();
+
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: EdgeInsetsDirectional.only(top: 16.h, bottom: 10.h),
+                      child: Text(
+                        'Recientes',
+                        style: bodyText(context: context, fontSize: textSize14px, fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                    ListView.separated(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: trips.length,
+                      separatorBuilder: (_, _) => SizedBox(height: 8.h),
+                      itemBuilder: (context, index) {
+                        final entry = trips[index];
+                        final label = '${entry['pickup_name']} → ${entry['destination_name']}';
+                        return GestureDetector(
+                          onTap: () => _bloc?.applyLocationHistoryEntry(entry),
+                          child: Container(
+                            width: double.infinity,
+                            padding: EdgeInsetsDirectional.symmetric(horizontal: 12.w, vertical: 12.h),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(12.r),
+                              border: Border.all(color: getCurrentTheme(context).colorTextFieldBorder),
+                            ),
+                            child: Text(
+                              label,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: bodyText(context: context, fontSize: textSize13px),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                );
+              },
+            );
+          },
+        );
+      },
+    );
   }
 
   Widget setOnMap() {

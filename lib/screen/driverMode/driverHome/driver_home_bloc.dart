@@ -454,9 +454,9 @@ class DriverHomeBloc extends Bloc {
         rideIdList.add(orderId);
         unawaited(triggerRideAlertFeedback());
         callAvailableRideApi(isLoading: false);
-        pushNotificationService.flutterLocalNotificationsPlugin.cancelAll();
+        pushNotificationService.dismissRideNotification(orderId);
       } else if (notificationType == 9 && !isWaitingOpen) {
-        pushNotificationService.flutterLocalNotificationsPlugin.cancelAll();
+        pushNotificationService.dismissRideNotification(orderId);
         callAvailableRideApi(isLoading: false);
         String name = (notificationData[NotificationConstant.customerName] ?? "").toString();
         if (context.mounted) {

@@ -72,7 +72,7 @@ class PassengerRideDetailBloc extends Bloc {
           addressList = response.addressList ?? [];
           if (response.rideStatus == 4) {
             ActiveRideOfflineService.instance.clearRideSnapshot();
-            pushNotificationService.flutterLocalNotificationsPlugin.cancelAll();
+            pushNotificationService.dismissRideNotification(rideId);
             openScreenWithClearPrevious(context, const PassengerHome());
             return;
           }
@@ -125,7 +125,7 @@ class PassengerRideDetailBloc extends Bloc {
         if (!context.mounted) return;
         if (isApiStatus(context, response.status, message, true)) {
           subjectRating.sink.add(ApiResponse.completed(response));
-          pushNotificationService.flutterLocalNotificationsPlugin.cancelAll();
+          pushNotificationService.dismissRideNotification(rideId);
           getRideDetailApi();
         } else {
           subjectRating.sink.add(ApiResponse.error(message));
@@ -380,7 +380,7 @@ class PassengerRideDetailBloc extends Bloc {
       int orderId = int.parse((notificationData[NotificationConstant.rideId] ?? 0).toString());
       if (notificationType == 1 && orderId == rideId) {
         if (orderStatus == 4) {
-          pushNotificationService.flutterLocalNotificationsPlugin.cancelAll();
+          pushNotificationService.dismissRideNotification(rideId);
           ActiveRideOfflineService.instance.clearRideSnapshot();
           if (!context.mounted) return;
           openScreenWithClearPrevious(context, const PassengerHome());

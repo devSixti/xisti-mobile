@@ -181,61 +181,12 @@ class _PassengerHomeState extends State<PassengerHome> {
       padding: EdgeInsetsDirectional.only(start: commonHorizontalPadding, end: commonHorizontalPadding),
       child: Column(
         children: [
-          recentLocationHistory(),
           fromAddress(),
           multiStopAddress(),
           SizedBox(height: 15.h),
           toAddress(),
         ],
       ),
-    );
-  }
-
-  Widget recentLocationHistory() {
-    return StreamBuilder<List<Map<String, dynamic>>>(
-      stream: _bloc?.locationHistorySubject,
-      builder: (context, snap) {
-        final trips = snap.data ?? [];
-        if (trips.isEmpty) return const SizedBox.shrink();
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: EdgeInsetsDirectional.only(bottom: 8.h),
-              child: Text('Recientes', style: bodyText(context: context, fontSize: textSize13px, fontWeight: FontWeight.w600)),
-            ),
-            SizedBox(
-              height: 36.h,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                itemCount: trips.length,
-                separatorBuilder: (context, index) => SizedBox(width: 8.w),
-                itemBuilder: (context, index) {
-                  final entry = trips[index];
-                  final label = '${entry['pickup_name']} → ${entry['destination_name']}';
-                  return GestureDetector(
-                    onTap: () => _bloc?.applyLocationHistoryEntry(entry),
-                    child: Container(
-                      padding: EdgeInsetsDirectional.symmetric(horizontal: 10.w, vertical: 6.h),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(16.r),
-                        border: Border.all(color: getCurrentTheme(context).colorTextFieldBorder),
-                      ),
-                      child: Text(
-                        label,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: bodyText(context: context, fontSize: textSize12px),
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
-            SizedBox(height: 12.h),
-          ],
-        );
-      },
     );
   }
 

@@ -118,7 +118,7 @@ class OfferRideBloc extends Bloc {
           stopTimer();
           acceptDriverSubject.sink.add(ApiResponse.completed(response));
           itemDriverBid.setAcceptLoading(false);
-          pushNotificationService.flutterLocalNotificationsPlugin.cancelAll();
+          pushNotificationService.dismissRideNotification(rideId);
           openScreenWithClearPrevious(
             context,
             itemDriverBid.rideType == 1 ? PassengerRideDetail(rideId: rideId) : PassengerRunningRide(rideId: itemDriverBid.rideId ?? 0),
@@ -338,7 +338,7 @@ class OfferRideBloc extends Bloc {
 
       if (notificationType == 1 && orderStatus == 4) {
         showOrderCancelSheet(notificationMessage);
-        pushNotificationService.flutterLocalNotificationsPlugin.cancelAll();
+        pushNotificationService.dismissRideNotification(rideId);
         stopTimer();
       } else if (notificationType == 1) {
         unawaited(triggerRideAlertFeedback());
@@ -350,7 +350,7 @@ class OfferRideBloc extends Bloc {
           openScreenWithClearPrevious(context, PassengerRunningRide(rideId: rideId));
         }
       } else if (notificationType == 8) {
-        pushNotificationService.flutterLocalNotificationsPlugin.cancelAll();
+        pushNotificationService.dismissRideNotification(rideId);
         findDriverApi(false);
       }
     });

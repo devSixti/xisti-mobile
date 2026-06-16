@@ -99,7 +99,6 @@ class PassengerHomeBloc extends Bloc {
   String deliveryPassengerDisclaimer = '';
   String encomiendaPassengerDisclaimer = '';
   final selectedDeliveryVehicleServiceId = BehaviorSubject<int?>();
-  final locationHistorySubject = BehaviorSubject<List<Map<String, dynamic>>>.seeded([]);
 
   Future<void> callPassengerRunningServiceApi() async {
     if (await isNetworkConnected(
@@ -352,7 +351,6 @@ class PassengerHomeBloc extends Bloc {
               pickup: pickup,
               destination: drop,
             );
-            await refreshLocationHistory();
           }
           rideBookSubject.add(ApiResponse.completed(response));
           openOfferRideScreen(response.rideId ?? 0);
@@ -432,20 +430,6 @@ class PassengerHomeBloc extends Bloc {
     if (filtered.isNotEmpty) {
       vehicleSelect(0);
     }
-    refreshLocationHistory();
-  }
-
-  Future<void> refreshLocationHistory() async {
-    final serviceId = subjectSelectedServiceData.valueOrNull?.serviceId ?? 0;
-    final trips = await PassengerLocationHistoryService.recentTrips(serviceId);
-    locationHistorySubject.add(trips);
-  }
-
-  void applyLocationHistoryEntry(Map<String, dynamic> entry) {
-    fromAddressController.add(PassengerLocationHistoryService.pickupFromEntry(entry));
-    toAddressController.add(PassengerLocationHistoryService.destinationFromEntry(entry));
-    setMarkers();
-    mapApiCall();
   }
 
   void selectServiceMode(String mode) {
@@ -518,7 +502,6 @@ class PassengerHomeBloc extends Bloc {
         selectedDeliveryVehicleServiceId.add(matched!.vehicleServiceId);
       }
     }
-    refreshLocationHistory();
     offerFareAmountController.sink.add(null);
     if ((fromAddressController.valueOrNull?.name ?? "").isNotEmpty && (toAddressController.valueOrNull?.name ?? "").isNotEmpty) {
       callRideCalculationApi();
@@ -680,6 +663,7 @@ class PassengerHomeBloc extends Bloc {
           stopAddressList: addStopAddressList.valueOrNull,
           isAddStopAddress: isAddStopAddress,
           selectedIndex: selectedIndex,
+          serviceId: subjectSelectedServiceData.valueOrNull?.serviceId ?? 0,
           onConfirmLocation: (fromAddress, toAddress, addressList) {
             fromAddressController.sink.add(fromAddress);
             toAddressController.sink.add(toAddress);
@@ -985,7 +969,6 @@ class PassengerHomeBloc extends Bloc {
     recipientNumberController.close();
     itemEstimatedPriceController.close();
     selectedDeliveryVehicleServiceId.close();
-    locationHistorySubject.close();
   }
 }
 

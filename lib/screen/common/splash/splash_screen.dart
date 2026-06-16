@@ -61,16 +61,16 @@ class _SplashScreenState extends State<SplashScreen> {
                 ),
               ),
               Container(
-                alignment: AlignmentDirectional.center,
-                padding: EdgeInsetsDirectional.only(start: commonHorizontalPadding, end: commonHorizontalPadding, bottom: 150.h),
+                alignment: Alignment.center,
+                padding: EdgeInsets.symmetric(horizontal: commonHorizontalPadding),
                 child: Image.asset(
-                  setImagesBasedOnTheme(context, 'splash_logo.png'),
-                  width: 280.w,
+                  'assets/images/xisti/logo_full.png',
+                  width: 300.w,
                   fit: BoxFit.contain,
-                  filterQuality: FilterQuality.medium,
+                  filterQuality: FilterQuality.high,
                   errorBuilder: (context, error, stackTrace) => Image.asset(
-                    'assets/images/xisti/logo_full.png',
-                    width: 200.w,
+                    setImagesBasedOnTheme(context, 'splash_logo.png'),
+                    width: 300.w,
                     fit: BoxFit.contain,
                   ),
                 ),

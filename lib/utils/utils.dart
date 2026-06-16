@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
+import 'dart:ui' as ui;
 
 import 'package:android_nav_setting/android_nav_setting.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
@@ -14,6 +15,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
@@ -464,6 +466,40 @@ String setImagesBasedOnTheme(BuildContext context, String imgName) {
 
 String setLottieAnimationBasedOnTheme(BuildContext context, String imgName) {
   return "assets/lottieJson/${getCurrentTheme(context).themeMode == 1 ? "light" : "dark"}/$imgName";
+}
+
+Future<File> cropImageToSquare(File file) async {
+  final bytes = await file.readAsBytes();
+  final codec = await ui.instantiateImageCodec(bytes);
+  final frame = await codec.getNextFrame();
+  final image = frame.image;
+  final side = image.width < image.height ? image.width : image.height;
+  final offsetX = (image.width - side) ~/ 2;
+  final offsetY = (image.height - side) ~/ 2;
+
+  final recorder = ui.PictureRecorder();
+  final canvas = Canvas(recorder);
+  canvas.drawImageRect(
+    image,
+    Rect.fromLTWH(offsetX.toDouble(), offsetY.toDouble(), side.toDouble(), side.toDouble()),
+    Rect.fromLTWH(0, 0, side.toDouble(), side.toDouble()),
+    Paint(),
+  );
+  final picture = recorder.endRecording();
+  final squaredImage = await picture.toImage(side, side);
+  final byteData = await squaredImage.toByteData(format: ui.ImageByteFormat.png);
+  image.dispose();
+  squaredImage.dispose();
+
+  final dir = await getTemporaryDirectory();
+  final out = File('${dir.path}/profile_square_${DateTime.now().millisecondsSinceEpoch}.png');
+  await out.writeAsBytes(byteData!.buffer.asUint8List());
+  return out;
+}
+
+Future<File> prepareProfileImageFile(File file) async {
+  final squared = await cropImageToSquare(file);
+  return compressImage(squared);
 }
 
 Future<File> compressImage(File file) async {

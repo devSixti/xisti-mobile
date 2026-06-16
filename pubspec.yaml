@@ -8,7 +8,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # ex. 1.0.1+1
 # ex. 1.0.5+5
 # ex. 1.1.0+10
-version: 1.0.0+1
+version: 1.0.1+2
 
 # Used Flutter SDK 3.41.2
 environment:
@@ -116,11 +116,14 @@ flutter_native_splash:
   color: "#0B0B0B"
   background_image: assets/images/splash_bg.png
   image: assets/images/xisti/logo_full.png
+  android_gravity: center
+  ios_content_mode: scaleAspectFit
   android: true
   ios: true
   android_12:
     color: "#0B0B0B"
     image: assets/images/xisti/logo_full.png
+    icon_background_color: "#0B0B0B"
 
 
 # The following section is specific to Flutter packages.

@@ -20,7 +20,7 @@ class DriverNewRequestBloc extends Bloc {
   DriverNewRequestBloc(this.context, this.rideId) {
     newRequestSubject.sink.add(ApiResponse.loading());
     setPrefNotificationData(null);
-    pushNotificationService.flutterLocalNotificationsPlugin.cancelAll();
+    pushNotificationService.dismissRideNotification(rideId);
   }
 
   final DriverNewRequestRepo _repo = DriverNewRequestRepo();

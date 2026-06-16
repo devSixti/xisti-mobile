@@ -26,6 +26,7 @@ import 'services/backgroundService/location_service_repository.dart';
 import 'services/push_notification_service.dart';
 import 'utils/file_downloader.dart';
 import 'utils/get_location_utils.dart';
+import 'utils/notification_payload_util.dart';
 import 'utils/shared_pref_util.dart';
 import 'utils/utils.dart';
 
@@ -304,7 +305,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage notification) asy
   await ensureFirebaseInitialized();
   localTimeZone = (await FlutterTimezone.getLocalTimezone()).identifier;
   tz.initializeTimeZones();
-  Map<String, dynamic> notificationData = notification.data;
+  Map<String, dynamic> notificationData = normalizeNotificationPayload(notification);
   debugPrint("firebaseMessagingBackgroundHandler >>>>>> $notificationData");
   if (notificationData.isNotEmpty) {
     await PushNotificationService.displayBackgroundNotification(notificationData);
@@ -321,7 +322,8 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage notification) asy
       PackageInfo packageInfo = await PackageInfo.fromPlatform();
       final appCheck = AppCheck();
       await appCheck.launchApp(packageInfo.packageName);
-      pushNotificationService.flutterLocalNotificationsPlugin.cancelAll();
+      final rideId = int.tryParse((notificationData[NotificationConstant.rideId] ?? 0).toString());
+      await pushNotificationService.dismissRideNotification(rideId);
     }
   }
 }
