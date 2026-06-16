@@ -56,7 +56,8 @@ platform :ios do
     flutter_args.concat(dart_defines.split) unless dart_defines.empty?
 
     Dir.chdir("..") do
-      sh("flutter", "pub", "get")
+      # Pods already resolved in CI; pub get is done before Fastlane.
+      # Re-running pub get here invalidates Pods and triggers a second pod install.
       sh(*flutter_args)
     end
 

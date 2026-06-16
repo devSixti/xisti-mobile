@@ -235,6 +235,7 @@ jobs:
     needs: quality
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: macos-latest
+    timeout-minutes: 120
     environment: app-store-production
     steps:
       - uses: actions/checkout@v4
@@ -255,10 +256,27 @@ jobs:
           bundler-cache: true
           working-directory: ios
 
+      - name: Cache CocoaPods
+        uses: actions/cache@v4
+        with:
+          path: |
+            ios/Pods
+            ~/Library/Caches/CocoaPods
+            ~/.cocoapods
+          key: pods-${{ runner.os }}-${{ hashFiles('ios/Podfile.lock', 'ios/Podfile', 'pubspec.lock') }}
+          restore-keys: |
+            pods-${{ runner.os }}-
+
       - name: CocoaPods install
         working-directory: ios
+        env:
+          COCOAPODS_DISABLE_STATS: "true"
         run: |
-          bundle exec pod install --repo-update
+          set -euo pipefail
+          # Avoid --repo-update in CI (can hang for hours on trunk CDN).
+          bundle exec pod install --verbose
+          test -f Podfile.lock
+          test -d Pods
           echo "PATH=$(ruby -e 'print Gem.bindir'):${PATH}" >> "$GITHUB_ENV"
 
       - name: Preflight iOS CD secrets
@@ -297,6 +315,7 @@ jobs:
         env:
           FLUTTER_ROOT: ${{ env.FLUTTER_ROOT }}
           PATH: ${{ env.PATH }}
+          COCOAPODS_DISABLE_STATS: "true"
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
           APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
           APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
