@@ -237,6 +237,7 @@ class _PassengerHomeState extends State<PassengerHome> {
 
   Widget _modernBookingPanel() {
     return Column(
+      mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Padding(
@@ -244,7 +245,7 @@ class _PassengerHomeState extends State<PassengerHome> {
           child: PassengerHomeBarrioShortcuts(onBarrioSelected: (b) => _bloc?.flyToBarrio(b)),
         ),
         SizedBox(
-          height: XistiUiTokens.wireframeVehiclePhotoTileMaxHeight,
+          height: XistiUiTokens.wireframeVehicleRowHeight,
           child: serviceData(fillAvailable: true),
         ),
         encomiendaFields(),
@@ -295,21 +296,18 @@ class _PassengerHomeState extends State<PassengerHome> {
             ],
           ),
         ),
-        SizedBox(
-          height: XistiUiTokens.wireframePanelHeight(context),
-          child: StreamBuilder<String>(
-            stream: _bloc?.selectedServiceModeSubject,
-            builder: (context, modeSnap) {
-              return AnimatedSwitcher(
-                duration: const Duration(milliseconds: 280),
-                child: PassengerHomeBookingSheet(
-                  key: ValueKey(modeSnap.data ?? ServiceModeKind.transport),
-                  expandToFill: true,
-                  body: _modernBookingPanel(),
-                ),
-              );
-            },
-          ),
+        StreamBuilder<String>(
+          stream: _bloc?.selectedServiceModeSubject,
+          builder: (context, modeSnap) {
+            return AnimatedSwitcher(
+              duration: const Duration(milliseconds: 280),
+              child: PassengerHomeBookingSheet(
+                key: ValueKey(modeSnap.data ?? ServiceModeKind.transport),
+                expandToFill: false,
+                body: _modernBookingPanel(),
+              ),
+            );
+          },
         ),
       ],
     );
@@ -729,8 +727,10 @@ class _PassengerHomeState extends State<PassengerHome> {
         return Container(
           padding: EdgeInsetsDirectional.only(start: commonHorizontalPadding, end: commonHorizontalPadding),
           margin: EdgeInsetsDirectional.only(
-            bottom: isXistiNewHomeLayoutEnabled() ? 4.h : getBottomMargin(),
-            top: 12.h,
+            bottom: isXistiNewHomeLayoutEnabled()
+                ? MediaQuery.paddingOf(context).bottom + 4.h
+                : getBottomMargin(),
+            top: 6.h,
           ),
           child: Row(
             children: [
@@ -889,55 +889,43 @@ class _PassengerHomeState extends State<PassengerHome> {
               final usePhotoTile = useModern && fillAvailable;
 
               if (usePhotoTile) {
-                return LayoutBuilder(
-                  builder: (context, constraints) {
-                    final tileH = constraints.maxHeight.clamp(
-                      XistiUiTokens.wireframeVehiclePhotoTileMinHeight,
-                      XistiUiTokens.wireframeVehiclePhotoTileMaxHeight,
-                    );
-                    return Center(
-                      child: serviceTypeList.length <= 2
-                          ? Row(
-                              mainAxisSize: MainAxisSize.min,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                for (var position = 0; position < serviceTypeList.length; position++) ...[
-                                  if (position > 0) SizedBox(width: 12.w),
-                                  SizedBox(
-                                    width: tileH,
-                                    height: tileH,
-                                    child: _vehicleTile(
-                                      serviceTypeList,
-                                      position,
-                                      modeSnap.data,
-                                      photoTile: true,
-                                      photoTileHeight: tileH,
-                                    ),
-                                  ),
-                                ],
-                              ],
-                            )
-                          : SizedBox(
-                              height: tileH,
-                              child: ListView.builder(
-                                scrollDirection: Axis.horizontal,
-                                padding: EdgeInsetsDirectional.symmetric(horizontal: commonHorizontalPadding),
-                                itemCount: serviceTypeList.length,
-                                itemBuilder: (context, position) => SizedBox(
-                                  width: tileH,
-                                  height: tileH,
-                                  child: _vehicleTile(
-                                    serviceTypeList,
-                                    position,
-                                    modeSnap.data,
-                                    photoTile: true,
-                                    photoTileHeight: tileH,
-                                  ),
-                                ),
+                final boxSize = XistiUiTokens.wireframeVehicleBoxSize;
+                return Center(
+                  child: serviceTypeList.length <= 2
+                      ? Row(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            for (var position = 0; position < serviceTypeList.length; position++) ...[
+                              if (position > 0) SizedBox(width: 20.w),
+                              _vehicleTile(
+                                serviceTypeList,
+                                position,
+                                modeSnap.data,
+                                photoTile: true,
+                                photoTileHeight: boxSize,
+                              ),
+                            ],
+                          ],
+                        )
+                      : SizedBox(
+                          height: XistiUiTokens.wireframeVehicleRowHeight,
+                          child: ListView.builder(
+                            scrollDirection: Axis.horizontal,
+                            padding: EdgeInsetsDirectional.symmetric(horizontal: commonHorizontalPadding),
+                            itemCount: serviceTypeList.length,
+                            itemBuilder: (context, position) => Padding(
+                              padding: EdgeInsetsDirectional.only(end: 16.w),
+                              child: _vehicleTile(
+                                serviceTypeList,
+                                position,
+                                modeSnap.data,
+                                photoTile: true,
+                                photoTileHeight: boxSize,
                               ),
                             ),
-                    );
-                  },
+                          ),
+                        ),
                 );
               }
 

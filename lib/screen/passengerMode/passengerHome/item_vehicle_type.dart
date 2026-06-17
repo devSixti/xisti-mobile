@@ -12,9 +12,8 @@ class ItemVehicleType extends StatelessWidget {
   final bool isSelected;
   final String? serviceMode;
   final bool expanded;
-  /// Wireframe home: cuadrado compacto con icono + nombre dentro (Moto / Carro).
   final bool wireframeTile;
-  /// Panel moderno: foto grande del vehículo ocupando altura disponible.
+  /// Home moderno: cuadrado compacto + nombre debajo (referencia wireframe).
   final bool photoTile;
   final double? photoTileHeight;
 
@@ -32,7 +31,7 @@ class ItemVehicleType extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (photoTile) {
-      return _photoTile(context);
+      return _referenceHomeTile(context);
     }
     if (wireframeTile) {
       return _wireframeTile(context);
@@ -40,60 +39,89 @@ class ItemVehicleType extends StatelessWidget {
     return _legacyTile(context);
   }
 
-  Widget _photoTile(BuildContext context) {
+  Widget _referenceHomeTile(BuildContext context) {
     final theme = getCurrentTheme(context);
     final accent = XistiUiTokens.accentForMode(serviceMode);
-    final tileH = photoTileHeight ?? 56.h;
-    final tileW = tileH;
+    final boxSize = photoTileHeight ?? XistiUiTokens.wireframeVehicleBoxSize;
 
-    return Container(
-      width: tileW,
-      height: tileH,
-      margin: EdgeInsetsDirectional.only(end: 8.w),
-      decoration: BoxDecoration(
-        color: theme.colorScaffoldBg,
-        borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(
-          color: isSelected ? accent : theme.colorDarkBorder,
-          width: isSelected ? 2.w : 1.w,
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Expanded(
-            child: Padding(
-              padding: EdgeInsetsDirectional.fromSTEB(4.w, 4.h, 4.w, 2.h),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(6.r),
-                child: LoadImageWithPlaceHolder(
-                  width: double.infinity,
-                  height: double.infinity,
-                  imageFit: BoxFit.contain,
-                  image: serviceTypeItem.serviceIcon ?? "",
-                  defaultAssetImage: "assets/images/app_icon.png",
-                  borderRadius: BorderRadius.zero,
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: boxSize,
+          height: boxSize,
+          decoration: BoxDecoration(
+            color: theme.colorScaffoldBg,
+            borderRadius: BorderRadius.circular(12.r),
+            border: Border.all(
+              color: isSelected ? accent : theme.colorDarkBorder,
+              width: isSelected ? 2.w : 1.w,
+            ),
+          ),
+          child: Stack(
+            children: [
+              Center(
+                child: Padding(
+                  padding: EdgeInsets.all(6.w),
+                  child: LoadImageWithPlaceHolder(
+                    width: boxSize - 12.w,
+                    height: boxSize - 12.w,
+                    imageFit: BoxFit.contain,
+                    image: serviceTypeItem.serviceIcon ?? "",
+                    defaultAssetImage: "assets/images/app_icon.png",
+                    borderRadius: BorderRadius.zero,
+                  ),
                 ),
               ),
+              if (isSelected)
+                Align(
+                  alignment: AlignmentDirectional.topEnd,
+                  child: GestureDetector(
+                    onTap: () {
+                      showModalBottomSheet(
+                        context: context,
+                        backgroundColor: Colors.transparent,
+                        isScrollControlled: true,
+                        builder: (context) {
+                          return VehicleInformationSheet(
+                            serviceName: serviceTypeItem.serviceName ?? "",
+                            serviceIcon: serviceTypeItem.serviceIcon ?? "",
+                            serviceDescription: serviceTypeItem.serviceDescription ?? "",
+                          );
+                        },
+                      );
+                    },
+                    child: Container(
+                      margin: EdgeInsetsDirectional.only(top: 3.h, end: 3.w),
+                      padding: EdgeInsets.all(2.sp),
+                      decoration: BoxDecoration(
+                        color: theme.colorScaffoldBg.withValues(alpha: 0.92),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(CustomIcons.information, size: 11.sp, color: accent),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+        SizedBox(height: 4.h),
+        SizedBox(
+          width: boxSize,
+          child: Text(
+            serviceTypeItem.serviceName ?? "-",
+            textAlign: TextAlign.center,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: bodyText(
+              context: context,
+              textColor: isSelected ? accent : theme.colorTextCommon,
+              fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+              fontSize: textSize10px,
             ),
           ),
-          Padding(
-            padding: EdgeInsetsDirectional.only(bottom: 3.h, start: 2.w, end: 2.w),
-            child: Text(
-              serviceTypeItem.serviceName ?? "-",
-              textAlign: TextAlign.center,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: bodyText(
-                context: context,
-                textColor: isSelected ? accent : theme.colorTextCommon,
-                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                fontSize: textSize10px,
-              ),
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 

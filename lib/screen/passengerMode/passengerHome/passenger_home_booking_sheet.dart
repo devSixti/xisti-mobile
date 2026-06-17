@@ -58,7 +58,10 @@ class PassengerHomeBookingSheet extends StatelessWidget {
                   child: inner,
                 ),
               )
-            : inner,
+            : Padding(
+                padding: EdgeInsetsDirectional.only(top: 4.h),
+                child: inner,
+              ),
       ),
     );
   }
