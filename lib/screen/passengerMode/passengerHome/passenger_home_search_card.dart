@@ -33,6 +33,7 @@ class PassengerHomeSearchCard extends StatelessWidget {
   final void Function(Map<String, dynamic> entry)? onRecentDestinationTap;
   /// Viajes / Envío integrados en la misma tarjeta (wireframe).
   final Widget? modeSelectorFooter;
+  final bool compactModern;
 
   const PassengerHomeSearchCard({
     super.key,
@@ -46,6 +47,7 @@ class PassengerHomeSearchCard extends StatelessWidget {
     this.onClearDropoff,
     this.onRecentDestinationTap,
     this.modeSelectorFooter,
+    this.compactModern = false,
   });
 
   @override
@@ -55,12 +57,19 @@ class PassengerHomeSearchCard extends StatelessWidget {
     final pickupHint = serviceMode == ServiceModeKind.encomiendas ? 'Dónde comprar' : languages.pickUpLocation;
     final dropHint = serviceMode == ServiceModeKind.encomiendas ? 'Dónde entregar' : languages.dropLocation;
     final showRecents = (dropoff?.name ?? '').isEmpty && recentTrips.isNotEmpty;
+    final cardPadV = compactModern ? 8.h : 10.h;
+    final cardPadH = compactModern ? 12.w : 14.w;
+    final headerGap = compactModern ? 6.h : 8.h;
+    final routePadV = compactModern ? 4.0 : 6.0;
+    final connectorH = compactModern ? 10.h : 12.h;
+    final recentMax = compactModern ? 1 : 3;
+    final recentH = compactModern ? 28.h : 32.h;
 
     return Container(
       margin: EdgeInsetsDirectional.symmetric(
         horizontal: XistiUiTokens.overlayHorizontalPadding,
       ),
-      padding: EdgeInsetsDirectional.fromSTEB(14.w, 10.h, 14.w, 10.h),
+      padding: EdgeInsetsDirectional.fromSTEB(cardPadH, cardPadV, cardPadH, cardPadV),
       decoration: BoxDecoration(
         color: theme.colorScaffoldBg.withValues(alpha: 0.97),
         borderRadius: BorderRadius.circular(XistiUiTokens.searchCardRadius),
@@ -92,7 +101,7 @@ class PassengerHomeSearchCard extends StatelessWidget {
               ),
             ],
           ),
-          SizedBox(height: 8.h),
+          SizedBox(height: headerGap),
           _routeRow(
             context: context,
             icon: CustomIcons.pickupLocation,
@@ -101,10 +110,11 @@ class PassengerHomeSearchCard extends StatelessWidget {
             hasValue: (pickup?.name ?? '').isNotEmpty,
             onTap: onPickupTap,
             onClear: onClearPickup,
+            verticalPadding: routePadV,
           ),
           Padding(
             padding: EdgeInsetsDirectional.only(start: 11.w),
-            child: Container(width: 2.w, height: 12.h, color: theme.colorDarkBorder),
+            child: Container(width: 2.w, height: connectorH, color: theme.colorDarkBorder),
           ),
           _routeRow(
             context: context,
@@ -115,14 +125,15 @@ class PassengerHomeSearchCard extends StatelessWidget {
             onTap: onDropoffTap,
             onClear: onClearDropoff,
             emphasized: true,
+            verticalPadding: routePadV,
           ),
           if (showRecents) ...[
-            SizedBox(height: 8.h),
+            SizedBox(height: compactModern ? 6.h : 8.h),
             SizedBox(
-              height: 32.h,
+              height: recentH,
               child: ListView.separated(
                 scrollDirection: Axis.horizontal,
-                itemCount: recentTrips.length > 3 ? 3 : recentTrips.length,
+                itemCount: recentTrips.length > recentMax ? recentMax : recentTrips.length,
                 separatorBuilder: (_, _) => SizedBox(width: 6.w),
                 itemBuilder: (context, index) {
                   final entry = recentTrips[index];
@@ -164,9 +175,9 @@ class PassengerHomeSearchCard extends StatelessWidget {
             ),
           ],
           if (modeSelectorFooter != null) ...[
-            SizedBox(height: 8.h),
+            SizedBox(height: compactModern ? 6.h : 8.h),
             Divider(height: 1.h, color: theme.colorDarkBorder.withValues(alpha: 0.6)),
-            SizedBox(height: 6.h),
+            SizedBox(height: compactModern ? 4.h : 6.h),
             modeSelectorFooter!,
           ],
         ],
@@ -183,6 +194,7 @@ class PassengerHomeSearchCard extends StatelessWidget {
     required VoidCallback onTap,
     VoidCallback? onClear,
     bool emphasized = false,
+    double verticalPadding = 6,
   }) {
     final theme = getCurrentTheme(context);
     return Material(
@@ -191,7 +203,7 @@ class PassengerHomeSearchCard extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(12.r),
         child: Padding(
-          padding: EdgeInsetsDirectional.symmetric(vertical: 6.h),
+          padding: EdgeInsetsDirectional.symmetric(vertical: verticalPadding.h),
           child: Row(
             children: [
               Icon(icon, size: 20.sp, color: iconColor),

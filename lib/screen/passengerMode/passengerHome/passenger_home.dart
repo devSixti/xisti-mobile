@@ -220,6 +220,7 @@ class _PassengerHomeState extends State<PassengerHome> {
                           },
                           onRecentDestinationTap: (entry) => _bloc?.applyRecentDestinationEntry(entry),
                           modeSelectorFooter: _modernServiceChipsBar(),
+                          compactModern: true,
                         );
                       },
                     );
@@ -229,6 +230,21 @@ class _PassengerHomeState extends State<PassengerHome> {
             );
           },
         ),
+      ],
+    );
+  }
+
+  Widget _modernBookingPanel() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: EdgeInsetsDirectional.fromSTEB(0, 6.h, 0, 4.h),
+          child: PassengerHomeBarrioShortcuts(onBarrioSelected: (b) => _bloc?.flyToBarrio(b)),
+        ),
+        Expanded(child: serviceData(fillAvailable: true)),
+        encomiendaFields(),
+        confirmBtnAndOtherOption(),
       ],
     );
   }
@@ -285,7 +301,7 @@ class _PassengerHomeState extends State<PassengerHome> {
                 child: PassengerHomeBookingSheet(
                   key: ValueKey(modeSnap.data ?? ServiceModeKind.transport),
                   expandToFill: true,
-                  children: _modernBookingSheetChildren(),
+                  body: _modernBookingPanel(),
                 ),
               );
             },
@@ -840,7 +856,7 @@ class _PassengerHomeState extends State<PassengerHome> {
     },
   );
 
-  Widget serviceData() => StreamBuilder<String>(
+  Widget serviceData({bool fillAvailable = false}) => StreamBuilder<String>(
     stream: _bloc?.selectedServiceModeSubject,
     builder: (context, modeSnap) {
       return StreamBuilder<List<ServiceTypeItem>>(
@@ -864,6 +880,53 @@ class _PassengerHomeState extends State<PassengerHome> {
                   ),
                 );
               }
+
+              final useModern = isXistiNewHomeLayoutEnabled();
+              final usePhotoTile = useModern && fillAvailable;
+
+              if (usePhotoTile) {
+                return LayoutBuilder(
+                  builder: (context, constraints) {
+                    final tileH = constraints.maxHeight.clamp(
+                      XistiUiTokens.wireframeVehiclePhotoTileMinHeight,
+                      140.h,
+                    );
+                    return Padding(
+                      padding: EdgeInsetsDirectional.symmetric(horizontal: commonHorizontalPadding),
+                      child: serviceTypeList.length <= 2
+                          ? Row(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                for (var position = 0; position < serviceTypeList.length; position++) ...[
+                                  if (position > 0) SizedBox(width: 10.w),
+                                  Expanded(
+                                    child: _vehicleTile(
+                                      serviceTypeList,
+                                      position,
+                                      modeSnap.data,
+                                      photoTile: true,
+                                      photoTileHeight: tileH,
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            )
+                          : ListView.builder(
+                              scrollDirection: Axis.horizontal,
+                              itemCount: serviceTypeList.length,
+                              itemBuilder: (context, position) => _vehicleTile(
+                                serviceTypeList,
+                                position,
+                                modeSnap.data,
+                                photoTile: true,
+                                photoTileHeight: tileH,
+                              ),
+                            ),
+                    );
+                  },
+                );
+              }
+
               return Padding(
                 padding: EdgeInsetsDirectional.only(
                   start: commonHorizontalPadding,
@@ -872,7 +935,7 @@ class _PassengerHomeState extends State<PassengerHome> {
                   bottom: 2.h,
                 ),
                 child: SizedBox(
-                  height: isXistiNewHomeLayoutEnabled() ? XistiUiTokens.wireframeVehicleTileHeight : 78.h,
+                  height: useModern ? XistiUiTokens.wireframeVehicleTileHeight : 78.h,
                   child: serviceTypeList.length <= 2
                       ? Row(
                           children: [
@@ -883,7 +946,7 @@ class _PassengerHomeState extends State<PassengerHome> {
                                   serviceTypeList,
                                   position,
                                   modeSnap.data,
-                                  wireframe: isXistiNewHomeLayoutEnabled(),
+                                  wireframe: useModern,
                                 ),
                               ),
                             ],
@@ -896,7 +959,7 @@ class _PassengerHomeState extends State<PassengerHome> {
                             serviceTypeList,
                             position,
                             modeSnap.data,
-                            wireframe: isXistiNewHomeLayoutEnabled(),
+                            wireframe: useModern,
                           ),
                         ),
                 ),
@@ -908,7 +971,14 @@ class _PassengerHomeState extends State<PassengerHome> {
     },
   );
 
-  Widget _vehicleTile(List<ServiceTypeItem> serviceTypeList, int position, String? serviceMode, {bool wireframe = false}) {
+  Widget _vehicleTile(
+    List<ServiceTypeItem> serviceTypeList,
+    int position,
+    String? serviceMode, {
+    bool wireframe = false,
+    bool photoTile = false,
+    double? photoTileHeight,
+  }) {
     return GestureDetector(
       onTap: () => _bloc?.vehicleSelect(position),
       child: StreamBuilder<ServiceTypeItem?>(
@@ -921,7 +991,9 @@ class _PassengerHomeState extends State<PassengerHome> {
             isSelected: item.matchesSelection(selected),
             serviceMode: serviceMode,
             expanded: serviceTypeList.length <= 2,
-            wireframeTile: wireframe,
+            wireframeTile: wireframe && !photoTile,
+            photoTile: photoTile,
+            photoTileHeight: photoTileHeight,
           );
         },
       ),

@@ -14,6 +14,9 @@ class ItemVehicleType extends StatelessWidget {
   final bool expanded;
   /// Wireframe home: cuadrado compacto con icono + nombre dentro (Moto / Carro).
   final bool wireframeTile;
+  /// Panel moderno: foto grande del vehículo ocupando altura disponible.
+  final bool photoTile;
+  final double? photoTileHeight;
 
   const ItemVehicleType({
     super.key,
@@ -22,14 +25,75 @@ class ItemVehicleType extends StatelessWidget {
     this.serviceMode,
     this.expanded = false,
     this.wireframeTile = false,
+    this.photoTile = false,
+    this.photoTileHeight,
   });
 
   @override
   Widget build(BuildContext context) {
+    if (photoTile) {
+      return _photoTile(context);
+    }
     if (wireframeTile) {
       return _wireframeTile(context);
     }
     return _legacyTile(context);
+  }
+
+  Widget _photoTile(BuildContext context) {
+    final theme = getCurrentTheme(context);
+    final accent = XistiUiTokens.accentForMode(serviceMode);
+    final tileH = photoTileHeight ?? 88.h;
+
+    return Container(
+      width: expanded ? double.infinity : 100.w,
+      height: tileH,
+      margin: EdgeInsetsDirectional.only(end: expanded ? 0 : 10.w),
+      decoration: BoxDecoration(
+        color: theme.colorScaffoldBg,
+        borderRadius: BorderRadius.circular(14.r),
+        border: Border.all(
+          color: isSelected ? accent : theme.colorDarkBorder,
+          width: isSelected ? 2.w : 1.w,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Expanded(
+            child: Padding(
+              padding: EdgeInsetsDirectional.fromSTEB(8.w, 8.h, 8.w, 4.h),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8.r),
+                child: LoadImageWithPlaceHolder(
+                  width: double.infinity,
+                  height: double.infinity,
+                  imageFit: BoxFit.contain,
+                  image: serviceTypeItem.serviceIcon ?? "",
+                  defaultAssetImage: "assets/images/app_icon.png",
+                  borderRadius: BorderRadius.zero,
+                ),
+              ),
+            ),
+          ),
+          Padding(
+            padding: EdgeInsetsDirectional.only(bottom: 6.h, start: 4.w, end: 4.w),
+            child: Text(
+              serviceTypeItem.serviceName ?? "-",
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: bodyText(
+                context: context,
+                textColor: isSelected ? accent : theme.colorTextCommon,
+                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                fontSize: textSize12px,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _wireframeTile(BuildContext context) {

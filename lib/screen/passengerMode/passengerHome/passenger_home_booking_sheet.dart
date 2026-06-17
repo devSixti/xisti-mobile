@@ -4,33 +4,36 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../utils/utils.dart';
 import '../../../utils/xisti_ui_tokens.dart';
 
-/// Fixed bottom booking panel — wireframe: barrios, vehículos, envío, CTA.
+/// Fixed bottom booking panel — wireframe: barrios, vehículos, CTA.
 class PassengerHomeBookingSheet extends StatelessWidget {
-  final List<Widget> children;
+  final List<Widget>? children;
+  final Widget? body;
   final bool expandToFill;
 
   const PassengerHomeBookingSheet({
     super.key,
-    required this.children,
+    this.children,
+    this.body,
     this.expandToFill = false,
-  });
+  }) : assert(children != null || body != null, 'Provide children or body');
 
   @override
   Widget build(BuildContext context) {
     final theme = getCurrentTheme(context);
     final bottomInset = MediaQuery.paddingOf(context).bottom;
 
-    final content = SingleChildScrollView(
-      padding: EdgeInsetsDirectional.only(
-        top: 6.h,
-        bottom: expandToFill ? bottomInset + 10.h : 4.h,
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: children,
-      ),
-    );
+    final inner = body ??
+        SingleChildScrollView(
+          padding: EdgeInsetsDirectional.only(
+            top: 6.h,
+            bottom: expandToFill ? bottomInset + 10.h : 4.h,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: children!,
+          ),
+        );
 
     return Material(
       color: theme.colorScaffoldBg,
@@ -48,13 +51,11 @@ class PassengerHomeBookingSheet extends StatelessWidget {
           ),
         ),
         child: expandToFill
-            ? Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Expanded(child: content),
-                ],
+            ? Padding(
+                padding: EdgeInsetsDirectional.only(bottom: bottomInset),
+                child: inner,
               )
-            : content,
+            : inner,
       ),
     );
   }

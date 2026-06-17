@@ -534,6 +534,12 @@ class PassengerHomeBloc extends Bloc {
           .where((s) => s.serviceId != ServiceType.rickshaw)
           .toList();
     }
+    if (list.isEmpty && deliveryVehicleOptions.isNotEmpty) {
+      list = ServiceModeKind.serviceItemsFromDeliveryOptions(
+        deliveryVehicleOptions,
+        serviceMode: mode,
+      );
+    }
     list.sort(_serviceDisplayOrder);
     filteredServicesSubject.add(list);
   }
