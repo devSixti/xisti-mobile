@@ -1,4 +1,3 @@
-import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import '../hive/hive_constant.dart';
@@ -18,7 +17,7 @@ class SecureTokenStorage {
   static Future<void> init() async {
     try {
       _cachedAccessToken = (await _storage.read(key: _key)) ?? '';
-    } on MissingPluginException {
+    } on Object {
       _cachedAccessToken = '';
     }
     final legacy = settingsBox.get(hiveAccessToken);
@@ -41,7 +40,7 @@ class SecureTokenStorage {
         return;
       }
       await _storage.write(key: _key, value: token);
-    } on MissingPluginException {
+    } on Object {
       // Unit tests / unsupported platforms: in-memory cache only.
     }
   }
@@ -50,7 +49,7 @@ class SecureTokenStorage {
     _cachedAccessToken = '';
     try {
       await _storage.delete(key: _key);
-    } on MissingPluginException {
+    } on Object {
       // Unit tests / unsupported platforms.
     }
   }
