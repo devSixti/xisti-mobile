@@ -6,6 +6,8 @@ import '../../blocs/bloc.dart';
 import '../../screen/common/wallet/walletHome/wallet_home.dart';
 import '../../screen/driverMode/driverHome/driver_home_dl.dart';
 import '../../screen/driverMode/driverNewRequest/driver_new_request_dl.dart';
+import '../../screen/driverMode/driverWaiting/driver_waiting_dl.dart';
+import '../../screen/driverMode/driverWaiting/driver_waiting_repo.dart';
 import '../../screen/driverMode/driverNewRequest/driver_new_request_repo.dart';
 import '../../screen/driverMode/driverRideHistory/driver_ride_history.dart';
 import '../../screen/driverMode/driverRunningRide/driver_running_ride.dart';
@@ -25,6 +27,7 @@ class AcceptRequestBottomSheetBloc extends Bloc {
   }
 
   final DriverNewRequestRepo _repo = DriverNewRequestRepo();
+  final DriverWaitingRepo _waitingRepo = DriverWaitingRepo();
 
   GoogleMapController? googleMapController;
   BuildContext? walletBottomSheet;
@@ -45,6 +48,52 @@ class AcceptRequestBottomSheetBloc extends Bloc {
     googleMapController = value;
     mapApiCall();
     setMarkers();
+  }
+
+  Future<bool> _navigateIfRideAlreadyActive() async {
+    try {
+      final waiting = DriverWaitingPojo.fromJson(await _waitingRepo.getRideStatusApi(rideId: rideListItem.rideId));
+      if (waiting.status != 1) return false;
+      final accepted = waiting.bidStatus == 1 || waiting.rideStatus == 1 || waiting.rideStatus == 2;
+      if (!accepted) return false;
+      if (!context.mounted) return true;
+      rideIdList.clear();
+      if (Navigator.canPop(context)) {
+        Navigator.pop(context);
+      }
+      if (waiting.rideType == 1) {
+        openScreenWithClearPrevious(context, DriverRideHistory());
+      } else {
+        openScreenWithClearPrevious(
+          context,
+          DriverRunningRide(
+            rideId: rideListItem.rideId,
+            serviceId: rideListItem.serviceId != 0 ? rideListItem.serviceId : ServiceType.taxi,
+          ),
+        );
+      }
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  void _navigateAfterAcceptSuccess() {
+    rideIdList.clear();
+    if (Navigator.canPop(context)) {
+      Navigator.pop(context);
+    }
+    if (rideListItem.rideType == 1) {
+      openScreenWithClearPrevious(context, DriverRideHistory());
+    } else {
+      openScreenWithClearPrevious(
+        context,
+        DriverRunningRide(
+          rideId: rideListItem.rideId,
+          serviceId: rideListItem.serviceId != 0 ? rideListItem.serviceId : ServiceType.taxi,
+        ),
+      );
+    }
   }
 
   Future<void> callDriverBidApi() async {
@@ -76,13 +125,20 @@ class AcceptRequestBottomSheetBloc extends Bloc {
         } else {
           if (response.messageCode == 339) {
             openWalletBottomSheet(message: message);
+          } else if (await _navigateIfRideAlreadyActive()) {
+            return;
           } else {
             openSimpleSnackbar(context, message);
-            Navigator.pop(context);
+            if (Navigator.canPop(context)) {
+              Navigator.pop(context);
+            }
           }
         }
       } catch (e) {
         driverBidSubject.sink.add(ApiResponse.error(e.toString()));
+        if (await _navigateIfRideAlreadyActive()) {
+          return;
+        }
       }
     }
   }
@@ -98,24 +154,27 @@ class AcceptRequestBottomSheetBloc extends Bloc {
         var response = DriverBidPojo.fromJson(await _repo.rideAcceptApi(rideListItem.rideId));
         String message = getApiMsg(response.message);
         if (!context.mounted) return;
-        if (isApiStatus(context, response.status, message, true, showMess: true, messageCode: response.messageCode, hideMessOnCodeList: [0, 339])) {
+        if (isApiStatus(context, response.status, message, true, showMess: response.messageCode != 23, messageCode: response.messageCode, hideMessOnCodeList: [0, 339, 23])) {
           driverBidSubject.sink.add(ApiResponse.completed(response));
-          rideIdList.clear();
-          if (rideListItem.rideType == 1) {
-            openScreenWithClearPrevious(context, DriverRideHistory());
-          } else {
-            openScreenWithClearPrevious(context, DriverRunningRide(rideId: rideListItem.rideId, serviceId: rideListItem.serviceId));
-          }
+          if (!context.mounted) return;
+          _navigateAfterAcceptSuccess();
         } else {
           if (response.messageCode == 339) {
             openWalletBottomSheet(message: message);
+          } else if (response.messageCode == 23 || await _navigateIfRideAlreadyActive()) {
+            return;
           } else {
             openSimpleSnackbar(context, message);
-            Navigator.pop(context);
+            if (Navigator.canPop(context)) {
+              Navigator.pop(context);
+            }
           }
         }
       } catch (e) {
         driverBidSubject.sink.add(ApiResponse.error(e.toString()));
+        if (await _navigateIfRideAlreadyActive()) {
+          return;
+        }
       }
     }
   }

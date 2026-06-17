@@ -241,7 +241,7 @@
   "accountDeleteDialogMsg": "¿Estás seguro de que quieres eliminar tu cuenta? Cualquier saldo en tu billetera no será reembolsable.",
   "logout": "Cerrar sesión",
   "logOutDialogMsg": "¿Estás seguro de que quieres cerrar sesión?",
-  "arrived": "Llegó",
+  "arrived": "Llegué",
   "enterOtp": "Ingresar código",
   "numberOfToll": "Número de peajes",
   "tollAmount": "Monto del peaje",

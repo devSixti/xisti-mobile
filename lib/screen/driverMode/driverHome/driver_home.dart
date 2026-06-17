@@ -10,12 +10,13 @@ import '../../../commonView/common_view.dart';
 import '../../../commonView/custom_rounded_button.dart';
 import '../../../commonView/driver_status_button.dart';
 import '../../../commonView/no_record_found.dart';
-import '../../../commonView/ride_request_type_chip.dart';
 import '../../../utils/utils.dart';
 import '../../common/account/account_screen.dart';
 import '../../common/selectLocation/select_location.dart';
 import 'driver_home_bloc.dart';
 import 'driver_home_dl.dart';
+import 'driver_ride_request_overlay.dart';
+import 'driver_ride_request_detail_panel.dart';
 
 class DriverHome extends StatefulWidget {
   final bool isFromLogin;
@@ -57,10 +58,24 @@ class _DriverHomeState extends State<DriverHome> with WidgetsBindingObserver {
                   return Positioned.fill(
                     child: ColoredBox(
                       color: getCurrentTheme(context).colorScaffoldBg,
-                      child: lottie_animation.Lottie.asset(
-                        setLottieAnimationBasedOnTheme(context, 'offline.json'),
-                        fit: BoxFit.cover,
-                        alignment: AlignmentDirectional.center,
+                      child: SafeArea(
+                        child: LayoutBuilder(
+                          builder: (context, constraints) {
+                            final side = constraints.maxWidth * 0.82;
+                            final height = (constraints.maxHeight * 0.58).clamp(220.0, constraints.maxHeight - 120);
+                            return Center(
+                              child: SizedBox(
+                                width: side,
+                                height: height,
+                                child: lottie_animation.Lottie.asset(
+                                  setLottieAnimationBasedOnTheme(context, 'offline.json'),
+                                  fit: BoxFit.contain,
+                                  alignment: Alignment.center,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
                       ),
                     ),
                   );
@@ -95,19 +110,75 @@ class _DriverHomeState extends State<DriverHome> with WidgetsBindingObserver {
                     final rideList = snapshot.data?.data?.rideList ?? [];
                     final status = snapshot.data?.status ?? Status.loading;
                     if (status == Status.error) {
-                      return _driverBottomOverlay(
-                        child: errorWidget(message: snapshot.data?.message ?? ''),
+                      return Positioned(
+                        left: commonHorizontalPadding,
+                        right: commonHorizontalPadding,
+                        top: MediaQuery.paddingOf(context).top + 72.h,
+                        child: Material(
+                          elevation: 4,
+                          borderRadius: BorderRadius.circular(16.r),
+                          color: getCurrentTheme(context).colorScaffoldBg,
+                          child: errorWidget(message: snapshot.data?.message ?? ''),
+                        ),
                       );
                     }
-                    if (status == Status.loading) {
-                      return _driverBottomOverlay(child: _searchingCompactBanner());
-                    }
-                    if (rideList.isEmpty) {
-                      return _driverBottomOverlay(child: _searchingCompactBanner());
-                    }
-                    return _driverBottomOverlay(
-                      child: rideListPanel(rideList: rideList),
-                      expanded: true,
+                    return StreamBuilder<RideList?>(
+                      stream: _bloc?.selectedDriverRideSubject,
+                      builder: (context, selectedSnap) {
+                        final selected = selectedSnap.data;
+                        return StreamBuilder<dynamic>(
+                          stream: _bloc?.selectDistanceSubject,
+                          builder: (context, distSnap) {
+                            final isSearching = status == Status.loading || rideList.isEmpty;
+                            return Positioned.fill(
+                              child: Stack(
+                                clipBehavior: Clip.none,
+                                children: [
+                                  Positioned(
+                                    left: 0,
+                                    right: 0,
+                                    top: MediaQuery.paddingOf(context).top + 64.h,
+                                    child: DriverRideRequestOverlay(
+                                      rideList: rideList,
+                                      selectedRide: selected,
+                                      isSearching: isSearching,
+                                      selectDistance: distSnap.data ?? 0,
+                                      onSelectRide: (ride) {
+                                        if (selected?.rideId == ride.rideId) {
+                                          _bloc?.selectedDriverRideSubject.sink.add(null);
+                                        } else {
+                                          _bloc?.selectedDriverRideSubject.sink.add(ride);
+                                        }
+                                      },
+                                    ),
+                                  ),
+                                  Positioned(
+                                    left: 0,
+                                    right: 0,
+                                    bottom: 0,
+                                    child: AnimatedSlide(
+                                      duration: const Duration(milliseconds: 280),
+                                      curve: Curves.easeOutCubic,
+                                      offset: selected != null ? Offset.zero : const Offset(0, 1),
+                                      child: selected == null
+                                          ? const SizedBox.shrink()
+                                          : DriverRideRequestDetailPanel(
+                                              ride: selected,
+                                              onClearSelection: () => _bloc?.selectedDriverRideSubject.sink.add(null),
+                                onAcceptRide: (ride) {
+                                  _bloc?.selectedDriverRideSubject.sink.add(null);
+                                  _bloc?.rideListItemSubject.sink.add(ride);
+                                  _bloc?.openAcceptRequestBottomSheet(rideListItem: ride);
+                                },
+                                            ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        );
+                      },
                     );
                   },
                 );
@@ -256,141 +327,6 @@ class _DriverHomeState extends State<DriverHome> with WidgetsBindingObserver {
         ],
       ),
       child: child,
-    );
-  }
-
-  Widget _driverBottomOverlay({required Widget child, bool expanded = false}) {
-    return Positioned(
-      left: 0,
-      right: 0,
-      bottom: 0,
-      child: Container(
-        constraints: BoxConstraints(maxHeight: expanded ? MediaQuery.sizeOf(context).height * 0.52 : 120.h),
-        decoration: BoxDecoration(
-          color: getCurrentTheme(context).colorScaffoldBg,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
-          boxShadow: [
-            BoxShadow(color: getCurrentTheme(context).colorBorder.withValues(alpha: 0.35), blurRadius: 12, offset: const Offset(0, -4)),
-          ],
-        ),
-        child: child,
-      ),
-    );
-  }
-
-  Widget _searchingCompactBanner() {
-    return StreamBuilder<dynamic>(
-      stream: _bloc?.selectDistanceSubject,
-      builder: (context, snapSelectDistance) {
-        final selectDistance = snapSelectDistance.data ?? 0;
-        return Padding(
-          padding: EdgeInsetsDirectional.symmetric(horizontal: commonHorizontalPadding, vertical: 16.h),
-          child: Row(
-            children: [
-              SizedBox(
-                width: 28.w,
-                height: 28.w,
-                child: CircularProgressIndicator(strokeWidth: 2.sp, color: getCurrentTheme(context).colorPrimary),
-              ),
-              SizedBox(width: 12.w),
-              Expanded(
-                child: RichText(
-                  text: TextSpan(
-                    style: bodyText(context: context, fontWeight: FontWeight.w600, fontSize: textSize14px),
-                    children: [
-                      TextSpan(text: languages.searchingForRideRequests.trim()),
-                      if (selectDistance > 0) TextSpan(text: languages.distanceKm(getDoubleFromDynamic(selectDistance).toString())),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  Widget rideListPanel({required List<RideList> rideList}) {
-    return ListView.separated(
-      padding: EdgeInsetsDirectional.only(start: commonHorizontalPadding, end: commonHorizontalPadding, top: 12.h, bottom: 90.h),
-      itemCount: rideList.length,
-      separatorBuilder: (_, _) => Padding(
-        padding: EdgeInsetsDirectional.symmetric(vertical: 16.h),
-        child: Divider(height: 0, thickness: 1.sp, color: getCurrentTheme(context).colorDivider),
-      ),
-      itemBuilder: (context, index) => _rideListTile(rideList[index]),
-    );
-  }
-
-  Widget _rideListTile(RideList rideListItem) {
-    return GestureDetector(
-      onTap: () {
-        _bloc?.rideListItemSubject.sink.add(rideListItem);
-        _bloc?.openAcceptRequestBottomSheet(rideListItem: rideListItem);
-      },
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                padding: EdgeInsetsDirectional.symmetric(horizontal: 10.w, vertical: 8.h),
-                decoration: BoxDecoration(
-                  border: Border.all(color: getCurrentTheme(context).colorContainerBorder, width: 0.5.sp),
-                  borderRadius: BorderRadius.circular(17.5.r),
-                ),
-                child: Row(
-                  children: [
-                    Icon(CustomIcons.locationRadius, size: 20.sp, color: getCurrentTheme(context).colorIconCommon),
-                    SizedBox(width: 8.w),
-                    Text(languages.kmAway(rideListItem.distance.toString()), style: bodyText(context: context, fontWeight: FontWeight.w600)),
-                  ],
-                ),
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  RideRequestTypeChip(
-                    serviceId: rideListItem.serviceId,
-                    serviceMode: rideListItem.serviceMode,
-                    isDelivery: rideListItem.isDelivery,
-                    isEncomienda: rideListItem.isEncomienda,
-                  ),
-                  SizedBox(height: 6.h),
-                  Text(
-                    getAmountWithCurrency(rideListItem.offeredPrice),
-                    style: bodyText(context: context, fontWeight: FontWeight.w600, textColor: getCurrentTheme(context).colorPrimary),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          Padding(
-            padding: EdgeInsetsDirectional.only(top: 12.h),
-            child: Row(
-              children: [
-                Icon(CustomIcons.pickupLocation, size: 20.sp, color: getCurrentTheme(context).colorIconCommon),
-                SizedBox(width: 10.w),
-                Expanded(child: Text(rideListItem.addressList.first.address, maxLines: 2, overflow: TextOverflow.ellipsis)),
-              ],
-            ),
-          ),
-          Padding(
-            padding: EdgeInsetsDirectional.only(top: 10.h),
-            child: Row(
-              children: [
-                Icon(CustomIcons.dropLocation, size: 20.sp, color: getCurrentTheme(context).colorIconCommon),
-                SizedBox(width: 10.w),
-                Expanded(child: Text(rideListItem.addressList.last.address, maxLines: 2, overflow: TextOverflow.ellipsis)),
-              ],
-            ),
-          ),
-        ],
-      ),
     );
   }
 

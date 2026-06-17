@@ -53,6 +53,7 @@ export '../constant/dimensions.dart';
 export '../main.dart';
 export 'custom_icons.dart';
 export 'firebase_util.dart';
+export 'image_url_util.dart';
 export 'map_utils.dart';
 export 'style_util.dart';
 export 'time_util.dart';

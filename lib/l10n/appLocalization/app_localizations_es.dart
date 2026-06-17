@@ -782,7 +782,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get logOutDialogMsg => '¿Estás seguro de que quieres cerrar sesión?';
 
   @override
-  String get arrived => 'Llegó';
+  String get arrived => 'Llegué';
 
   @override
   String get enterOtp => 'Ingresar código';

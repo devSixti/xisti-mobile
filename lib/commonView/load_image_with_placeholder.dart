@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../appThemeManager/app_theme_colors.dart';
 import '../constant/dimensions.dart';
 import '../main.dart';
+import '../utils/image_url_util.dart';
 import 'common_circular_progress_indicator.dart';
 
 class LoadImageWithPlaceHolder extends StatelessWidget {
@@ -60,7 +61,11 @@ class LoadImageWithPlaceHolder extends StatelessWidget {
   }
 
   ImageProvider getImageProvider() {
-    return isNetworkImage ? (image.isNotEmpty ? NetworkImage(image) : AssetImage(defaultAssetImage ?? "")) : AssetImage(image);
+    if (!isNetworkImage) {
+      return AssetImage(image);
+    }
+    final resolved = resolveNetworkProfileImage(image);
+    return resolved.isNotEmpty ? NetworkImage(resolved) : AssetImage(defaultAssetImage ?? "");
   }
 
   Color? getColor() {
@@ -73,8 +78,15 @@ class LoadImageWithPlaceHolder extends StatelessWidget {
     return imageFit ?? (isNetworkImage ? (image.isNotEmpty ? BoxFit.cover : BoxFit.scaleDown) : BoxFit.cover);
   }
 
-  Center getErrorHolder() {
-    return Center(child: errorHolder ?? /*getPlaceHolderImage()*/ Container(color: getCurrentTheme(navigatorKey.currentContext!).colorShimmerBg));
+  Widget getErrorHolder() {
+    if (errorHolder != null) {
+      return Center(child: errorHolder!);
+    }
+    final fallback = defaultAssetImage;
+    if (fallback != null && fallback.isNotEmpty) {
+      return Image.asset(fallback, width: width, height: height, fit: BoxFit.cover);
+    }
+    return Center(child: Container(color: getCurrentTheme(navigatorKey.currentContext!).colorShimmerBg));
   }
 
   Widget getFrameBuilder(Widget child, int? frame, bool wasSynchronouslyLoaded) {

@@ -26,7 +26,6 @@ import '../../../utils/get_route_utils.dart';
 import '../../../services/active_ride_offline_service.dart';
 import '../../../utils/utils.dart';
 import '../driverHome/driver_home.dart';
-import '../driverRideDetail/driver_ride_detail.dart';
 import 'driver_running_ride_dl.dart';
 import 'driver_running_ride_repo.dart';
 
@@ -42,6 +41,7 @@ class DriverRunningRideBloc extends Bloc {
   DatabaseReference? _databaseReference;
   StreamSubscription<RemoteMessage>? firebaseOnMessageStream;
   StreamSubscription<Position>? subscription;
+  bool _exitToHomeScheduled = false;
   AddressListItem? pickupAddressItem;
   AddressListItem? dropAddressItem;
 
@@ -220,16 +220,15 @@ class DriverRunningRideBloc extends Bloc {
           }
 
           if (response.rideCancelledStatus == 1 || (response.rideStatus ?? 0) == DriverRideStatus.driverCancel) {
-            if (cancelContext?.mounted ?? false) {
-              Navigator.pop(cancelContext!);
+            rideStatus = response.rideStatus ?? DriverRideStatus.driverCancel;
+            changeStatus(rideStatus);
+            if (cancelReason.trim().isNotEmpty) {
+              _navigateToDriverHomeAfterRideEnded();
+              return;
             }
             message = (response.cancelBy ?? '').trim().isNotEmpty
                 ? (response.cancelBy ?? '')
                 : languages.rideCancelByAdminMsg;
-            if ((response.rideStatus ?? 0) == DriverRideStatus.driverCancel) {
-              changeRideStatusWiseLayout();
-              return;
-            }
             showRideCompleteCancelBottomSheet(languages.rideCancel, message);
             return;
           }
@@ -257,9 +256,37 @@ class DriverRunningRideBloc extends Bloc {
   }
 
   void setLayout() {
+    if (rideStatus == DriverRideStatus.driverCancel) {
+      _navigateToDriverHomeAfterRideEnded();
+      return;
+    }
     changeRideStatusWiseLayout();
     setFirebaseReference();
     writeDataInFirebase();
+  }
+
+  void _navigateToDriverHomeAfterRideEnded() {
+    if (_exitToHomeScheduled || !context.mounted) return;
+    _exitToHomeScheduled = true;
+
+    backgroundLocationService.onStop();
+    ActiveRideOfflineService.instance.clearRideSnapshot();
+    pushNotificationService.dismissRideNotification(rideId);
+    finishChatWithUser();
+    deleteRideHistoryInFirebase();
+
+    final bookingNo = _rideDetails.bookingNo;
+    if (bookingNo.toString().isNotEmpty) {
+      FirebaseDatabase.instance.ref().child(ChatConstant.chat).child(ChatConstant.rides).child(bookingNo.toString()).remove();
+    }
+
+    if (cancelContext?.mounted ?? false) {
+      Navigator.pop(cancelContext!);
+      cancelContext = null;
+    }
+
+    if (!context.mounted) return;
+    openScreenWithClearPrevious(context, const DriverHome());
   }
 
   void rideButtonOnTapAction({bool callRideDetailsApi = false}) {
@@ -302,8 +329,7 @@ class DriverRunningRideBloc extends Bloc {
         changeActionButtonText(languages.startRide);
         break;
       case DriverRideStatus.driverCancel:
-        FirebaseDatabase.instance.ref().child(ChatConstant.chat).child(ChatConstant.rides).child(_rideDetails.bookingNo.toString()).remove();
-        openScreenWithClearPrevious(context, const DriverHome());
+        _navigateToDriverHomeAfterRideEnded();
         break;
       case DriverRideStatus.driverRunning:
         startRide();
@@ -607,7 +633,7 @@ class DriverRunningRideBloc extends Bloc {
       if (rideStatus >= DriverRideStatus.driverRunning) {
         driverRideStartLocation = LatLng(currentLocationData?.latitude ?? 0, currentLocationData?.longitude ?? 0);
         driverRideEndLocation = (currentDestinationLatLong).isNotEmpty ? convertStringLatLongToLatLongObject(currentDestinationLatLong) : dropLanLng;
-      } else if (rideStatus <= DriverRideStatus.driverCancel) {
+      } else if (rideStatus < DriverRideStatus.driverRunning) {
         driverRideStartLocation = LatLng(currentLocationData?.latitude ?? 0, currentLocationData?.longitude ?? 0);
         driverRideEndLocation = pickupLanLng;
       } else {
@@ -815,25 +841,25 @@ class DriverRunningRideBloc extends Bloc {
   }
 
   void showRideCompleteCancelBottomSheet(String title, String message) {
-    if ((cancelContext?.mounted ?? false)) {
+    if (_exitToHomeScheduled) return;
+    if (cancelContext?.mounted ?? false) {
       return;
     }
-    FirebaseDatabase.instance.ref().child(ChatConstant.chat).child(ChatConstant.rides).child((_rideDetails.bookingNo).toString()).remove();
     pushNotificationService.dismissRideNotification(rideId);
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
       enableDrag: false,
       isDismissible: false,
-      builder: (context) {
-        cancelContext = context;
+      builder: (sheetContext) {
+        cancelContext = sheetContext;
         return CommonBottomSheet(
           cancelable: false,
           title: title,
           message: message,
           positiveButtonTxt: languages.ok,
           onPositivePress: () {
-            openScreenWithClearPrevious(context, DriverRideDetail(rideId: rideId));
+            _navigateToDriverHomeAfterRideEnded();
           },
         );
       },

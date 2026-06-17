@@ -47,7 +47,7 @@ class ActiveRideOfflineService {
 
   /// Call after a successful ride-status API response while [rideStatus] indicates an active trip.
   void persistFromApiResponse(Map<String, dynamic> response, {required int rideStatus}) {
-    if (rideStatus <= 0 || rideStatus >= 6) {
+    if (rideStatus <= 0 || rideStatus == 4 || rideStatus >= 9) {
       clearRideSnapshot();
       return;
     }

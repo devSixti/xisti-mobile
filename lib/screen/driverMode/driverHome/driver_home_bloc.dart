@@ -66,6 +66,8 @@ class DriverHomeBloc extends Bloc {
   StreamSubscription<RemoteMessage>? firebaseOnMessageStream;
   var refreshKey = GlobalKey<RefreshIndicatorState>();
 
+  final selectedDriverRideSubject = BehaviorSubject<RideList?>();
+
   final availableRideSubject = BehaviorSubject<ApiResponse<AvailableRidePojo>>();
   final driverHomeSubject = BehaviorSubject<ApiResponse<DriverHomePojo>>();
   final selectDistanceSubject = BehaviorSubject<dynamic>.seeded(0);
@@ -192,6 +194,11 @@ class DriverHomeBloc extends Bloc {
           driverPriceSuggestionSubject.sink.add(getDoubleFromDynamic(response.driverPriceSuggestion));
           rideList = [];
           rideList.addAll(_filterRidesByAvailability(response.rideList));
+          final selected = selectedDriverRideSubject.valueOrNull;
+          if (selected != null) {
+            final idx = rideList.indexWhere((e) => e.rideId == selected.rideId);
+            selectedDriverRideSubject.sink.add(idx >= 0 ? rideList[idx] : null);
+          }
           if (rideList.isNotEmpty) {
             RideList? rideListItem = rideListItemSubject.valueOrNull;
             if (rideListItem != null) {
@@ -506,6 +513,7 @@ class DriverHomeBloc extends Bloc {
   void dispose() {
     googleMapController?.dispose();
     stopTimer();
+    selectedDriverRideSubject.close();
     availableRideSubject.close();
     driverHomeSubject.close();
     selectDistanceSubject.close();
