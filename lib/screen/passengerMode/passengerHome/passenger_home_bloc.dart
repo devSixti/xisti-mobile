@@ -992,8 +992,9 @@ class PassengerHomeBloc extends Bloc {
     if (!context.mounted) return;
     List<Marker> markerList = markersListController.valueOrNull ?? [];
     if ((fromAddressController.valueOrNull?.name ?? "").isNotEmpty) {
-        BitmapDescriptor pickUpMarkerIcon = await getBitmapDescriptorFromAssetBytes(path: setImagesBasedOnTheme(context, 'ic_pin_pickup_location.png'));
-        int pos = markerList.indexWhere((item) => item.markerId == const MarkerId("pickup"));
+      BitmapDescriptor pickUpMarkerIcon = await getBitmapDescriptorFromAssetBytes(path: setImagesBasedOnTheme(context, 'ic_pin_pickup_location.png'));
+      if (!context.mounted) return;
+      int pos = markerList.indexWhere((item) => item.markerId == const MarkerId("pickup"));
         if (pos >= 0) {
           Marker currentMarker = markerList[pos];
           Marker currentNewMarker = Marker(
@@ -1016,6 +1017,7 @@ class PassengerHomeBloc extends Bloc {
       }
 
       if ((toAddressController.valueOrNull?.name ?? "").isNotEmpty) {
+        if (!context.mounted) return;
         BitmapDescriptor destinationMarkerIcon = await getBitmapDescriptorFromAssetBytes(
           path: setImagesBasedOnTheme(context, 'ic_pin_destination_location.png'),
         );
@@ -1070,8 +1072,7 @@ class PassengerHomeBloc extends Bloc {
           }
         });
       }
-      markersListController.sink.add(markerList);
-    }
+    markersListController.sink.add(markerList);
   }
 
   void openDemoSheet() {
