@@ -3,7 +3,7 @@ import 'dart:io';
 
 import '../constant/constant.dart';
 import '../hive/hive_helper.dart';
-import 'utils.dart';
+import 'mobile_auth_header.dart';
 
 /// Syncs mobile config fields exposed by XISTI Admin API.
 void applyAppMobileSettingsFromJson(dynamic json) {

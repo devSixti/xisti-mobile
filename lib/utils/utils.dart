@@ -28,6 +28,7 @@ import '../constant/constant.dart';
 import '../services/session_restore_service.dart';
 import 'api_message_localizer.dart';
 import 'app_mobile_settings.dart';
+import 'mobile_auth_header.dart' as mobile_auth;
 import 'phone_util.dart';
 import '../constant/dimensions.dart';
 import '../hive/hive_helper.dart';
@@ -319,17 +320,7 @@ Future<void> initAppConfig() async {
   if (await isNetworkConnected()) setDeviceIpAddressInPref();
 }
 
-void setAuthKey(String text) {
-  String authKey = base64.encode(utf8.encode(text));
-  // logD(tag, "authKey: $authKey");
-  String md5String = md5.convert(utf8.encode(authKey)).toString();
-  // logD(tag, "utf8.encode(authKey): ${utf8.encode(authKey)}");
-  // logD(tag, "md5String: $md5String");
-  String preText = getRandomString(57);
-  String postText = getRandomString(43);
-  text = "$preText$md5String$postText"; //Removing of prefix/post fix characters will fail apis!
-  putDataInSettingBox(hiveAuthKey, text);
-}
+void setAuthKey(String text) => mobile_auth.setAuthKey(text);
 
 String getRandomString(int length) {
   const chars = 'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890';
