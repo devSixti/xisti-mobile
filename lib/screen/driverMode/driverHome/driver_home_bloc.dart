@@ -14,8 +14,10 @@ import '../../../bottomSheet/acceptRequestBottomSheet/accept_request_bottom_shee
 import '../../../bottomSheet/common_bottom_sheet.dart';
 import '../../../bottomSheet/manage_distance_bottom_sheet.dart';
 import '../../../bottomSheet/overlay_permission_bottom_sheet.dart';
+import '../../../bottomSheet/region_confirm_sheet.dart';
 import '../../../hive/hive_helper.dart';
 import '../../../networking/base_dl.dart';
+import '../../../services/dispatch_trigger_service.dart';
 import '../../../services/push_notification_service.dart';
 import '../../../utils/service_mode_util.dart';
 import '../../../utils/alert_feedback_util.dart';
@@ -297,10 +299,25 @@ class DriverHomeBloc extends Bloc {
     }
   }
 
+  bool _regionPromptInFlight = false;
+
+  Future<void> _maybePromptRegionChange(double lat, double lng) async {
+    if (_regionPromptInFlight || !context.mounted) return;
+    _regionPromptInFlight = true;
+    await handleRegionPromptIfNeeded(
+      context,
+      lat,
+      lng,
+      onRegionApplied: (_) {},
+    );
+    _regionPromptInFlight = false;
+  }
+
   Future<void> getCurrentLocation() async {
     mapStyleSubject.add(getCurrentTheme(context).mapStyle);
     getLocationUtils.getLocationUtils(
       (locationData) async {
+        await _maybePromptRegionChange(locationData.latitude, locationData.longitude);
         await _syncDriverLocationToServer(locationData.latitude, locationData.longitude);
         if (googleMapController != null) {
           googleMapController!.animateCamera(
@@ -466,11 +483,13 @@ class DriverHomeBloc extends Bloc {
   }
 
   void startTimer() {
-    if (!(_availableApiTimer?.isActive ?? false)) {
-      _availableApiTimer ??= Timer.periodic(const Duration(seconds: 10), (timer) {
-        callAvailableRideApi(isLoading: false);
-      });
-    }
+    if (_availableApiTimer?.isActive ?? false) return;
+    _availableApiTimer = Timer.periodic(DispatchTriggerService.fastPollInterval, (timer) {
+      if (DispatchTriggerService.shouldSkipScheduledPoll('refresh_available_rides')) {
+        return;
+      }
+      callAvailableRideApi(isLoading: false);
+    });
   }
 
   void stopTimer() {
@@ -483,15 +502,18 @@ class DriverHomeBloc extends Bloc {
   void manageNotification() {
     firebaseOnMessageStream ??= FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
       Map<String, dynamic> notificationData = message.data;
+      DispatchTriggerService.recordFromNotificationData(notificationData);
       int notificationType = int.parse((notificationData[NotificationConstant.notificationType] ?? 0).toString());
       int orderId = int.parse((notificationData[NotificationConstant.rideId] ?? 0).toString());
       if (notificationType == 7) {
         rideIdList.add(orderId);
         unawaited(triggerRideAlertFeedback());
+        DispatchTriggerService.recordManualRefresh('refresh_available_rides');
         callAvailableRideApi(isLoading: false);
         pushNotificationService.dismissRideNotification(orderId);
       } else if (notificationType == 9 && !isWaitingOpen) {
         pushNotificationService.dismissRideNotification(orderId);
+        DispatchTriggerService.recordManualRefresh('refresh_available_rides');
         callAvailableRideApi(isLoading: false);
         String name = (notificationData[NotificationConstant.customerName] ?? "").toString();
         if (context.mounted) {

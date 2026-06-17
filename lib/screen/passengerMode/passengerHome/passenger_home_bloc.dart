@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -9,11 +10,13 @@ import 'package:package_info_plus/package_info_plus.dart';
 
 import '../../../blocs/bloc.dart';
 import '../../../bottomSheet/demo_product_bottom_sheet.dart';
+import '../../../bottomSheet/region_confirm_sheet.dart';
 import '../../../bottomSheet/warning_bottom_sheet.dart';
 import '../../../commonView/common_view.dart';
 import '../../../commonView/custom_marker.dart';
 import '../../../hive/hive_helper.dart';
 import '../../../networking/base_dl.dart';
+import '../../../utils/app_mobile_settings.dart';
 import '../../../utils/destination_payment_util.dart';
 import '../../../utils/get_route_utils.dart';
 import '../../../services/passenger_location_history_service.dart';
@@ -24,7 +27,8 @@ import '../../common/splash/splash_repo.dart';
 import '../offerRide/offer_ride_screen.dart';
 import '../passengerRunningRide/passenger_running_ride.dart';
 import '../setRoute/set_route_screen.dart';
-import '../../../utils/xisti_main_city_zones.dart';
+import '../../../services/xisti_region_service.dart';
+import '../../../utils/xisti_region_catalog.dart';
 import '../../../utils/xisti_ui_tokens.dart';
 import 'passenger_home_activity_dl.dart';
 import 'passenger_home_barrio_shortcuts.dart';
@@ -275,7 +279,7 @@ class PassengerHomeBloc extends Bloc {
         if (isApiStatus(context, response.status, message, true)) {
           subjectRideCalculation.add(ApiResponse.completed(response));
           recommendedPriceSubject.sink.add(getDoubleFromDynamic(response.recommendedFare));
-          minPriceSubject.sink.add(getDoubleFromDynamic(response.minPrice));
+          minPriceSubject.sink.add(applyRegionalMinFareFloor(response.minPrice));
           maxPriceSubject.sink.add(getDoubleFromDynamic(response.maxPrice));
           mapApiSubject.sink.add(false);
         } else {
@@ -792,10 +796,43 @@ class PassengerHomeBloc extends Bloc {
     );
   }
 
-  void _updateCityZonesForCoordinates(double lat, double lng) {
-    final city = XistiMainCityZoneCatalog.resolveCity(lat, lng);
-    activeMainCitySubject.add(city.displayName);
-    activeCityZonesSubject.add(city.zones);
+  bool _regionPromptInFlight = false;
+
+  void _applyRegionToUi(ResolvedXistiRegion region) {
+    activeMainCitySubject.add(region.city.displayName);
+    activeCityZonesSubject.add(region.city.zones);
+    final regionalMin = getRegionMinFareFromSettings();
+    if (regionalMin > 0) {
+      final current = minPriceSubject.valueOrNull;
+      minPriceSubject.sink.add(
+        current == null ? regionalMin : applyRegionalMinFareFloor(current),
+      );
+    }
+  }
+
+  Future<void> _updateCityZonesForCoordinates(double lat, double lng) async {
+    if (_regionPromptInFlight) return;
+    final preview = XistiRegionService.resolve(lat, lng);
+    _applyRegionToUi(preview);
+
+    final prompt = XistiRegionService.promptForCoordinates(lat, lng);
+    if (prompt == null) {
+      _applyRegionToUi(XistiRegionService.activeRegion());
+      return;
+    }
+
+    _regionPromptInFlight = true;
+    if (!context.mounted) {
+      _regionPromptInFlight = false;
+      return;
+    }
+    await handleRegionPromptIfNeeded(
+      context,
+      lat,
+      lng,
+      onRegionApplied: _applyRegionToUi,
+    );
+    _regionPromptInFlight = false;
   }
 
   Future<void> getCurrentLocation() async {

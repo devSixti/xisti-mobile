@@ -8,7 +8,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # ex. 1.0.1+1
 # ex. 1.0.5+5
 # ex. 1.1.0+10
-version: 1.0.2+22
+version: 1.0.3+23
 
 # Used Flutter SDK 3.41.2
 environment:
@@ -46,7 +46,7 @@ dependencies:
   google_maps_flutter_ios_sdk10: 2.17.5
   flutter_screenutil: 5.9.3
   flutter_local_notifications: 20.1.0
-  googleapis_auth: 2.0.0
+  flutter_secure_storage: ^9.2.4
   crypto: 3.0.7
   connectivity_plus: 7.0.0
   url_launcher: 6.3.2

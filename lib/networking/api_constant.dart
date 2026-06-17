@@ -29,6 +29,7 @@ class ApiConst {
   static const endPointGetDriverRunningService = "get-driver-running-service";
   static const endPointGetCustomerRunningService = "get-customer-running-service";
   static const endPointAppVersionCheck = "app-version-check";
+  static const endPointMarketConfig = "market-config";
 
   //Terms And Condition
   static const endPointTermsAndConditions = '/terms-and-conditions';

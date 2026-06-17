@@ -440,6 +440,10 @@ int getCurrencyFractionDigits() {
   if (isColombiaCurrencySelected()) {
     return 0;
   }
+  final currency = getStringFromSettingBox(hiveSelectedCurrency, defaultValue: defaultCurrency).toUpperCase();
+  if (currency.contains('AR')) {
+    return 0;
+  }
   return 2;
 }
 

@@ -1,11 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:math';
-
-import 'package:crypto/crypto.dart';
 
 import '../constant/constant.dart';
 import '../hive/hive_helper.dart';
+import 'utils.dart';
 
 /// Syncs mobile config fields exposed by XISTI Admin API.
 void applyAppMobileSettingsFromJson(dynamic json) {
@@ -65,21 +63,29 @@ void applyAppMobileSettingsFromJson(dynamic json) {
   }
 }
 
-/// Injected at build time for QA APKs: `--dart-define=QA_APP_KEY=...`
+/// Injected at build time: `--dart-define=XISTI_APP_KEY=...` (or legacy `QA_APP_KEY`).
+const String kXistiAppKey = String.fromEnvironment('XISTI_APP_KEY', defaultValue: '');
+
+/// @deprecated Use [kXistiAppKey]
 const String kQaAppKey = String.fromEnvironment('QA_APP_KEY', defaultValue: '');
 
-void _applyQaAppKeyIfConfigured() {
-  if (kQaAppKey.isEmpty) {
+String get buildTimeAppKey {
+  if (kXistiAppKey.isNotEmpty) {
+    return kXistiAppKey;
+  }
+  return kQaAppKey;
+}
+
+void applyBuildTimeAppKeyIfConfigured() {
+  final key = buildTimeAppKey;
+  if (key.isEmpty) {
     return;
   }
-  final authKey = base64.encode(utf8.encode(kQaAppKey));
-  final md5String = md5.convert(utf8.encode(authKey)).toString();
-  const chars = 'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890';
-  final rnd = Random();
-  String rand(int n) => String.fromCharCodes(
-        Iterable.generate(n, (_) => chars.codeUnitAt(rnd.nextInt(chars.length))),
-      );
-  putDataInSettingBox(hiveAuthKey, '${rand(57)}$md5String${rand(43)}');
+  setAuthKey(key);
+}
+
+void _applyQaAppKeyIfConfigured() {
+  applyBuildTimeAppKeyIfConfigured();
 }
 
 /// Defaults when app-version-check is unreachable (DNS down, offline, etc.).
@@ -161,6 +167,20 @@ double getFareNegotiationStepFromSettings() {
     return _normalizeFareNegotiationStep(stored);
   }
   return isColombiaCurrencySelected() ? kColombiaFareNegotiationStep : 1;
+}
+
+/// Country floor from [XistiRegionService.applyRegion] (CO / US / BR / AR).
+double getRegionMinFareFromSettings() =>
+    getDoubleFromSettingBox(hiveRegionMinFare, defaultValue: 0);
+
+/// Ensures API min fare never falls below the active regional floor.
+double applyRegionalMinFareFloor(dynamic apiMinFare) {
+  final api = double.tryParse(apiMinFare?.toString() ?? '') ?? 0;
+  final regional = getRegionMinFareFromSettings();
+  if (regional <= 0) {
+    return api;
+  }
+  return api < regional ? regional : api;
 }
 
 double getVatRateOnCommissionPercent() {

@@ -98,7 +98,6 @@ class LanguageAndCurrencyBloc extends Bloc {
         var response = LanguageAndCurrencyResponse.fromJson(await _languageAndCurrencyRepo.getLanguageAndCurrency());
         if (!context.mounted) return;
         if (isApiStatus(context, response.status, response.message, true)) {
-          setAuthKey(response.appKey ?? "");
           final currencies = response.currencyList.isNotEmpty ? response.currencyList : _fallbackCurrencies;
           if (currencies.isNotEmpty) {
             int index = currencies.indexWhere((element) => element.currencySymbol == getStringFromSettingBox(hiveSelectedCurrency));

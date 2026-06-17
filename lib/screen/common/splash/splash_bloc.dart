@@ -11,6 +11,7 @@ import '../../../blocs/bloc.dart';
 import '../../../bottomSheet/common_bottom_sheet.dart';
 import '../../../bottomSheet/location_disclosure_sheet.dart';
 import '../../../hive/hive_helper.dart';
+import '../../../services/market_config_repo.dart';
 import '../../../utils/app_mobile_settings.dart';
 import '../../../services/session_restore_service.dart';
 import '../../../utils/utils.dart';
@@ -56,9 +57,13 @@ class SplashBloc extends Bloc {
 
       if (!context.mounted) return;
       if (isApiStatus(context, response.status, message, true)) {
-        setAuthKey(response.appKey ?? "");
+        applyBuildTimeAppKeyIfConfigured();
+        if (kDebugMode && getStringFromSettingBox(hiveAuthKey).isEmpty) {
+          debugPrint('$tag: XISTI_APP_KEY not configured — protected APIs will fail.');
+        }
         applySocialLoginSettingsFromApi(response.toJson());
         applyAppMobileSettingsFromJson(response.toJson());
+        unawaited(syncMarketConfig());
         _subject.sink.add(ApiResponse.completed(response));
         openForceFullyUpdateDialog(response.appVersion ?? "0", response.isForcefullyUpdate ?? 0);
       } else {

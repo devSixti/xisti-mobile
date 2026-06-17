@@ -8,6 +8,7 @@ import '../../../blocs/bloc.dart';
 import '../../../bottomSheet/common_bottom_sheet.dart';
 import '../../../bottomSheet/raise_fare_sheet.dart';
 import '../../../networking/base_dl.dart';
+import '../../../services/dispatch_trigger_service.dart';
 import '../../../services/push_notification_service.dart';
 import '../../../utils/alert_feedback_util.dart';
 import '../../../utils/utils.dart';
@@ -212,7 +213,11 @@ class OfferRideBloc extends Bloc {
 
   void startFindDriverTimer() {
     findDriverApi(true);
-    _apiTimer ??= Timer.periodic(const Duration(seconds: 10), (timer) {
+    if (_apiTimer?.isActive ?? false) return;
+    _apiTimer = Timer.periodic(DispatchTriggerService.fastPollInterval, (timer) {
+      if (DispatchTriggerService.shouldSkipScheduledPoll('refresh_driver_bids')) {
+        return;
+      }
       findDriverApi(false);
     });
   }
@@ -331,6 +336,7 @@ class OfferRideBloc extends Bloc {
     firebaseOnMessageStream ??= FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
       debugPrint("OnMessage message==> ${message.data.toString()}");
       Map<String, dynamic> notificationData = message.data;
+      DispatchTriggerService.recordFromNotificationData(notificationData);
       int notificationType = int.parse((notificationData[NotificationConstant.notificationType] ?? 0).toString());
       int orderStatus = int.parse((notificationData[NotificationConstant.rideStatus] ?? 0).toString());
       int rideType = int.parse((notificationData[NotificationConstant.rideType] ?? 0).toString());
@@ -351,6 +357,7 @@ class OfferRideBloc extends Bloc {
         }
       } else if (notificationType == 8) {
         pushNotificationService.dismissRideNotification(rideId);
+        DispatchTriggerService.recordManualRefresh('refresh_driver_bids');
         findDriverApi(false);
       }
     });

@@ -61,6 +61,12 @@ const String hiveEnableExpresoMobile = "enableExpresoMobile";
 const String hiveEnableEncomiendasMobile = "enableEncomiendasMobile";
 const String hiveRequireCourierPackageDimensions = "requireCourierPackageDimensions";
 const String hiveXistiNewHomeLayout = "xistiNewHomeLayout";
+const String hiveActiveRegionCountryId = "activeRegionCountryId";
+const String hiveActiveRegionCityId = "activeRegionCityId";
+const String hiveDeclinedRegionCityId = "declinedRegionCityId";
+const String hiveRegionMinFare = "regionMinFare";
+const String hiveMarketConfigJson = "marketConfigJson";
+const String hiveMarketConfigVersion = "marketConfigVersion";
 
 ///keys for [userPrefBox]
 const String hiveSelectedLanguageCode = "SelectedLanguageCode";

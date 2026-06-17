@@ -28,6 +28,7 @@ import 'utils/file_downloader.dart';
 import 'utils/get_location_utils.dart';
 import 'utils/notification_payload_util.dart';
 import 'utils/shared_pref_util.dart';
+import 'utils/app_mobile_settings.dart';
 import 'utils/utils.dart';
 
 late AppLocalizations languages;
@@ -54,6 +55,7 @@ void main() async {
 
   ///initializing boxes and register adapters for hive...
   await initBox();
+  applyBuildTimeAppKeyIfConfigured();
 
   tz.initializeTimeZones();
   await initSharedPreferences();

@@ -76,4 +76,11 @@ class ActiveRideOfflineService {
     }
     return null;
   }
+
+  bool get isSnapshotStale {
+    final ms = getIntFromSettingBox(_hiveActiveRideSyncedAt);
+    if (ms <= 0) return true;
+    return DateTime.now().difference(DateTime.fromMillisecondsSinceEpoch(ms)) >
+        const Duration(minutes: 3);
+  }
 }

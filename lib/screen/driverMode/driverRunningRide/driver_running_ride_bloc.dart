@@ -24,6 +24,8 @@ import '../../../networking/base_dl.dart';
 import '../../../services/push_notification_service.dart';
 import '../../../utils/get_route_utils.dart';
 import '../../../services/active_ride_offline_service.dart';
+import '../../../services/dispatch_trigger_service.dart';
+import '../../../services/ride_action_queue_service.dart';
 import '../../../utils/utils.dart';
 import '../driverHome/driver_home.dart';
 import 'driver_running_ride_dl.dart';
@@ -49,6 +51,7 @@ class DriverRunningRideBloc extends Bloc {
     pushNotificationService.dismissRideNotification(rideId);
     manageNotification();
     setDriverMarker(serviceId);
+    unawaited(_flushQueuedRideActions());
   }
 
   RideDetails _rideDetails = RideDetails();
@@ -101,7 +104,12 @@ class DriverRunningRideBloc extends Bloc {
     if (!await offlineService.hasNetwork) {
       if (offlineService.cachedRideId() == rideId && subject.valueOrNull?.status == Status.completed) {
         if (context.mounted) {
-          openSimpleSnackbar(context, 'Viaje en caché — reconectando cuando haya señal.');
+          openSimpleSnackbar(
+            context,
+            offlineService.isSnapshotStale
+                ? 'Sin señal — mostrando última ubicación conocida.'
+                : 'Viaje en caché — reconectando cuando haya señal.',
+          );
         }
         return;
       }
@@ -164,6 +172,7 @@ class DriverRunningRideBloc extends Bloc {
             isRideStart = true;
             backgroundLocationService.onStart();
           }
+          unawaited(_flushQueuedRideActions());
         } else {
           subject.sink.add(ApiResponse.error(message));
           if (response.status != 3) openSimpleSnackbar(context, message);
@@ -182,6 +191,27 @@ class DriverRunningRideBloc extends Bloc {
     String cancelReason = "",
     bool rideDetailsApiCall = false,
   }) async {
+    await _flushQueuedRideActions();
+
+    final queue = RideActionQueueService.instance;
+    if (!await queue.hasNetwork) {
+      await queue.enqueue(
+        rideId: rideId,
+        rideStatus: apiRideStatus,
+        cancelReason: cancelReason,
+        otp: otp,
+        rating: rating,
+        comment: comment,
+        wayPointStatus: wayPointStatus,
+        tollCharge: (apiRideStatus == DriverRideStatus.driverDrop && isTollCharge == 1) ? toll : 0,
+        tollCount: (apiRideStatus == DriverRideStatus.driverDrop && isTollCharge == 2) ? toll : 0,
+      );
+      if (context.mounted) {
+        openSimpleSnackbar(context, 'Sin señal: acción guardada. Se enviará al reconectar.');
+      }
+      return;
+    }
+
     if (await isNetworkConnected(
       onRetryPressedCallApi: () {
         callUpdateRideStatusApi(rating: rating, comment: comment, otp: otp);
@@ -238,6 +268,7 @@ class DriverRunningRideBloc extends Bloc {
           if (rideDetailsApiCall) {
             callRideDetailsApi(isLoading: false);
           }
+          await queue.clearForRide(rideId);
         } else {
           subjectUpdateRideStatus.sink.add(ApiResponse.error(message));
           subjectCancelRide.sink.add(ApiResponse.error(message));
@@ -501,9 +532,41 @@ class DriverRunningRideBloc extends Bloc {
   }
 
   /// This function listing all notification here also, while user using this screen....
+  Future<void> _flushQueuedRideActions() async {
+    final queue = RideActionQueueService.instance;
+    await queue.flush((action) async {
+      if ((action['ride_id'] ?? 0).toString() != rideId.toString()) {
+        return true;
+      }
+      try {
+        final response = UpdateRideStatusPojo.fromJson(
+          await _runningRideRepo.updateRideStatus(
+            rideId: rideId,
+            rideStatus: int.parse((action['ride_status'] ?? 0).toString()),
+            cancelReason: (action['cancel_reason'] ?? '').toString(),
+            rating: action['rating'] ?? 0,
+            comment: (action['comment'] ?? '').toString(),
+            otp: (action['otp'] ?? '').toString(),
+            tollCharge: action['toll_charge'] ?? 0,
+            tollCount: action['toll_count'] ?? 0,
+            wayPointStatus: int.parse((action['way_point_status'] ?? 0).toString()),
+          ),
+        );
+        if ((response.status ?? 0) == 1) {
+          rideStatus = response.rideStatus ?? rideStatus;
+          changeStatus(rideStatus);
+          changeRideStatusWiseLayout();
+          return true;
+        }
+      } catch (_) {}
+      return false;
+    });
+  }
+
   void manageNotification() {
     firebaseOnMessageStream ??= FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
       Map<String, dynamic> notificationData = message.data;
+      DispatchTriggerService.recordFromNotificationData(notificationData);
       int notificationType = int.parse((notificationData[NotificationConstant.notificationType] ?? 0).toString());
       int orderId = int.parse((notificationData[NotificationConstant.rideId] ?? 0).toString());
       String notificationMessage = notificationData[NotificationConstant.message] ?? "";

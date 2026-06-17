@@ -6,7 +6,6 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:googleapis_auth/auth_io.dart';
 
 import '../constant/chat_constant.dart';
 import '../hive/hive_helper.dart';
@@ -93,7 +92,6 @@ class PushNotificationService {
     }
     await initLocalNotification();
     _localNotificationPermissions();
-    autoRefreshCredentialsInitialize();
   }
 
   Future<void> _firebaseNotificationPermissions() async {
@@ -428,7 +426,7 @@ class PushNotificationService {
     );
 
     /// Configure Android initialization settings, including the app icon.
-    var initializationSettingsAndroid = const AndroidInitializationSettings('@mipmap/launcher_icon');
+    var initializationSettingsAndroid = const AndroidInitializationSettings('@drawable/ic_notification');
 
     /// Configure iOS initialization settings to request all permissions.
     var initializationSettingsIOS = DarwinInitializationSettings(requestSoundPermission: true, requestBadgePermission: true, requestAlertPermission: true);
@@ -533,44 +531,6 @@ class PushNotificationService {
     }
   }
 
-  Future<String> autoRefreshCredentialsInitialize() async {
-    AccessCredentials? pushAccessTokenCred;
-    String prefAccountAccessToken = getStringFromSettingBox(hiveServiceAccountAccessToken).trim();
-    if (prefAccountAccessToken.isNotEmpty) {
-      pushAccessTokenCred = AccessCredentials.fromJson(jsonDecode(prefAccountAccessToken));
-    }
-
-    if (firebaseProjectId.trim().isEmpty) {
-      String source = await rootBundle.loadString('assets/json/service_account.json');
-      final serviceAccount = jsonDecode(source);
-      if (serviceAccount['project_id'] != null) {
-        firebaseProjectId = serviceAccount['project_id'];
-      }
-    }
-
-    if (pushAccessTokenCred != null && !pushAccessTokenCred.accessToken.hasExpired) {
-      return pushAccessTokenCred.accessToken.data;
-    }
-
-    String source = await rootBundle.loadString('assets/json/service_account.json');
-    final serviceAccount = jsonDecode(source);
-    var accountCredentials = ServiceAccountCredentials.fromJson(serviceAccount);
-
-    AutoRefreshingAuthClient autoRefreshingAuthClient = await clientViaServiceAccount(accountCredentials, [
-      'https://www.googleapis.com/auth/firebase.messaging',
-    ]);
-
-    /// initialization
-    pushAccessTokenCred = autoRefreshingAuthClient.credentials;
-    // when new credentials are available, pushAccessTokenCred will be updated
-    // (it checks if the current credentials is expired)
-    autoRefreshingAuthClient.credentialUpdates.listen((cred) {
-      pushAccessTokenCred = cred;
-    });
-    putDataInSettingBox(hiveServiceAccountAccessToken, jsonEncode(pushAccessTokenCred));
-    return pushAccessTokenCred!.accessToken.data;
-  }
-
   void dispose() {
     if (pushNotificationStream.isClosed) return;
     pushNotificationStream.close();
@@ -582,7 +542,7 @@ class PushNotificationService {
     final notificationData = normalizeNotificationDataMap(rawNotificationData);
     WidgetsFlutterBinding.ensureInitialized();
     final plugin = FlutterLocalNotificationsPlugin();
-    const androidInit = AndroidInitializationSettings('@mipmap/launcher_icon');
+    const androidInit = AndroidInitializationSettings('@drawable/ic_notification');
     const iosInit = DarwinInitializationSettings(requestSoundPermission: true, requestBadgePermission: true, requestAlertPermission: true);
     await plugin.initialize(settings: const InitializationSettings(android: androidInit, iOS: iosInit));
     final androidPlugin = plugin.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
@@ -682,4 +642,6 @@ class NotificationConstant {
   static const reportId = 'report_id';
   static const isReportChat = 'is_report_chat';
   static const isAppKilledOrTerminated = 'isAppKilledOrTerminated';
+  static const dispatchAction = 'dispatch_action';
+  static const dispatchTs = 'dispatch_ts';
 }

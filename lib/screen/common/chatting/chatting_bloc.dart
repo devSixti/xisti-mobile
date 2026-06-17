@@ -125,46 +125,8 @@ class ChattingBloc extends Bloc {
   }
 
   Future<void> callNotificationApi(String msg, {bool isImage = false}) async {
-    var mainPushData = <String, dynamic>{};
-    var message = <String, dynamic>{};
-    var data = <String, dynamic>{};
-    //Data(It will add inside 'message')
-    data["user_id"] = userId;
-    data["title"] = userName;
-    data["desc"] = isImage ? "image" : msg;
-    data["body"] = isImage ? "image" : msg;
-    data["sound"] = "default";
-    data["user_img"] = getStringFromUserInfoBox(hiveProfileImage);
-    data["receiver_name"] = userName;
-    data["receiver_id"] = getIntFromUserInfoBox(hiveUserId).toString();
-    data["click_action"] = "FLUTTER_NOTIFICATION_CLICK";
-    data["user_type"] = ChatWithType.user.toString();
-    data["order_chat_number"] = chatNo;
-    data["report_id"] = reportId.toString();
-
-    //Message(It includes all data)
-    message["token"] = chatWithFCMToken;
-    message["data"] = data;
-    message["notification"] = {'title': userName, 'body': isImage ? "image" : msg};
-    message["android"] = {
-      'notification': {'click_action': 'FLUTTER_NOTIFICATION_CLICK', 'sound': 'default', 'channel_id': 'high_importance_channel'},
-    };
-    message["apns"] = {
-      'payload': {
-        'aps': {
-          'content-available': 0,
-          'sound': 'default'
-        },
-      },
-    };
-
-    //Main all push notification data(Which include all things)
-    mainPushData["validate_only"] = false;
-    mainPushData["message"] = message;
-
-    String auth2Token = await pushNotificationService.autoRefreshCredentialsInitialize();
-    var response = await ApiFirebaseHelper(auth2Token).postFormData("send", body: mainPushData);
-    debugPrint(response.toString());
+    // FCM for chat is sent server-side; client must not ship service account credentials.
+    debugPrint('$tag chat push skipped (server-side FCM only)');
   }
 
   Future<void> callUploadImageApi(String filePath) async {

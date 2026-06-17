@@ -10,6 +10,7 @@ import '../../../googleApi/google_api_repo.dart';
 import '../../../googleApi/place_auto_complete_dl.dart';
 import '../../../googleApi/place_detail_dl.dart';
 import '../../../hive/hive_helper.dart';
+import '../../../utils/app_mobile_settings.dart';
 import '../../../utils/get_route_utils.dart';
 import '../../../utils/utils.dart';
 import '../../driverMode/hailRide/ride_estimation_preview.dart';
@@ -198,7 +199,7 @@ class SelectLocationBloc extends Bloc {
           // subjectRideCalculation.add(ApiResponse.completed(response));
           subjectHailRide.add(ApiResponse.completed());
           recommendedPriceSubject.sink.add(getDoubleFromDynamic(response.recommendedFare));
-          minPriceSubject.sink.add(getDoubleFromDynamic(response.minPrice));
+          minPriceSubject.sink.add(applyRegionalMinFareFloor(response.minPrice));
           maxPriceSubject.sink.add(getDoubleFromDynamic(response.maxPrice));
         } else {
           subjectHailRide.add(ApiResponse.error(message));

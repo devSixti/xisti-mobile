@@ -2,6 +2,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 
 import '../constant/constant.dart';
 import '../main.dart';
+import '../services/secure_token_storage.dart';
 import 'hive_constant.dart';
 
 export 'hive_constant.dart';
@@ -22,10 +23,16 @@ Future<void> initBox() async {
   if (userPrefBox.get(hiveSelectedLanguageCode) == null) {
     putDataInUserPrefBox(hiveSelectedLanguageCode, defaultLanguage);
   }
+
+  await SecureTokenStorage.init();
 }
 
 ///put data in [settingsBox]
 Future<void> putDataInSettingBox(String key, dynamic value) async {
+  if (key == hiveAccessToken) {
+    await SecureTokenStorage.writeAccessToken(value?.toString() ?? '');
+    return;
+  }
   await settingsBox.put(key, value);
 }
 
@@ -41,6 +48,10 @@ Future<void> putDataInUserPrefBox(String key, dynamic value) async {
 
 ///different data types get from [settingsBox]
 String getStringFromSettingBox(String key, {String defaultValue = ""}) {
+  if (key == hiveAccessToken) {
+    final token = SecureTokenStorage.readAccessToken();
+    return token.isNotEmpty ? token : defaultValue;
+  }
   return settingsBox.get(key, defaultValue: defaultValue) ?? defaultValue;
 }
 
@@ -93,6 +104,7 @@ Future<void> hiveClearWithRemainSomeData({required bool isAccountDelete}) async 
 
   await settingsBox.clear();
   await userInfoBox.clear();
+  await SecureTokenStorage.clearAccessToken();
 
   putDataInSettingBox(hiveSelectedCurrency, selectedCurrency);
   putDataInUserInfoBox(hiveUserId, userId);

@@ -86,11 +86,14 @@ jobs:
 
       - name: Build debug APK (arm64)
         env:
+          XISTI_APP_KEY: ${{ secrets.XISTI_APP_KEY }}
           QA_APP_KEY: ${{ secrets.QA_APP_KEY }}
         run: |
           set -euo pipefail
           DEFINES="${{ env.DART_DEFINES }}"
-          if [ -n "${QA_APP_KEY:-}" ]; then
+          if [ -n "${XISTI_APP_KEY:-}" ]; then
+            DEFINES="${DEFINES} --dart-define=XISTI_APP_KEY=${XISTI_APP_KEY}"
+          elif [ -n "${QA_APP_KEY:-}" ]; then
             DEFINES="${DEFINES} --dart-define=QA_APP_KEY=${QA_APP_KEY}"
           fi
           flutter build apk --debug --target-platform android-arm64 ${DEFINES}
@@ -205,11 +208,14 @@ jobs:
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          XISTI_APP_KEY: ${{ secrets.XISTI_APP_KEY }}
           QA_APP_KEY: ${{ secrets.QA_APP_KEY }}
         run: |
           set -euo pipefail
           DEFINES="${{ env.DART_DEFINES }}"
-          if [ -n "${QA_APP_KEY:-}" ]; then
+          if [ -n "${XISTI_APP_KEY:-}" ]; then
+            DEFINES="${DEFINES} --dart-define=XISTI_APP_KEY=${XISTI_APP_KEY}"
+          elif [ -n "${QA_APP_KEY:-}" ]; then
             DEFINES="${DEFINES} --dart-define=QA_APP_KEY=${QA_APP_KEY}"
           fi
           flutter build appbundle --release ${DEFINES}
@@ -299,6 +305,21 @@ jobs:
         id: app_version
         run: echo "semver=$(grep '^version:' pubspec.yaml | awk '{print $2}')" >> "$GITHUB_OUTPUT"
 
+      - name: Prepare Flutter dart-defines (app auth key)
+        id: dart_defines
+        env:
+          XISTI_APP_KEY: ${{ secrets.XISTI_APP_KEY }}
+          QA_APP_KEY: ${{ secrets.QA_APP_KEY }}
+        run: |
+          set -euo pipefail
+          DEFINES="${{ env.DART_DEFINES }}"
+          if [ -n "${XISTI_APP_KEY:-}" ]; then
+            DEFINES="${DEFINES} --dart-define=XISTI_APP_KEY=${XISTI_APP_KEY}"
+          elif [ -n "${QA_APP_KEY:-}" ]; then
+            DEFINES="${DEFINES} --dart-define=QA_APP_KEY=${QA_APP_KEY}"
+          fi
+          echo "defines=${DEFINES}" >> "$GITHUB_OUTPUT"
+
       - name: Deploy to App Store Connect (Fastlane)
         working-directory: ios
         env:
@@ -314,7 +335,7 @@ jobs:
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
           MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
           MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
-          DART_DEFINES: ${{ env.DART_DEFINES }}
+          DART_DEFINES: ${{ steps.dart_defines.outputs.defines }}
         run: bundle exec fastlane deploy_app_store
 
       - name: Upload IPA artifact (backup)
