@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
@@ -8,6 +9,7 @@ import '../../../commonView/customCountryCodePicker/country_code.dart';
 import '../../../hive/hive_helper.dart';
 import '../../../networking/base_dl.dart';
 import '../../../utils/phone_util.dart';
+import '../../../services/session_restore_service.dart';
 import '../../../utils/utils.dart';
 import '../../../utils/validator.dart';
 import '../../passengerMode/passengerHome/passenger_home.dart';
@@ -117,6 +119,7 @@ class SignUpBloc extends Bloc {
           clearPendingSignupData();
           setDataInHive(response);
           putDataInSettingBox(hiveIsLoggedIn, true);
+          unawaited(SessionRestoreService.enableBiometricLoginIfAvailable());
           getGoogleMapKeyForApiCall();
           openScreenWithClearPrevious(context, const PassengerHome());
         }

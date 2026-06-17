@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
@@ -7,6 +8,7 @@ import 'package:pin_code_fields/pin_code_fields.dart';
 import '../../../blocs/bloc.dart';
 import '../../../hive/hive_helper.dart';
 import '../../../networking/base_dl.dart';
+import '../../../services/session_restore_service.dart';
 import '../../../utils/utils.dart';
 import '../../passengerMode/passengerHome/passenger_home.dart';
 import '../Login/login_dl.dart';
@@ -87,6 +89,7 @@ class OtpVerifyBloc extends Bloc {
         clearPendingSignupData();
         setDataInHive(response);
         putDataInSettingBox(hiveIsLoggedIn, true);
+        unawaited(SessionRestoreService.enableBiometricLoginIfAvailable());
         getGoogleMapKeyForApiCall();
         openScreenWithClearPrevious(context, const PassengerHome());
       }

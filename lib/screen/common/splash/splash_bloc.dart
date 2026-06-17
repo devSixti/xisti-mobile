@@ -12,6 +12,7 @@ import '../../../bottomSheet/common_bottom_sheet.dart';
 import '../../../bottomSheet/location_disclosure_sheet.dart';
 import '../../../hive/hive_helper.dart';
 import '../../../utils/app_mobile_settings.dart';
+import '../../../services/session_restore_service.dart';
 import '../../../utils/utils.dart';
 import '../../driverMode/driverHome/driver_home.dart';
 import '../../driverMode/driverRunningRide/driver_running_ride.dart';
@@ -163,7 +164,7 @@ class SplashBloc extends Bloc {
         var response = GetRunningServicePojo.fromJson(await _splashRepo.getDriverRunningServiceApi());
         String message = getApiMsg(response.message);
         if (!context.mounted) return;
-        if (isApiStatus(context, response.status, message, true, showMess: false)) {
+        if (isApiStatus(context, response.status, message, false, showMess: false)) {
           List<RunningRides> runningRidesList = response.runningRides ?? [];
           putDataInSettingBox(hiveIsAutoSettle, response.isAutoSettle == 1);
           if (runningRidesList.isEmpty) {
@@ -179,7 +180,7 @@ class SplashBloc extends Bloc {
             );
           }
         } else {
-          if (response.status == 0 || response.status == 1) {
+          if (response.status == 0 || response.status == 1 || isLoggedIn()) {
             _timer = Timer(const Duration(milliseconds: 5000), () {
               if (!context.mounted) return;
               openScreenWithClearPrevious(context, const DriverHome(isFromLogin: false));
@@ -206,7 +207,7 @@ class SplashBloc extends Bloc {
         var response = PassengerRunningPojo.fromJson(await _splashRepo.getPassengerRunningServiceApi());
         String message = getApiMsg(response.message);
         if (!context.mounted) return;
-        if (isApiStatus(context, response.status, message, true, showMess: false)) {
+        if (isApiStatus(context, response.status, message, false, showMess: false)) {
           if ((response.rideId ?? 0) == 0) {
             if (!context.mounted) return;
             _timer = Timer(const Duration(milliseconds: 5000), () {
@@ -238,7 +239,7 @@ class SplashBloc extends Bloc {
             });
           }
         } else {
-          if (response.status == 0 || response.status == 1) {
+          if (response.status == 0 || response.status == 1 || isLoggedIn()) {
             _timer = Timer(const Duration(milliseconds: 5000), () {
               if (!context.mounted) return;
               openScreenWithClearPrevious(context, const PassengerHome());
@@ -255,7 +256,19 @@ class SplashBloc extends Bloc {
     }
   }
 
-  void splashAction() {
+  Future<void> splashAction() async {
+    SessionRestoreService.syncLoggedInFlagFromStoredCredentials();
+
+    if (!isLoggedIn() && SessionRestoreService.canRestoreBiometricSession()) {
+      final restored = await SessionRestoreService.tryRestoreSessionWithBiometrics(context);
+      if (!context.mounted) {
+        return;
+      }
+      if (restored) {
+        SessionRestoreService.syncLoggedInFlagFromStoredCredentials();
+      }
+    }
+
     if (isLoggedIn()) {
       if (getIntFromSettingBox(hiveAppMode) == AppMode.driver) {
         callDriverRunningServiceApi();

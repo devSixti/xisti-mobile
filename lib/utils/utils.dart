@@ -25,6 +25,7 @@ import '../bottomSheet/common_bottom_sheet.dart';
 import '../bottomSheet/internet_connection_loss_sheet.dart';
 import '../constant/chat_constant.dart';
 import '../constant/constant.dart';
+import '../services/session_restore_service.dart';
 import 'api_message_localizer.dart';
 import 'app_mobile_settings.dart';
 import 'phone_util.dart';
@@ -104,6 +105,12 @@ bool isLoggedIn() {
   if (getBoolFromSettingBox(hiveIsLoggedIn)) {
     return true;
   }
+  final userId = getIntFromUserInfoBox(hiveUserId);
+  final token = getStringFromSettingBox(hiveAccessToken);
+  if (userId > 0 && token.trim().isNotEmpty) {
+    putDataInSettingBox(hiveIsLoggedIn, true);
+    return true;
+  }
   return false;
 }
 
@@ -144,6 +151,7 @@ void manageLoginResponse(BuildContext context, LoginPojo response) {
     if (response.isRegister == 1) {
       putDataInSettingBox(hiveIsLoggedIn, true);
       putDataInSettingBox(hiveAppMode, response.activeMode ?? AppMode.passenger);
+      unawaited(SessionRestoreService.enableBiometricLoginIfAvailable());
       changeSubscribeTopic();
       getGoogleMapKeyForApiCall();
       if (response.activeMode == AppMode.driver) {
