@@ -128,42 +128,65 @@ class _PassengerHomeState extends State<PassengerHome> {
 
   /// Wireframe: círculo recalcular (izq) y menú cuadrado (der), flotando sobre el panel fijo.
   Widget _mapFloatingActions() {
+    final theme = getCurrentTheme(context);
     return Positioned(
       left: commonHorizontalPadding,
       right: commonHorizontalPadding,
-      bottom: 10.h,
+      bottom: 14.h,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           GestureDetector(
             onTap: () => _bloc?.focusCurrentPosition(),
             child: Container(
-              width: 44.w,
-              height: 44.w,
+              width: 48.w,
+              height: 48.w,
               decoration: BoxDecoration(
-                color: getCurrentTheme(context).colorWhite,
+                color: theme.colorWhite,
                 shape: BoxShape.circle,
-                boxShadow: XistiUiTokens.floatingShadow(context, getCurrentTheme(context).colorBorder),
+                border: Border.all(color: XistiBrand.green.withValues(alpha: 0.55), width: 1.5.w),
+                boxShadow: XistiUiTokens.floatingShadow(context, theme.colorBorder),
               ),
-              child: Icon(CustomIcons.pickupLocation, size: 24.sp, color: getCurrentTheme(context).colorIconCommon),
+              child: Icon(CustomIcons.pickupLocation, size: 24.sp, color: XistiBrand.green),
             ),
           ),
           GestureDetector(
             onTap: () => openScreen(context, AccountScreen()),
             child: Container(
-              width: 44.w,
-              height: 44.w,
+              width: 48.w,
+              height: 48.w,
               decoration: BoxDecoration(
-                color: getCurrentTheme(context).colorScaffoldBg.withValues(alpha: 0.96),
+                color: theme.colorScaffoldBg.withValues(alpha: 0.98),
                 borderRadius: BorderRadius.circular(12.r),
-                border: Border.all(color: getCurrentTheme(context).colorDarkBorder, width: 1.w),
-                boxShadow: XistiUiTokens.floatingShadow(context, getCurrentTheme(context).colorBorder),
+                border: Border.all(color: XistiBrand.green.withValues(alpha: 0.45), width: 1.5.w),
+                boxShadow: XistiUiTokens.floatingShadow(context, theme.colorBorder),
               ),
-              child: Icon(CustomIcons.menu, size: 22.sp, color: getCurrentTheme(context).colorIconCommon),
+              child: Icon(CustomIcons.menu, size: 24.sp, color: theme.colorIconCommon),
             ),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _modernServiceChipsBar() {
+    return StreamBuilder<String>(
+      stream: _bloc?.selectedServiceModeSubject,
+      builder: (context, snapMode) {
+        return StreamBuilder<ApiResponse<ServiceTypeModel>>(
+          stream: _bloc?.subjectServiceData,
+          builder: (context, snapHome) {
+            final groups = snapHome.data?.data?.serviceModes ??
+                ServiceModeKind.groupsFromFlatServices(snapHome.data?.data?.services ?? []);
+            return PassengerHomeServiceChipsBar(
+              selectedMode: snapMode.data ?? ServiceModeKind.transport,
+              groups: groups,
+              onModeSelected: (mode) => _bloc?.selectServiceMode(mode),
+              embeddedInCard: true,
+            );
+          },
+        );
+      },
     );
   }
 
@@ -196,28 +219,11 @@ class _PassengerHomeState extends State<PassengerHome> {
                             _bloc?.clearMapData();
                           },
                           onRecentDestinationTap: (entry) => _bloc?.applyRecentDestinationEntry(entry),
+                          modeSelectorFooter: _modernServiceChipsBar(),
                         );
                       },
                     );
                   },
-                );
-              },
-            );
-          },
-        ),
-        SizedBox(height: 8.h),
-        StreamBuilder<String>(
-          stream: _bloc?.selectedServiceModeSubject,
-          builder: (context, snapMode) {
-            return StreamBuilder<ApiResponse<ServiceTypeModel>>(
-              stream: _bloc?.subjectServiceData,
-              builder: (context, snapHome) {
-                final groups = snapHome.data?.data?.serviceModes ??
-                    ServiceModeKind.groupsFromFlatServices(snapHome.data?.data?.services ?? []);
-                return PassengerHomeServiceChipsBar(
-                  selectedMode: snapMode.data ?? ServiceModeKind.transport,
-                  groups: groups,
-                  onModeSelected: (mode) => _bloc?.selectServiceMode(mode),
                 );
               },
             );
@@ -251,10 +257,12 @@ class _PassengerHomeState extends State<PassengerHome> {
 
   Widget _modernBodyPortrait() {
     final topInset = MediaQuery.paddingOf(context).top;
+    final panelMaxH = XistiUiTokens.wireframePanelMaxHeight(context);
 
     return Column(
       children: [
         Expanded(
+          flex: XistiUiTokens.wireframeMapFlex.toInt(),
           child: Stack(
             children: [
               _modernMapStack(),
@@ -268,17 +276,24 @@ class _PassengerHomeState extends State<PassengerHome> {
             ],
           ),
         ),
-        StreamBuilder<String>(
-          stream: _bloc?.selectedServiceModeSubject,
-          builder: (context, modeSnap) {
-            return AnimatedSwitcher(
-              duration: const Duration(milliseconds: 280),
-              child: PassengerHomeBookingSheet(
-                key: ValueKey(modeSnap.data ?? ServiceModeKind.transport),
-                children: _modernBookingSheetChildren(),
-              ),
-            );
-          },
+        Flexible(
+          flex: XistiUiTokens.wireframePanelFlex.toInt(),
+          fit: FlexFit.loose,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxHeight: panelMaxH),
+            child: StreamBuilder<String>(
+              stream: _bloc?.selectedServiceModeSubject,
+              builder: (context, modeSnap) {
+                return AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 280),
+                  child: PassengerHomeBookingSheet(
+                    key: ValueKey(modeSnap.data ?? ServiceModeKind.transport),
+                    children: _modernBookingSheetChildren(),
+                  ),
+                );
+              },
+            ),
+          ),
         ),
       ],
     );
@@ -858,14 +873,19 @@ class _PassengerHomeState extends State<PassengerHome> {
                   bottom: 2.h,
                 ),
                 child: SizedBox(
-                  height: 78.h,
+                  height: isXistiNewHomeLayoutEnabled() ? XistiUiTokens.wireframeVehicleTileHeight : 78.h,
                   child: serviceTypeList.length <= 2
                       ? Row(
                           children: [
                             for (var position = 0; position < serviceTypeList.length; position++) ...[
                               if (position > 0) SizedBox(width: 10.w),
                               Expanded(
-                                child: _vehicleTile(serviceTypeList, position, modeSnap.data, compact: true),
+                                child: _vehicleTile(
+                                  serviceTypeList,
+                                  position,
+                                  modeSnap.data,
+                                  wireframe: isXistiNewHomeLayoutEnabled(),
+                                ),
                               ),
                             ],
                           ],
@@ -873,8 +893,12 @@ class _PassengerHomeState extends State<PassengerHome> {
                       : ListView.builder(
                           scrollDirection: Axis.horizontal,
                           itemCount: serviceTypeList.length,
-                          itemBuilder: (context, position) =>
-                              _vehicleTile(serviceTypeList, position, modeSnap.data, compact: false),
+                          itemBuilder: (context, position) => _vehicleTile(
+                            serviceTypeList,
+                            position,
+                            modeSnap.data,
+                            wireframe: isXistiNewHomeLayoutEnabled(),
+                          ),
                         ),
                 ),
               );
@@ -885,7 +909,7 @@ class _PassengerHomeState extends State<PassengerHome> {
     },
   );
 
-  Widget _vehicleTile(List<ServiceTypeItem> serviceTypeList, int position, String? serviceMode, {bool compact = false}) {
+  Widget _vehicleTile(List<ServiceTypeItem> serviceTypeList, int position, String? serviceMode, {bool wireframe = false}) {
     return GestureDetector(
       onTap: () => _bloc?.vehicleSelect(position),
       child: StreamBuilder<ServiceTypeItem?>(
@@ -898,7 +922,7 @@ class _PassengerHomeState extends State<PassengerHome> {
             isSelected: item.matchesSelection(selected),
             serviceMode: serviceMode,
             expanded: serviceTypeList.length <= 2,
-            compact: compact,
+            wireframeTile: wireframe,
           );
         },
       ),

@@ -10,12 +10,14 @@ class PassengerHomeServiceChipsBar extends StatelessWidget {
   final String selectedMode;
   final List<ServiceModeGroup> groups;
   final ValueChanged<String> onModeSelected;
+  final bool embeddedInCard;
 
   const PassengerHomeServiceChipsBar({
     super.key,
     required this.selectedMode,
     required this.groups,
     required this.onModeSelected,
+    this.embeddedInCard = false,
   });
 
   @override
@@ -31,7 +33,9 @@ class PassengerHomeServiceChipsBar extends StatelessWidget {
       height: 32.h,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
-        padding: EdgeInsetsDirectional.symmetric(horizontal: XistiUiTokens.overlayHorizontalPadding),
+        padding: EdgeInsetsDirectional.symmetric(
+          horizontal: embeddedInCard ? 0 : XistiUiTokens.overlayHorizontalPadding,
+        ),
         itemCount: visible.length,
         separatorBuilder: (_, _) => SizedBox(width: 8.w),
         itemBuilder: (context, index) {

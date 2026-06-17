@@ -31,6 +31,8 @@ class PassengerHomeSearchCard extends StatelessWidget {
   final VoidCallback? onClearPickup;
   final VoidCallback? onClearDropoff;
   final void Function(Map<String, dynamic> entry)? onRecentDestinationTap;
+  /// Viajes / Envío integrados en la misma tarjeta (wireframe).
+  final Widget? modeSelectorFooter;
 
   const PassengerHomeSearchCard({
     super.key,
@@ -43,6 +45,7 @@ class PassengerHomeSearchCard extends StatelessWidget {
     this.onClearPickup,
     this.onClearDropoff,
     this.onRecentDestinationTap,
+    this.modeSelectorFooter,
   });
 
   @override
@@ -159,6 +162,12 @@ class PassengerHomeSearchCard extends StatelessWidget {
                 },
               ),
             ),
+          ],
+          if (modeSelectorFooter != null) ...[
+            SizedBox(height: 10.h),
+            Divider(height: 1.h, color: theme.colorDarkBorder.withValues(alpha: 0.6)),
+            SizedBox(height: 8.h),
+            modeSelectorFooter!,
           ],
         ],
       ),
