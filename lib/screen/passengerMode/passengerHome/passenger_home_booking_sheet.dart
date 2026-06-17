@@ -53,7 +53,10 @@ class PassengerHomeBookingSheet extends StatelessWidget {
         child: expandToFill
             ? Padding(
                 padding: EdgeInsetsDirectional.only(bottom: bottomInset),
-                child: inner,
+                child: Align(
+                  alignment: AlignmentDirectional.topCenter,
+                  child: inner,
+                ),
               )
             : inner,
       ),

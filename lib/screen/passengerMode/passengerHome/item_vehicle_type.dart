@@ -43,15 +43,15 @@ class ItemVehicleType extends StatelessWidget {
   Widget _photoTile(BuildContext context) {
     final theme = getCurrentTheme(context);
     final accent = XistiUiTokens.accentForMode(serviceMode);
-    final tileH = photoTileHeight ?? 88.h;
+    final tileH = photoTileHeight ?? 56.h;
 
     return Container(
-      width: expanded ? double.infinity : 100.w,
+      width: expanded ? double.infinity : 88.w,
       height: tileH,
-      margin: EdgeInsetsDirectional.only(end: expanded ? 0 : 10.w),
+      margin: EdgeInsetsDirectional.only(end: expanded ? 0 : 8.w),
       decoration: BoxDecoration(
         color: theme.colorScaffoldBg,
-        borderRadius: BorderRadius.circular(14.r),
+        borderRadius: BorderRadius.circular(12.r),
         border: Border.all(
           color: isSelected ? accent : theme.colorDarkBorder,
           width: isSelected ? 2.w : 1.w,
@@ -62,9 +62,9 @@ class ItemVehicleType extends StatelessWidget {
         children: [
           Expanded(
             child: Padding(
-              padding: EdgeInsetsDirectional.fromSTEB(8.w, 8.h, 8.w, 4.h),
+              padding: EdgeInsetsDirectional.fromSTEB(5.w, 5.h, 5.w, 2.h),
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(8.r),
+                borderRadius: BorderRadius.circular(6.r),
                 child: LoadImageWithPlaceHolder(
                   width: double.infinity,
                   height: double.infinity,
@@ -77,7 +77,7 @@ class ItemVehicleType extends StatelessWidget {
             ),
           ),
           Padding(
-            padding: EdgeInsetsDirectional.only(bottom: 6.h, start: 4.w, end: 4.w),
+            padding: EdgeInsetsDirectional.only(bottom: 4.h, start: 3.w, end: 3.w),
             child: Text(
               serviceTypeItem.serviceName ?? "-",
               textAlign: TextAlign.center,
@@ -87,7 +87,7 @@ class ItemVehicleType extends StatelessWidget {
                 context: context,
                 textColor: isSelected ? accent : theme.colorTextCommon,
                 fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                fontSize: textSize12px,
+                fontSize: textSize10px,
               ),
             ),
           ),

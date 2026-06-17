@@ -239,10 +239,13 @@ class _PassengerHomeState extends State<PassengerHome> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Padding(
-          padding: EdgeInsetsDirectional.fromSTEB(0, 6.h, 0, 4.h),
+          padding: EdgeInsetsDirectional.fromSTEB(0, 4.h, 0, 2.h),
           child: PassengerHomeBarrioShortcuts(onBarrioSelected: (b) => _bloc?.flyToBarrio(b)),
         ),
-        Expanded(child: serviceData(fillAvailable: true)),
+        SizedBox(
+          height: XistiUiTokens.wireframeVehiclePhotoTileMaxHeight,
+          child: serviceData(fillAvailable: true),
+        ),
         encomiendaFields(),
         confirmBtnAndOtherOption(),
       ],
@@ -889,7 +892,7 @@ class _PassengerHomeState extends State<PassengerHome> {
                   builder: (context, constraints) {
                     final tileH = constraints.maxHeight.clamp(
                       XistiUiTokens.wireframeVehiclePhotoTileMinHeight,
-                      140.h,
+                      XistiUiTokens.wireframeVehiclePhotoTileMaxHeight,
                     );
                     return Padding(
                       padding: EdgeInsetsDirectional.symmetric(horizontal: commonHorizontalPadding),

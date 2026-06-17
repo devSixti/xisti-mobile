@@ -24,18 +24,19 @@ abstract final class XistiUiTokens {
   static double get overlayHorizontalPadding => 16.w;
   static double get cardPadding => 16.w;
 
-  /// Wireframe: panel inferior ~34% pantalla.
+  /// Wireframe: panel inferior compacto (~24% pantalla).
   static double wireframePanelHeight(BuildContext context) {
     final screenH = MediaQuery.sizeOf(context).height;
     final bottomInset = MediaQuery.paddingOf(context).bottom;
-    return screenH * 0.34 + bottomInset;
+    return screenH * 0.24 + bottomInset;
   }
 
   static double get wireframeVehicleTileHeight => 52.h;
-  static double get wireframeVehiclePhotoTileMinHeight => 72.h;
+  static double get wireframeVehiclePhotoTileMinHeight => 46.h;
+  static double get wireframeVehiclePhotoTileMaxHeight => 56.h;
 
-  static int get wireframeMapFlex => 66;
-  static int get wireframePanelFlex => 34;
+  static int get wireframeMapFlex => 76;
+  static int get wireframePanelFlex => 24;
 
   static bool isTabletOrLandscape(BuildContext context) {
     final size = MediaQuery.sizeOf(context);
