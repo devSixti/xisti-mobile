@@ -33,9 +33,11 @@ abstract final class XistiUiTokens {
 
   static double get wireframeVehicleTileHeight => 52.h;
   /// Cuadrado solo imagen (referencia wireframe).
-  static double get wireframeVehicleBoxSize => 52.w;
-  /// Caja + etiqueta debajo.
-  static double get wireframeVehicleRowHeight => 68.h;
+  static double get wireframeVehicleBoxSize => 86.w;
+  static double get wireframeVehicleLabelGap => 4.h;
+  /// Caja + separador + etiqueta (derivado del box para evitar overflow).
+  static double get wireframeVehicleRowHeight =>
+      wireframeVehicleBoxSize + wireframeVehicleLabelGap + 16.h;
   static double get wireframeVehiclePhotoTileMinHeight => 46.h;
   static double get wireframeVehiclePhotoTileMaxHeight => 52.h;
 

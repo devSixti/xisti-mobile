@@ -24,6 +24,7 @@ import '../../common/splash/splash_repo.dart';
 import '../offerRide/offer_ride_screen.dart';
 import '../passengerRunningRide/passenger_running_ride.dart';
 import '../setRoute/set_route_screen.dart';
+import '../../../utils/xisti_main_city_zones.dart';
 import '../../../utils/xisti_ui_tokens.dart';
 import 'passenger_home_activity_dl.dart';
 import 'passenger_home_barrio_shortcuts.dart';
@@ -104,6 +105,12 @@ class PassengerHomeBloc extends Bloc {
   final selectedDeliveryVehicleServiceId = BehaviorSubject<int?>();
   final locationHistorySubject = BehaviorSubject<List<Map<String, dynamic>>>.seeded([]);
   final activityHubSubject = BehaviorSubject<PassengerActivitySnapshot?>.seeded(null);
+  final activeCityZonesSubject = BehaviorSubject<List<XistiBarrioShortcut>>.seeded(
+    XistiMainCityZoneCatalog.defaultCity.zones,
+  );
+  final activeMainCitySubject = BehaviorSubject<String>.seeded(
+    XistiMainCityZoneCatalog.defaultCity.displayName,
+  );
 
   Future<void> callPassengerRunningServiceApi() async {
     if (await isNetworkConnected(
@@ -775,6 +782,7 @@ class PassengerHomeBloc extends Bloc {
     getLocationUtils.getLocationUtils(
       (locationData) {},
       (locationData, address) {
+        _updateCityZonesForCoordinates(locationData.latitude, locationData.longitude);
         if (googleMapController != null) {
           focusInMap(googleMapController!, locationData.latitude, locationData.longitude, true);
         }
@@ -784,11 +792,18 @@ class PassengerHomeBloc extends Bloc {
     );
   }
 
+  void _updateCityZonesForCoordinates(double lat, double lng) {
+    final city = XistiMainCityZoneCatalog.resolveCity(lat, lng);
+    activeMainCitySubject.add(city.displayName);
+    activeCityZonesSubject.add(city.zones);
+  }
+
   Future<void> getCurrentLocation() async {
     subjectServiceData.add(ApiResponse.loading());
     getLocationUtils.getLocationUtils(
       (locationData) {
         currentLatLng = LatLng(locationData.latitude, locationData.longitude);
+        _updateCityZonesForCoordinates(locationData.latitude, locationData.longitude);
         if (googleMapController != null) {
           focusInMap(googleMapController!, locationData.latitude, locationData.longitude, true);
         }
@@ -1154,6 +1169,8 @@ class PassengerHomeBloc extends Bloc {
     selectedDeliveryVehicleServiceId.close();
     locationHistorySubject.close();
     activityHubSubject.close();
+    activeCityZonesSubject.close();
+    activeMainCitySubject.close();
   }
 }
 

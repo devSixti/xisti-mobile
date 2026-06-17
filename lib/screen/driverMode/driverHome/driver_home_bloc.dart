@@ -178,7 +178,12 @@ class DriverHomeBloc extends Bloc {
         availableRideSubject.add(ApiResponse.loading());
       }
       try {
-        var response = AvailableRidePojo.fromJson(await _repo.availableRideRequestApi());
+        var response = AvailableRidePojo.fromJson(
+          await _repo.availableRideRequestApi(
+            currentLat: currentLaLng?.latitude,
+            currentLng: currentLaLng?.longitude,
+          ),
+        );
         String message = getApiMsg(response.message);
         if (!context.mounted) return;
         if (isApiStatus(context, response.status, message, true)) {
@@ -245,6 +250,16 @@ class DriverHomeBloc extends Bloc {
     }
   }
 
+  Future<void> _syncDriverLocationToServer(double lat, double lng) async {
+    currentLaLng = LatLng(lat, lng);
+    currentLocationSubject.add(currentLaLng);
+    try {
+      await _repo.updateCurrentLatLongApi(currentLat: lat, currentLong: lng);
+    } catch (e) {
+      debugPrint('syncDriverLocationToServer: $e');
+    }
+  }
+
   Future<void> changeDriverStatus(bool currentStatus) async {
     debugPrint("changeDriverStatus 1: $currentStatus");
     if (isEmailOrNumNull() && currentStatus) {
@@ -253,6 +268,10 @@ class DriverHomeBloc extends Bloc {
       debugPrint("changeDriverStatus 2: $currentStatus");
       statusSwitchSubject.sink.add(currentStatus);
       if (currentStatus) {
+        final loc = currentLaLng;
+        if (loc != null) {
+          await _syncDriverLocationToServer(loc.latitude, loc.longitude);
+        }
         backgroundLocationService.onStart();
         WidgetsBinding.instance.addPostFrameCallback((_) {
           callAvailableRideApi(isLoading: true);
@@ -274,9 +293,8 @@ class DriverHomeBloc extends Bloc {
   Future<void> getCurrentLocation() async {
     mapStyleSubject.add(getCurrentTheme(context).mapStyle);
     getLocationUtils.getLocationUtils(
-      (locationData) {
-        currentLaLng = LatLng(locationData.latitude, locationData.longitude);
-        currentLocationSubject.add(currentLaLng);
+      (locationData) async {
+        await _syncDriverLocationToServer(locationData.latitude, locationData.longitude);
         if (googleMapController != null) {
           googleMapController!.animateCamera(
             CameraUpdate.newLatLngZoom(currentLaLng!, 15),

@@ -137,7 +137,7 @@ class _OfferFareAndBookSheetState extends State<OfferFareAndBookSheet> {
                   offerFare(),
                   Divider(height: 0, thickness: 2.h, color: getCurrentTheme(context).colorTextFieldBorder),
                   fareInfo(),
-                  if (widget.isCourier || widget.isEncomienda) courierPaymentMethod() else paymentType(),
+                  offerPaymentMethod(),
                   if (widget.isCourier || widget.isEncomienda) ...[
                     deliveryLegalNoticeCompact(),
                     if (widget.deliveryVehicleOptions.isNotEmpty) deliveryVehicleSection(),
@@ -538,7 +538,7 @@ class _OfferFareAndBookSheetState extends State<OfferFareAndBookSheet> {
     );
   }
 
-  Widget courierPaymentMethod() {
+  Widget offerPaymentMethod() {
     return StreamBuilder<List<OfferPaymentSelection>>(
       stream: _bloc?.courierPaymentListController,
       builder: (context, snapList) {

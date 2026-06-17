@@ -59,6 +59,7 @@ class _DriverHomeState extends State<DriverHome> with WidgetsBindingObserver {
                       color: getCurrentTheme(context).colorScaffoldBg,
                       child: lottie_animation.Lottie.asset(
                         setLottieAnimationBasedOnTheme(context, 'offline.json'),
+                        fit: BoxFit.cover,
                         alignment: AlignmentDirectional.center,
                       ),
                     ),
@@ -157,7 +158,7 @@ class _DriverHomeState extends State<DriverHome> with WidgetsBindingObserver {
         return StreamBuilder<LatLng?>(
           stream: _bloc?.currentLocationSubject,
           builder: (context, locSnap) {
-            final loc = locSnap.data ?? const LatLng(6.2476, -75.5658);
+            final loc = locSnap.data ?? defaultLatLng;
             return GoogleMap(
               zoomControlsEnabled: false,
               myLocationEnabled: true,

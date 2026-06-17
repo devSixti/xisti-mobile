@@ -105,7 +105,7 @@ class ItemVehicleType extends StatelessWidget {
             ],
           ),
         ),
-        SizedBox(height: 4.h),
+        SizedBox(height: XistiUiTokens.wireframeVehicleLabelGap),
         SizedBox(
           width: boxSize,
           child: Text(

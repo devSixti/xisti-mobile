@@ -55,12 +55,7 @@ class OfferFareAndBookBloc extends Bloc {
     String packageLengthCm,
     int? selectedDeliveryVehicleServiceId,
   ) {
-    if (isCourier || isEncomienda) {
-      setCourierPaymentList(paymentType, destinationPaymentMethod);
-    } else {
-      setPaymentTypeList(paymentType);
-      setDestinationPaymentList(destinationPaymentMethod);
-    }
+    setOfferPaymentList(paymentType, destinationPaymentMethod, includeOnlinePayment: !(isCourier || isEncomienda));
     if (deliveryOptions.isNotEmpty) {
       final initial = selectedDeliveryVehicleServiceId ?? deliveryOptions.first.vehicleServiceId ?? 0;
       selectedDeliveryVehicleServiceIdSubject.add(initial > 0 ? initial : null);
@@ -107,20 +102,7 @@ class OfferFareAndBookBloc extends Bloc {
     selectedDeliveryVehicleServiceIdSubject.add(vehicleServiceId);
   }
 
-  void setPaymentTypeList(int paymentType) {
-    final paymentList = <PaymentTypeModel>[
-      if (getBoolFromSettingBox(hivePaymentTypeCash)) PaymentTypeModel(type: PaymentType.cash, name: languages.cash),
-      if (getBoolFromSettingBox(hivePaymentTypeOnline)) PaymentTypeModel(type: PaymentType.online, name: languages.onlinePayment),
-      if (getBoolFromSettingBox(hivePaymentTypeWallet)) PaymentTypeModel(type: PaymentType.wallet, name: languages.wallet),
-    ];
-    paymentListController.sink.add(paymentList);
-    if (paymentList.isNotEmpty) {
-      final index = paymentList.indexWhere((element) => element.type == paymentType);
-      selectedPaymentController.sink.add(index >= 0 ? paymentList[index] : paymentList.first);
-    }
-  }
-
-  List<OfferPaymentSelection> _buildCourierPaymentOptions() {
+  List<OfferPaymentSelection> _buildOfferPaymentOptions({required bool includeOnlinePayment}) {
     final isSpanish = getLanguageFromUserPrefBox().startsWith('es');
     final destinationOptions = DestinationPaymentUtil.optionsForLocale(isSpanish);
     final options = <OfferPaymentSelection>[];
@@ -148,6 +130,16 @@ class OfferFareAndBookBloc extends Bloc {
       );
     }
 
+    if (includeOnlinePayment && getBoolFromSettingBox(hivePaymentTypeOnline)) {
+      options.add(
+        OfferPaymentSelection(
+          label: languages.onlinePayment,
+          paymentType: PaymentType.online,
+          destinationPaymentCode: DestinationPaymentUtil.cash,
+        ),
+      );
+    }
+
     if (getBoolFromSettingBox(hivePaymentTypeWallet)) {
       options.add(
         OfferPaymentSelection(
@@ -161,8 +153,12 @@ class OfferFareAndBookBloc extends Bloc {
     return options;
   }
 
-  void setCourierPaymentList(int paymentType, String destinationPaymentCode) {
-    final options = _buildCourierPaymentOptions();
+  void setOfferPaymentList(
+    int paymentType,
+    String destinationPaymentCode, {
+    required bool includeOnlinePayment,
+  }) {
+    final options = _buildOfferPaymentOptions(includeOnlinePayment: includeOnlinePayment);
     courierPaymentListController.sink.add(options);
     if (options.isEmpty) {
       return;
@@ -174,10 +170,17 @@ class OfferFareAndBookBloc extends Bloc {
       if (walletOptions.isNotEmpty) {
         selected = walletOptions.first;
       }
+    } else if (paymentType == PaymentType.online) {
+      final onlineOptions = options.where((o) => o.paymentType == PaymentType.online);
+      if (onlineOptions.isNotEmpty) {
+        selected = onlineOptions.first;
+      }
     } else {
       final normalizedCode = destinationPaymentCode.trim().toLowerCase();
       for (final option in options) {
-        if (!option.isWallet && option.destinationPaymentCode == normalizedCode) {
+        if (!option.isWallet &&
+            option.paymentType == PaymentType.cash &&
+            option.destinationPaymentCode == normalizedCode) {
           selected = option;
           break;
         }
@@ -197,14 +200,6 @@ class OfferFareAndBookBloc extends Bloc {
     selectedDestinationPaymentController.sink.add(
       DestinationPaymentOption(code: selection.destinationPaymentCode, label: selection.label),
     );
-  }
-
-  void setDestinationPaymentList(String selectedCode) {
-    final isSpanish = getLanguageFromUserPrefBox().startsWith('es');
-    final options = DestinationPaymentUtil.optionsForLocale(isSpanish);
-    destinationPaymentListController.sink.add(options);
-    final match = options.where((o) => o.code == selectedCode);
-    selectedDestinationPaymentController.sink.add(match.isNotEmpty ? match.first : options.first);
   }
 
   void onSubmitValue() {

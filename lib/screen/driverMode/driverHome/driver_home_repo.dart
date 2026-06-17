@@ -44,10 +44,18 @@ class DriverHomeRepo {
     return response;
   }
 
-  Future availableRideRequestApi() async {
+  Future availableRideRequestApi({double? currentLat, double? currentLng}) async {
+    final body = {
+      ApiParam.paramUserId: getIntFromUserInfoBox(hiveUserId),
+      ApiParam.paramAccessToken: getStringFromSettingBox(hiveAccessToken),
+    };
+    if (currentLat != null && currentLng != null) {
+      body[ApiParam.paramCurrentLat] = currentLat.toString();
+      body[ApiParam.paramCurrentLng] = currentLng.toString();
+    }
     final response = await _apiBaseHelper.post(
       ApiConst.endPointAvailableRide,
-      body: {ApiParam.paramUserId: getIntFromUserInfoBox(hiveUserId), ApiParam.paramAccessToken: getStringFromSettingBox(hiveAccessToken)},
+      body: body,
     );
     return response;
   }

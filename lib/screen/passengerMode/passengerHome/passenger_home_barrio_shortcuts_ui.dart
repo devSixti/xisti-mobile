@@ -5,15 +5,22 @@ import '../../../utils/utils.dart';
 import '../../../utils/xisti_ui_tokens.dart';
 import 'passenger_home_barrio_shortcuts.dart';
 
-/// Horizontal zone chips — tap to fly map camera to Medellín neighborhoods.
+/// Horizontal zone chips — tap to fly map camera to neighborhoods in the active main city.
 /// Clipped with edge fade so items appear to enter/exit within the panel.
 class PassengerHomeBarrioShortcuts extends StatelessWidget {
+  final List<XistiBarrioShortcut> shortcuts;
   final ValueChanged<XistiBarrioShortcut> onBarrioSelected;
 
-  const PassengerHomeBarrioShortcuts({super.key, required this.onBarrioSelected});
+  const PassengerHomeBarrioShortcuts({
+    super.key,
+    required this.shortcuts,
+    required this.onBarrioSelected,
+  });
 
   @override
   Widget build(BuildContext context) {
+    if (shortcuts.isEmpty) return const SizedBox.shrink();
+
     final theme = getCurrentTheme(context);
 
     return SizedBox(
@@ -38,10 +45,10 @@ class PassengerHomeBarrioShortcuts extends StatelessWidget {
             scrollDirection: Axis.horizontal,
             padding: EdgeInsetsDirectional.symmetric(horizontal: XistiUiTokens.overlayHorizontalPadding),
             clipBehavior: Clip.hardEdge,
-            itemCount: kXistiBarrioShortcuts.length,
+            itemCount: shortcuts.length,
             separatorBuilder: (_, _) => SizedBox(width: 6.w),
             itemBuilder: (context, index) {
-              final barrio = kXistiBarrioShortcuts[index];
+              final barrio = shortcuts[index];
               return Material(
                 color: Colors.transparent,
                 child: InkWell(

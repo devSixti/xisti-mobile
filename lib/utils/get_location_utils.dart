@@ -1,6 +1,8 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 
+import '../constant/constant.dart';
 import 'utils.dart';
 
 class GetLocationUtils {
@@ -69,7 +71,30 @@ class GetLocationUtils {
   }
 
   Future<Position> fetchCurrentLocation() async {
+    if (_useMedellinTestLocation()) {
+      return _medellinTestPosition();
+    }
     Position l = await Geolocator.getCurrentPosition();
     return l;
+  }
+
+  bool _useMedellinTestLocation() {
+    if (kDebugMode) return true;
+    return const bool.fromEnvironment('USE_MEDELLIN_TEST_LOCATION', defaultValue: false);
+  }
+
+  Position _medellinTestPosition() {
+    return Position(
+      latitude: defaultLatLng.latitude,
+      longitude: defaultLatLng.longitude,
+      timestamp: DateTime.now(),
+      accuracy: 1,
+      altitude: 0,
+      altitudeAccuracy: 0,
+      heading: 0,
+      headingAccuracy: 0,
+      speed: 0,
+      speedAccuracy: 0,
+    );
   }
 }

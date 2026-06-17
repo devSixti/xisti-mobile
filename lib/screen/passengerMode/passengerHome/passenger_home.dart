@@ -14,6 +14,7 @@ import '../../../utils/map_style_hot_reload.dart';
 import '../../../utils/utils.dart';
 import '../../../utils/xisti_ui_tokens.dart';
 import 'passenger_home_activity_hub.dart';
+import 'passenger_home_barrio_shortcuts.dart';
 import 'passenger_home_barrio_shortcuts_ui.dart';
 import '../../common/account/account_screen.dart';
 import 'item_vehicle_type.dart';
@@ -235,18 +236,36 @@ class _PassengerHomeState extends State<PassengerHome> {
     );
   }
 
+  Widget _cityZoneShortcuts() {
+    return StreamBuilder<List<XistiBarrioShortcut>>(
+      stream: _bloc?.activeCityZonesSubject,
+      builder: (context, snap) {
+        return PassengerHomeBarrioShortcuts(
+          shortcuts: snap.data ?? kXistiBarrioShortcutsDefault,
+          onBarrioSelected: (b) => _bloc?.flyToBarrio(b),
+        );
+      },
+    );
+  }
+
   Widget _modernBookingPanel() {
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Padding(
-          padding: EdgeInsetsDirectional.fromSTEB(0, 4.h, 0, 2.h),
-          child: PassengerHomeBarrioShortcuts(onBarrioSelected: (b) => _bloc?.flyToBarrio(b)),
+          padding: EdgeInsetsDirectional.fromSTEB(0, 2.h, 0, 0),
+          child: _cityZoneShortcuts(),
         ),
+        SizedBox(height: 8.h),
         SizedBox(
           height: XistiUiTokens.wireframeVehicleRowHeight,
-          child: serviceData(fillAvailable: true),
+          child: ClipRect(
+            child: Align(
+              alignment: AlignmentDirectional.topStart,
+              child: serviceData(fillAvailable: true),
+            ),
+          ),
         ),
         encomiendaFields(),
         confirmBtnAndOtherOption(),
@@ -257,7 +276,7 @@ class _PassengerHomeState extends State<PassengerHome> {
   List<Widget> _modernBookingSheetChildren() => [
         Padding(
           padding: EdgeInsetsDirectional.only(bottom: 6.h),
-          child: PassengerHomeBarrioShortcuts(onBarrioSelected: (b) => _bloc?.flyToBarrio(b)),
+          child: _cityZoneShortcuts(),
         ),
         serviceData(),
         deliveryFields(),
@@ -890,29 +909,33 @@ class _PassengerHomeState extends State<PassengerHome> {
 
               if (usePhotoTile) {
                 final boxSize = XistiUiTokens.wireframeVehicleBoxSize;
-                return Center(
+                return Align(
+                  alignment: AlignmentDirectional.centerStart,
                   child: serviceTypeList.length <= 2
-                      ? Row(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            for (var position = 0; position < serviceTypeList.length; position++) ...[
-                              if (position > 0) SizedBox(width: 20.w),
-                              _vehicleTile(
-                                serviceTypeList,
-                                position,
-                                modeSnap.data,
-                                photoTile: true,
-                                photoTileHeight: boxSize,
-                              ),
+                      ? Padding(
+                          padding: EdgeInsetsDirectional.only(start: commonHorizontalPadding),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              for (var position = 0; position < serviceTypeList.length; position++) ...[
+                                if (position > 0) SizedBox(width: 20.w),
+                                _vehicleTile(
+                                  serviceTypeList,
+                                  position,
+                                  modeSnap.data,
+                                  photoTile: true,
+                                  photoTileHeight: boxSize,
+                                ),
+                              ],
                             ],
-                          ],
+                          ),
                         )
                       : SizedBox(
                           height: XistiUiTokens.wireframeVehicleRowHeight,
                           child: ListView.builder(
                             scrollDirection: Axis.horizontal,
-                            padding: EdgeInsetsDirectional.symmetric(horizontal: commonHorizontalPadding),
+                            padding: EdgeInsetsDirectional.only(start: commonHorizontalPadding, end: commonHorizontalPadding),
                             itemCount: serviceTypeList.length,
                             itemBuilder: (context, position) => Padding(
                               padding: EdgeInsetsDirectional.only(end: 16.w),
