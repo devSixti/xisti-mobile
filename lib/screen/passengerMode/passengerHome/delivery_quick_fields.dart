@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../commonView/custom_text_field.dart';
-import '../../../utils/app_mobile_settings.dart';
 import '../../../utils/utils.dart';
 
 /// Peso y dimensiones del paquete en home (modo Envío), antes de ofertar tarifa.
@@ -74,10 +73,6 @@ class _DeliveryQuickFieldsState extends State<DeliveryQuickFields> {
 
   @override
   Widget build(BuildContext context) {
-    if (!isCourierPackageDimensionsRequired()) {
-      return const SizedBox.shrink();
-    }
-
     return Padding(
       padding: EdgeInsetsDirectional.only(
         start: commonHorizontalPadding,

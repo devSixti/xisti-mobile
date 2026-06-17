@@ -28,7 +28,7 @@ class PassengerHomeServiceChipsBar extends StatelessWidget {
           ];
 
     return SizedBox(
-      height: 40.h,
+      height: 32.h,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         padding: EdgeInsetsDirectional.symmetric(horizontal: XistiUiTokens.overlayHorizontalPadding),

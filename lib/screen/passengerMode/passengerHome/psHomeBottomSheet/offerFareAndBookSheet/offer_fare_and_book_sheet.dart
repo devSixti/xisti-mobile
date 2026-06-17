@@ -11,7 +11,6 @@ import '../../../../../commonView/dropdown_button2.dart';
 import '../../../../../commonView/scaffold_with_safe_area.dart';
 import '../../../../../commonView/spinner_date_time_picker.dart';
 import '../../../../../hive/hive_helper.dart';
-import '../../../../../utils/app_mobile_settings.dart';
 import '../../../../../utils/destination_payment_util.dart';
 import '../../../../../commonView/xisti_bottom_sheet_shell.dart';
 import '../../../../../commonView/xisti_horizontal_payment_selector.dart';
@@ -150,7 +149,7 @@ class _OfferFareAndBookSheetState extends State<OfferFareAndBookSheet> {
                       encomiendaPriceCap(),
                     ] else ...[
                       estimatedPrice(),
-                      if (isCourierPackageDimensionsRequired()) packageDimensions(),
+                      packageDimensions(),
                       parcelNote(),
                     ],
                   ],

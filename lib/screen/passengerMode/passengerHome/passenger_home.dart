@@ -122,8 +122,48 @@ class _PassengerHomeState extends State<PassengerHome> {
       fit: StackFit.expand,
       children: [
         googleMap(),
-        _mapCenterPin(legacyOffset: false),
       ],
+    );
+  }
+
+  /// Wireframe: círculo recalcular (izq) y menú cuadrado (der), flotando sobre el panel fijo.
+  Widget _mapFloatingActions() {
+    return Positioned(
+      left: commonHorizontalPadding,
+      right: commonHorizontalPadding,
+      bottom: 10.h,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          GestureDetector(
+            onTap: () => _bloc?.focusCurrentPosition(),
+            child: Container(
+              width: 44.w,
+              height: 44.w,
+              decoration: BoxDecoration(
+                color: getCurrentTheme(context).colorWhite,
+                shape: BoxShape.circle,
+                boxShadow: XistiUiTokens.floatingShadow(context, getCurrentTheme(context).colorBorder),
+              ),
+              child: Icon(CustomIcons.pickupLocation, size: 24.sp, color: getCurrentTheme(context).colorIconCommon),
+            ),
+          ),
+          GestureDetector(
+            onTap: () => openScreen(context, AccountScreen()),
+            child: Container(
+              width: 44.w,
+              height: 44.w,
+              decoration: BoxDecoration(
+                color: getCurrentTheme(context).colorScaffoldBg.withValues(alpha: 0.96),
+                borderRadius: BorderRadius.circular(12.r),
+                border: Border.all(color: getCurrentTheme(context).colorDarkBorder, width: 1.w),
+                boxShadow: XistiUiTokens.floatingShadow(context, getCurrentTheme(context).colorBorder),
+              ),
+              child: Icon(CustomIcons.menu, size: 22.sp, color: getCurrentTheme(context).colorIconCommon),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -165,6 +205,7 @@ class _PassengerHomeState extends State<PassengerHome> {
             );
           },
         ),
+        SizedBox(height: 8.h),
         StreamBuilder<String>(
           stream: _bloc?.selectedServiceModeSubject,
           builder: (context, snapMode) {
@@ -188,14 +229,14 @@ class _PassengerHomeState extends State<PassengerHome> {
 
   List<Widget> _modernBookingSheetChildren() => [
         Padding(
-          padding: EdgeInsetsDirectional.only(bottom: 8.h),
+          padding: EdgeInsetsDirectional.only(bottom: 6.h),
           child: PassengerHomeBarrioShortcuts(onBarrioSelected: (b) => _bloc?.flyToBarrio(b)),
         ),
         serviceData(),
         deliveryFields(),
         encomiendaFields(),
-        activityHubCard(),
         confirmBtnAndOtherOption(),
+        activityHubCard(),
       ];
 
   Widget activityHubCard() => StreamBuilder(
@@ -218,28 +259,12 @@ class _PassengerHomeState extends State<PassengerHome> {
             children: [
               _modernMapStack(),
               Positioned(
-                top: topInset + 8.h,
+                top: topInset + 6.h,
                 left: 0,
                 right: 0,
                 child: _modernMapOverlayColumn(topInset: topInset),
               ),
-              accountBtn(topOffset: topInset + 8.h),
-              Positioned(
-                right: commonHorizontalPadding,
-                bottom: 16.h,
-                child: GestureDetector(
-                  onTap: () => _bloc?.focusCurrentPosition(),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: getCurrentTheme(context).colorWhite,
-                      borderRadius: BorderRadiusDirectional.all(Radius.circular(50.r)),
-                      boxShadow: XistiUiTokens.floatingShadow(context, getCurrentTheme(context).colorBorder),
-                    ),
-                    padding: EdgeInsetsDirectional.all(10.sp),
-                    child: Icon(CustomIcons.pickupLocation, size: 28.sp, color: getCurrentTheme(context).colorIconCommon),
-                  ),
-                ),
-              ),
+              _mapFloatingActions(),
             ],
           ),
         ),
@@ -270,28 +295,12 @@ class _PassengerHomeState extends State<PassengerHome> {
             children: [
               _modernMapStack(),
               Positioned(
-                top: topInset + 8.h,
+                top: topInset + 6.h,
                 left: 0,
                 right: 0,
                 child: _modernMapOverlayColumn(topInset: topInset),
               ),
-              accountBtn(topOffset: topInset + 8.h),
-              Positioned(
-                right: commonHorizontalPadding,
-                bottom: 16.h,
-                child: GestureDetector(
-                  onTap: () => _bloc?.focusCurrentPosition(),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: getCurrentTheme(context).colorWhite,
-                      borderRadius: BorderRadiusDirectional.all(Radius.circular(50.r)),
-                      boxShadow: XistiUiTokens.floatingShadow(context, getCurrentTheme(context).colorBorder),
-                    ),
-                    padding: EdgeInsetsDirectional.all(10.sp),
-                    child: Icon(CustomIcons.pickupLocation, size: 28.sp, color: getCurrentTheme(context).colorIconCommon),
-                  ),
-                ),
-              ),
+              _mapFloatingActions(),
             ],
           ),
         ),
@@ -688,7 +697,7 @@ class _PassengerHomeState extends State<PassengerHome> {
         final hideStopsAndOptions = _bloc?.isEncomiendasMode ?? false;
         return Container(
           padding: EdgeInsetsDirectional.only(start: commonHorizontalPadding, end: commonHorizontalPadding),
-          margin: EdgeInsetsDirectional.only(bottom: getBottomMargin(), top: 20.h),
+          margin: EdgeInsetsDirectional.only(bottom: getBottomMargin(), top: 12.h),
           child: Row(
             children: [
               if (!hideStopsAndOptions) ...[
@@ -845,18 +854,18 @@ class _PassengerHomeState extends State<PassengerHome> {
                 padding: EdgeInsetsDirectional.only(
                   start: commonHorizontalPadding,
                   end: commonHorizontalPadding,
-                  top: 4.h,
-                  bottom: 4.h,
+                  top: 2.h,
+                  bottom: 2.h,
                 ),
                 child: SizedBox(
-                  height: 118.h,
+                  height: 78.h,
                   child: serviceTypeList.length <= 2
                       ? Row(
                           children: [
                             for (var position = 0; position < serviceTypeList.length; position++) ...[
-                              if (position > 0) SizedBox(width: 12.w),
+                              if (position > 0) SizedBox(width: 10.w),
                               Expanded(
-                                child: _vehicleTile(serviceTypeList, position, modeSnap.data),
+                                child: _vehicleTile(serviceTypeList, position, modeSnap.data, compact: true),
                               ),
                             ],
                           ],
@@ -864,7 +873,8 @@ class _PassengerHomeState extends State<PassengerHome> {
                       : ListView.builder(
                           scrollDirection: Axis.horizontal,
                           itemCount: serviceTypeList.length,
-                          itemBuilder: (context, position) => _vehicleTile(serviceTypeList, position, modeSnap.data),
+                          itemBuilder: (context, position) =>
+                              _vehicleTile(serviceTypeList, position, modeSnap.data, compact: false),
                         ),
                 ),
               );
@@ -875,7 +885,7 @@ class _PassengerHomeState extends State<PassengerHome> {
     },
   );
 
-  Widget _vehicleTile(List<ServiceTypeItem> serviceTypeList, int position, String? serviceMode) {
+  Widget _vehicleTile(List<ServiceTypeItem> serviceTypeList, int position, String? serviceMode, {bool compact = false}) {
     return GestureDetector(
       onTap: () => _bloc?.vehicleSelect(position),
       child: StreamBuilder<ServiceTypeItem?>(
@@ -888,6 +898,7 @@ class _PassengerHomeState extends State<PassengerHome> {
             isSelected: item.matchesSelection(selected),
             serviceMode: serviceMode,
             expanded: serviceTypeList.length <= 2,
+            compact: compact,
           );
         },
       ),

@@ -54,11 +54,10 @@ class PassengerHomeSearchCard extends StatelessWidget {
     final showRecents = (dropoff?.name ?? '').isEmpty && recentTrips.isNotEmpty;
 
     return Container(
-      margin: EdgeInsetsDirectional.only(
-        start: XistiUiTokens.overlayHorizontalPadding,
-        end: XistiUiTokens.overlayHorizontalPadding + 48.w,
+      margin: EdgeInsetsDirectional.symmetric(
+        horizontal: XistiUiTokens.overlayHorizontalPadding,
       ),
-      padding: EdgeInsetsDirectional.fromSTEB(14.w, 12.h, 14.w, 12.h),
+      padding: EdgeInsetsDirectional.fromSTEB(16.w, 14.h, 16.w, 14.h),
       decoration: BoxDecoration(
         color: theme.colorScaffoldBg.withValues(alpha: 0.97),
         borderRadius: BorderRadius.circular(XistiUiTokens.searchCardRadius),
@@ -90,7 +89,7 @@ class PassengerHomeSearchCard extends StatelessWidget {
               ),
             ],
           ),
-          SizedBox(height: 10.h),
+          SizedBox(height: 12.h),
           _routeRow(
             context: context,
             icon: CustomIcons.pickupLocation,
@@ -102,7 +101,7 @@ class PassengerHomeSearchCard extends StatelessWidget {
           ),
           Padding(
             padding: EdgeInsetsDirectional.only(start: 12.w),
-            child: Container(width: 2.w, height: 14.h, color: theme.colorDarkBorder),
+            child: Container(width: 2.w, height: 18.h, color: theme.colorDarkBorder),
           ),
           _routeRow(
             context: context,
@@ -183,7 +182,7 @@ class PassengerHomeSearchCard extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(12.r),
         child: Padding(
-          padding: EdgeInsetsDirectional.symmetric(vertical: 8.h),
+          padding: EdgeInsetsDirectional.symmetric(vertical: 10.h),
           child: Row(
             children: [
               Icon(icon, size: 22.sp, color: iconColor),

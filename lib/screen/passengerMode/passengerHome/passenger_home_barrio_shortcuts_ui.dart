@@ -16,7 +16,7 @@ class PassengerHomeBarrioShortcuts extends StatelessWidget {
     final theme = getCurrentTheme(context);
 
     return SizedBox(
-      height: 34.h,
+      height: 28.h,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         padding: EdgeInsetsDirectional.symmetric(horizontal: XistiUiTokens.overlayHorizontalPadding),

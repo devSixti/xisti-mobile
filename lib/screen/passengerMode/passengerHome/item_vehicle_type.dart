@@ -12,6 +12,7 @@ class ItemVehicleType extends StatelessWidget {
   final bool isSelected;
   final String? serviceMode;
   final bool expanded;
+  final bool compact;
 
   const ItemVehicleType({
     super.key,
@@ -19,17 +20,21 @@ class ItemVehicleType extends StatelessWidget {
     this.isSelected = false,
     this.serviceMode,
     this.expanded = false,
+    this.compact = false,
   });
 
   @override
   Widget build(BuildContext context) {
     final theme = getCurrentTheme(context);
     final accent = XistiUiTokens.accentForMode(serviceMode);
+    final cardHeight = compact ? 56.h : 72.h;
+    final iconSize = compact ? 34.h : 44.h;
+    final radius = compact ? 14.r : 16.r;
 
     return Container(
       alignment: AlignmentDirectional.center,
-      width: expanded ? double.infinity : 100.w,
-      margin: EdgeInsetsDirectional.only(end: expanded ? 0 : 12.w),
+      width: expanded ? double.infinity : 88.w,
+      margin: EdgeInsetsDirectional.only(end: expanded ? 0 : 10.w),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -39,21 +44,23 @@ class ItemVehicleType extends StatelessWidget {
               AnimatedContainer(
                 duration: const Duration(milliseconds: 220),
                 curve: Curves.easeOutCubic,
-                child: AspectRatio(
-                  aspectRatio: 1.0,
-                  child: Container(
-                    width: double.maxFinite,
-                    padding: EdgeInsetsDirectional.only(start: 10.w, end: 10.w, top: 10.h, bottom: 8.h),
-                    decoration: XistiUiTokens.glassCard(
-                      background: theme.colorScaffoldBg,
-                      borderColor: theme.colorBorder,
-                      accent: accent,
-                      selected: isSelected,
-                      radius: 18.r,
-                    ),
+                height: cardHeight,
+                width: double.infinity,
+                padding: EdgeInsetsDirectional.symmetric(horizontal: 8.w, vertical: 6.h),
+                decoration: XistiUiTokens.glassCard(
+                  background: theme.colorScaffoldBg,
+                  borderColor: theme.colorBorder,
+                  accent: accent,
+                  selected: isSelected,
+                  radius: radius,
+                ),
+                child: Center(
+                  child: SizedBox(
+                    height: iconSize,
+                    width: iconSize,
                     child: LoadImageWithPlaceHolder(
-                      width: double.maxFinite,
-                      height: double.maxFinite,
+                      width: iconSize,
+                      height: iconSize,
                       imageFit: BoxFit.contain,
                       image: serviceTypeItem.serviceIcon ?? "",
                       defaultAssetImage: "assets/images/app_icon.png",
@@ -62,7 +69,7 @@ class ItemVehicleType extends StatelessWidget {
                   ),
                 ),
               ),
-              if (isSelected)
+              if (isSelected && !compact)
                 Align(
                   alignment: AlignmentDirectional.topEnd,
                   child: GestureDetector(
@@ -81,19 +88,19 @@ class ItemVehicleType extends StatelessWidget {
                       );
                     },
                     child: Container(
-                      margin: EdgeInsetsDirectional.only(top: 4.h, end: 4.w),
-                      padding: EdgeInsets.all(4.sp),
+                      margin: EdgeInsetsDirectional.only(top: 3.h, end: 3.w),
+                      padding: EdgeInsets.all(3.sp),
                       decoration: BoxDecoration(
                         color: theme.colorScaffoldBg.withValues(alpha: 0.9),
                         shape: BoxShape.circle,
                       ),
-                      child: Icon(CustomIcons.information, size: 14.sp, color: accent),
+                      child: Icon(CustomIcons.information, size: 12.sp, color: accent),
                     ),
                   ),
                 ),
             ],
           ),
-          SizedBox(height: 6.h),
+          SizedBox(height: compact ? 4.h : 5.h),
           Text(
             serviceTypeItem.serviceName ?? "-",
             textAlign: TextAlign.center,
@@ -103,7 +110,7 @@ class ItemVehicleType extends StatelessWidget {
               context: context,
               textColor: isSelected ? accent : theme.colorTextCommon,
               fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-              fontSize: textSize13px,
+              fontSize: compact ? textSize12px : textSize13px,
             ),
           ),
         ],
