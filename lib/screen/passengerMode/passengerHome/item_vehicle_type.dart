@@ -44,11 +44,12 @@ class ItemVehicleType extends StatelessWidget {
     final theme = getCurrentTheme(context);
     final accent = XistiUiTokens.accentForMode(serviceMode);
     final tileH = photoTileHeight ?? 56.h;
+    final tileW = tileH;
 
     return Container(
-      width: expanded ? double.infinity : 88.w,
+      width: tileW,
       height: tileH,
-      margin: EdgeInsetsDirectional.only(end: expanded ? 0 : 8.w),
+      margin: EdgeInsetsDirectional.only(end: 8.w),
       decoration: BoxDecoration(
         color: theme.colorScaffoldBg,
         borderRadius: BorderRadius.circular(12.r),
@@ -62,7 +63,7 @@ class ItemVehicleType extends StatelessWidget {
         children: [
           Expanded(
             child: Padding(
-              padding: EdgeInsetsDirectional.fromSTEB(5.w, 5.h, 5.w, 2.h),
+              padding: EdgeInsetsDirectional.fromSTEB(4.w, 4.h, 4.w, 2.h),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(6.r),
                 child: LoadImageWithPlaceHolder(
@@ -77,7 +78,7 @@ class ItemVehicleType extends StatelessWidget {
             ),
           ),
           Padding(
-            padding: EdgeInsetsDirectional.only(bottom: 4.h, start: 3.w, end: 3.w),
+            padding: EdgeInsetsDirectional.only(bottom: 3.h, start: 2.w, end: 2.w),
             child: Text(
               serviceTypeItem.serviceName ?? "-",
               textAlign: TextAlign.center,

@@ -122,6 +122,7 @@ class _PassengerHomeState extends State<PassengerHome> {
       fit: StackFit.expand,
       children: [
         googleMap(),
+        _mapCenterPin(legacyOffset: false),
       ],
     );
   }
@@ -894,15 +895,17 @@ class _PassengerHomeState extends State<PassengerHome> {
                       XistiUiTokens.wireframeVehiclePhotoTileMinHeight,
                       XistiUiTokens.wireframeVehiclePhotoTileMaxHeight,
                     );
-                    return Padding(
-                      padding: EdgeInsetsDirectional.symmetric(horizontal: commonHorizontalPadding),
+                    return Center(
                       child: serviceTypeList.length <= 2
                           ? Row(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 for (var position = 0; position < serviceTypeList.length; position++) ...[
-                                  if (position > 0) SizedBox(width: 10.w),
-                                  Expanded(
+                                  if (position > 0) SizedBox(width: 12.w),
+                                  SizedBox(
+                                    width: tileH,
+                                    height: tileH,
                                     child: _vehicleTile(
                                       serviceTypeList,
                                       position,
@@ -914,15 +917,23 @@ class _PassengerHomeState extends State<PassengerHome> {
                                 ],
                               ],
                             )
-                          : ListView.builder(
-                              scrollDirection: Axis.horizontal,
-                              itemCount: serviceTypeList.length,
-                              itemBuilder: (context, position) => _vehicleTile(
-                                serviceTypeList,
-                                position,
-                                modeSnap.data,
-                                photoTile: true,
-                                photoTileHeight: tileH,
+                          : SizedBox(
+                              height: tileH,
+                              child: ListView.builder(
+                                scrollDirection: Axis.horizontal,
+                                padding: EdgeInsetsDirectional.symmetric(horizontal: commonHorizontalPadding),
+                                itemCount: serviceTypeList.length,
+                                itemBuilder: (context, position) => SizedBox(
+                                  width: tileH,
+                                  height: tileH,
+                                  child: _vehicleTile(
+                                    serviceTypeList,
+                                    position,
+                                    modeSnap.data,
+                                    photoTile: true,
+                                    photoTileHeight: tileH,
+                                  ),
+                                ),
                               ),
                             ),
                     );
@@ -993,7 +1004,7 @@ class _PassengerHomeState extends State<PassengerHome> {
             serviceTypeItem: item,
             isSelected: item.matchesSelection(selected),
             serviceMode: serviceMode,
-            expanded: serviceTypeList.length <= 2,
+            expanded: serviceTypeList.length <= 2 && !photoTile,
             wireframeTile: wireframe && !photoTile,
             photoTile: photoTile,
             photoTileHeight: photoTileHeight,

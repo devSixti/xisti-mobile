@@ -985,9 +985,13 @@ class PassengerHomeBloc extends Bloc {
   }
 
   Future<void> setMarkers() async {
-    if ((fromAddressController.valueOrNull?.name ?? "").isNotEmpty && (toAddressController.valueOrNull?.name ?? "").isNotEmpty) {
-      List<Marker> markerList = markersListController.valueOrNull ?? [];
-      if ((fromAddressController.valueOrNull?.name ?? "").isNotEmpty) {
+    if ((fromAddressController.valueOrNull?.name ?? "").isEmpty &&
+        (toAddressController.valueOrNull?.name ?? "").isEmpty) {
+      return;
+    }
+    if (!context.mounted) return;
+    List<Marker> markerList = markersListController.valueOrNull ?? [];
+    if ((fromAddressController.valueOrNull?.name ?? "").isNotEmpty) {
         BitmapDescriptor pickUpMarkerIcon = await getBitmapDescriptorFromAssetBytes(path: setImagesBasedOnTheme(context, 'ic_pin_pickup_location.png'));
         int pos = markerList.indexWhere((item) => item.markerId == const MarkerId("pickup"));
         if (pos >= 0) {
@@ -1012,7 +1016,6 @@ class PassengerHomeBloc extends Bloc {
       }
 
       if ((toAddressController.valueOrNull?.name ?? "").isNotEmpty) {
-        if (!context.mounted) return;
         BitmapDescriptor destinationMarkerIcon = await getBitmapDescriptorFromAssetBytes(
           path: setImagesBasedOnTheme(context, 'ic_pin_destination_location.png'),
         );
