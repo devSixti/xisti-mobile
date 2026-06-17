@@ -30,7 +30,7 @@ class PassengerHomeServiceChipsBar extends StatelessWidget {
           ];
 
     return SizedBox(
-      height: 32.h,
+      height: 28.h,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         padding: EdgeInsetsDirectional.symmetric(
@@ -59,7 +59,7 @@ class PassengerHomeServiceChipsBar extends StatelessWidget {
                 borderRadius: BorderRadius.circular(XistiUiTokens.chipRadius),
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 280),
-                  padding: EdgeInsetsDirectional.symmetric(horizontal: 14.w, vertical: 8.h),
+                  padding: EdgeInsetsDirectional.symmetric(horizontal: 14.w, vertical: 6.h),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(XistiUiTokens.chipRadius),
                     border: Border.all(

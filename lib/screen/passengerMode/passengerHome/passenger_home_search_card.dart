@@ -60,7 +60,7 @@ class PassengerHomeSearchCard extends StatelessWidget {
       margin: EdgeInsetsDirectional.symmetric(
         horizontal: XistiUiTokens.overlayHorizontalPadding,
       ),
-      padding: EdgeInsetsDirectional.fromSTEB(16.w, 14.h, 16.w, 14.h),
+      padding: EdgeInsetsDirectional.fromSTEB(14.w, 10.h, 14.w, 10.h),
       decoration: BoxDecoration(
         color: theme.colorScaffoldBg.withValues(alpha: 0.97),
         borderRadius: BorderRadius.circular(XistiUiTokens.searchCardRadius),
@@ -92,7 +92,7 @@ class PassengerHomeSearchCard extends StatelessWidget {
               ),
             ],
           ),
-          SizedBox(height: 12.h),
+          SizedBox(height: 8.h),
           _routeRow(
             context: context,
             icon: CustomIcons.pickupLocation,
@@ -103,8 +103,8 @@ class PassengerHomeSearchCard extends StatelessWidget {
             onClear: onClearPickup,
           ),
           Padding(
-            padding: EdgeInsetsDirectional.only(start: 12.w),
-            child: Container(width: 2.w, height: 18.h, color: theme.colorDarkBorder),
+            padding: EdgeInsetsDirectional.only(start: 11.w),
+            child: Container(width: 2.w, height: 12.h, color: theme.colorDarkBorder),
           ),
           _routeRow(
             context: context,
@@ -117,9 +117,9 @@ class PassengerHomeSearchCard extends StatelessWidget {
             emphasized: true,
           ),
           if (showRecents) ...[
-            SizedBox(height: 10.h),
+            SizedBox(height: 8.h),
             SizedBox(
-              height: 36.h,
+              height: 32.h,
               child: ListView.separated(
                 scrollDirection: Axis.horizontal,
                 itemCount: recentTrips.length > 3 ? 3 : recentTrips.length,
@@ -164,9 +164,9 @@ class PassengerHomeSearchCard extends StatelessWidget {
             ),
           ],
           if (modeSelectorFooter != null) ...[
-            SizedBox(height: 10.h),
-            Divider(height: 1.h, color: theme.colorDarkBorder.withValues(alpha: 0.6)),
             SizedBox(height: 8.h),
+            Divider(height: 1.h, color: theme.colorDarkBorder.withValues(alpha: 0.6)),
+            SizedBox(height: 6.h),
             modeSelectorFooter!,
           ],
         ],
@@ -191,10 +191,10 @@ class PassengerHomeSearchCard extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(12.r),
         child: Padding(
-          padding: EdgeInsetsDirectional.symmetric(vertical: 10.h),
+          padding: EdgeInsetsDirectional.symmetric(vertical: 6.h),
           child: Row(
             children: [
-              Icon(icon, size: 22.sp, color: iconColor),
+              Icon(icon, size: 20.sp, color: iconColor),
               SizedBox(width: 10.w),
               Expanded(
                 child: Text(

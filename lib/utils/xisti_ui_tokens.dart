@@ -24,14 +24,17 @@ abstract final class XistiUiTokens {
   static double get overlayHorizontalPadding => 16.w;
   static double get cardPadding => 16.w;
 
-  /// Wireframe: panel inferior ~30% pantalla; vehículos compactos.
-  static double wireframePanelMaxHeight(BuildContext context) =>
-      MediaQuery.sizeOf(context).height * 0.30;
+  /// Wireframe: panel inferior ~38% pantalla; vehículos compactos.
+  static double wireframePanelHeight(BuildContext context) {
+    final screenH = MediaQuery.sizeOf(context).height;
+    final bottomInset = MediaQuery.paddingOf(context).bottom;
+    return screenH * 0.38 + bottomInset;
+  }
 
   static double get wireframeVehicleTileHeight => 52.h;
 
-  static double get wireframeMapFlex => 7;
-  static double get wireframePanelFlex => 3;
+  static int get wireframeMapFlex => 62;
+  static int get wireframePanelFlex => 38;
 
   static bool isTabletOrLandscape(BuildContext context) {
     final size = MediaQuery.sizeOf(context);

@@ -257,17 +257,16 @@ class _PassengerHomeState extends State<PassengerHome> {
 
   Widget _modernBodyPortrait() {
     final topInset = MediaQuery.paddingOf(context).top;
-    final panelMaxH = XistiUiTokens.wireframePanelMaxHeight(context);
 
     return Column(
       children: [
         Expanded(
-          flex: XistiUiTokens.wireframeMapFlex.toInt(),
+          flex: XistiUiTokens.wireframeMapFlex,
           child: Stack(
             children: [
               _modernMapStack(),
               Positioned(
-                top: topInset + 6.h,
+                top: topInset + 4.h,
                 left: 0,
                 right: 0,
                 child: _modernMapOverlayColumn(topInset: topInset),
@@ -276,23 +275,20 @@ class _PassengerHomeState extends State<PassengerHome> {
             ],
           ),
         ),
-        Flexible(
-          flex: XistiUiTokens.wireframePanelFlex.toInt(),
-          fit: FlexFit.loose,
-          child: ConstrainedBox(
-            constraints: BoxConstraints(maxHeight: panelMaxH),
-            child: StreamBuilder<String>(
-              stream: _bloc?.selectedServiceModeSubject,
-              builder: (context, modeSnap) {
-                return AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 280),
-                  child: PassengerHomeBookingSheet(
-                    key: ValueKey(modeSnap.data ?? ServiceModeKind.transport),
-                    children: _modernBookingSheetChildren(),
-                  ),
-                );
-              },
-            ),
+        SizedBox(
+          height: XistiUiTokens.wireframePanelHeight(context),
+          child: StreamBuilder<String>(
+            stream: _bloc?.selectedServiceModeSubject,
+            builder: (context, modeSnap) {
+              return AnimatedSwitcher(
+                duration: const Duration(milliseconds: 280),
+                child: PassengerHomeBookingSheet(
+                  key: ValueKey(modeSnap.data ?? ServiceModeKind.transport),
+                  expandToFill: true,
+                  children: _modernBookingSheetChildren(),
+                ),
+              );
+            },
           ),
         ),
       ],
@@ -712,7 +708,10 @@ class _PassengerHomeState extends State<PassengerHome> {
         final hideStopsAndOptions = _bloc?.isEncomiendasMode ?? false;
         return Container(
           padding: EdgeInsetsDirectional.only(start: commonHorizontalPadding, end: commonHorizontalPadding),
-          margin: EdgeInsetsDirectional.only(bottom: getBottomMargin(), top: 12.h),
+          margin: EdgeInsetsDirectional.only(
+            bottom: isXistiNewHomeLayoutEnabled() ? 4.h : getBottomMargin(),
+            top: 12.h,
+          ),
           child: Row(
             children: [
               if (!hideStopsAndOptions) ...[
