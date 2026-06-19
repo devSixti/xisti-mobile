@@ -49,6 +49,10 @@
 		<string>990bf41bb5a28fe0d85dcbe95add18df</string>
 		<key>FacebookDisplayName</key>
 		<string>XISTI</string>
+		<key>GIDClientID</key>
+		<string>980764435052-rudvg41gq53dr17pce16a5p0adsuq226.apps.googleusercontent.com</string>
+		<key>GIDServerClientID</key>
+		<string>980764435052-jvlsr21keklk5i5djg3giqqfv35054th.apps.googleusercontent.com</string>
 		<key>ITSAppUsesNonExemptEncryption</key>
 		<false/>
 		<key>LSApplicationQueriesSchemes</key>

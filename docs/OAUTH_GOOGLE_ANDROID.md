@@ -37,7 +37,15 @@ cp ~/Descargas/client_secret_980764435052-*.json xisti-mobile/android/oauth-clie
 
 ## iOS
 
-Crea cliente OAuth **iOS** (`com.app.xisti`) en GCP/Firebase y actualiza `ios/Runner/Info.plist` (`CFBundleURLSchemes` con el reversed client id). El plist actual aún puede tener un client id antiguo.
+Cliente OAuth **iOS** (`client_type: 2`): `980764435052-rudvg41gq53dr17pce16a5p0adsuq226.apps.googleusercontent.com`
+
+Requisitos (google_sign_in 7.x):
+
+1. `ios/Runner/GoogleService-Info.plist` — claves `CLIENT_ID` y `REVERSED_CLIENT_ID`
+2. `ios/Runner/Info.plist` — `GIDClientID`, `GIDServerClientID`, `CFBundleURLSchemes` con reversed client id
+3. Dart — `GoogleSignIn.instance.initialize(clientId: ..., serverClientId: ...)` en `social_login.dart`
+
+Si falta `GIDClientID`, Google Sign-In falla en iOS con error de configuración.
 
 ## Cliente Web (`client_type: 3`) — obligatorio en Android
 

@@ -145,7 +145,10 @@ class _SocialLoginState extends State<SocialLogin> {
       return;
     }
     final GoogleSignIn signIn = GoogleSignIn.instance;
-    await signIn.initialize(serverClientId: kGoogleWebClientId);
+    await signIn.initialize(
+      clientId: Platform.isIOS ? kGoogleIosClientId : null,
+      serverClientId: kGoogleWebClientId,
+    );
     _googleSignInInitialized = true;
   }
 

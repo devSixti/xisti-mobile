@@ -24,9 +24,13 @@
 	<true></true>
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
-	<key>GOOGLE_APP_ID</key>
-	<string>1:980764435052:ios:42e8f22a7615f00d87ee49</string>
-	<key>DATABASE_URL</key>
+		<key>GOOGLE_APP_ID</key>
+		<string>1:980764435052:ios:42e8f22a7615f00d87ee49</string>
+		<key>CLIENT_ID</key>
+		<string>980764435052-rudvg41gq53dr17pce16a5p0adsuq226.apps.googleusercontent.com</string>
+		<key>REVERSED_CLIENT_ID</key>
+		<string>com.googleusercontent.apps.980764435052-rudvg41gq53dr17pce16a5p0adsuq226</string>
+		<key>DATABASE_URL</key>
 	<string>https://xisti-app-ad901-default-rtdb.firebaseio.com</string>
 </dict>
 </plist>
