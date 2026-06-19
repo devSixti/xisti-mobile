@@ -278,9 +278,14 @@ class PassengerHomeBloc extends Bloc {
         if (!context.mounted) return;
         if (isApiStatus(context, response.status, message, true)) {
           subjectRideCalculation.add(ApiResponse.completed(response));
-          recommendedPriceSubject.sink.add(getDoubleFromDynamic(response.recommendedFare));
-          minPriceSubject.sink.add(applyRegionalMinFareFloor(response.minPrice));
-          maxPriceSubject.sink.add(getDoubleFromDynamic(response.maxPrice));
+          final fares = normalizePassengerFareRange(
+            recommendedFare: response.recommendedFare,
+            minPrice: response.minPrice,
+            maxPrice: response.maxPrice,
+          );
+          recommendedPriceSubject.sink.add(fares.recommended);
+          minPriceSubject.sink.add(fares.minPrice);
+          maxPriceSubject.sink.add(fares.maxPrice);
           mapApiSubject.sink.add(false);
         } else {
           mapApiSubject.sink.add(false);
@@ -801,11 +806,24 @@ class PassengerHomeBloc extends Bloc {
   void _applyRegionToUi(ResolvedXistiRegion region) {
     activeMainCitySubject.add(region.city.displayName);
     activeCityZonesSubject.add(region.city.zones);
+    final recommended = recommendedPriceSubject.valueOrNull;
+    final currentMin = minPriceSubject.valueOrNull;
+    final currentMax = maxPriceSubject.valueOrNull;
+    if (recommended != null && currentMin != null && currentMax != null) {
+      final fares = normalizePassengerFareRange(
+        recommendedFare: recommended,
+        minPrice: currentMin,
+        maxPrice: currentMax,
+      );
+      recommendedPriceSubject.sink.add(fares.recommended);
+      minPriceSubject.sink.add(fares.minPrice);
+      maxPriceSubject.sink.add(fares.maxPrice);
+      return;
+    }
     final regionalMin = getRegionMinFareFromSettings();
     if (regionalMin > 0) {
-      final current = minPriceSubject.valueOrNull;
       minPriceSubject.sink.add(
-        current == null ? regionalMin : applyRegionalMinFareFloor(current),
+        currentMin == null ? regionalMin : applyRegionalMinFareFloor(currentMin),
       );
     }
   }

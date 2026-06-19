@@ -2,11 +2,20 @@ import 'dart:convert';
 
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
+import '../hive/hive_helper.dart';
 import '../networking/api_base_helper.dart';
 import 'route_detail_dl.dart';
 
 class GoogleApiRepo {
   final ApiBaseHelper _apiBaseHelper = ApiBaseHelper(baseUrl: BaseUrl.domain + BaseUrl.endPointBaseUrlApi);
+
+  Map<String, dynamic> _authBody([Map<String, dynamic>? body]) {
+    return {
+      ApiParam.paramUserId: getIntFromUserInfoBox(hiveUserId),
+      ApiParam.paramAccessToken: getStringFromSettingBox(hiveAccessToken),
+      ...?body,
+    };
+  }
 
   Future placeAutoCompleteApiCall(String search, LatLng currentLatLng) async {
     if (search.isEmpty) {
@@ -14,14 +23,21 @@ class GoogleApiRepo {
     }
     final response = await _apiBaseHelper.post(
       ApiConst.endPointPlaceAutoComplete,
-      body: {ApiParam.paramInput: search, ApiParam.paramLatitude: currentLatLng.latitude, ApiParam.paramLongitude: currentLatLng.longitude},
+      body: _authBody({
+        ApiParam.paramInput: search,
+        ApiParam.paramLatitude: currentLatLng.latitude,
+        ApiParam.paramLongitude: currentLatLng.longitude,
+      }),
     );
     return response;
   }
 
   Future placeDetailApiCall(String placeID) async {
     if (placeID.isNotEmpty) {
-      final response = await _apiBaseHelper.post(ApiConst.endPointPlaceDetail, body: {ApiParam.paramPlaceID: placeID});
+      final response = await _apiBaseHelper.post(
+        ApiConst.endPointPlaceDetail,
+        body: _authBody({ApiParam.paramPlaceID: placeID}),
+      );
       return response;
     }
     return "";
@@ -36,13 +52,13 @@ class GoogleApiRepo {
     }
     final response = await _apiBaseHelper.post(
       ApiConst.endPointRouteDetail,
-      body: {
+      body: _authBody({
         ApiParam.paramPickupLatitude: pickupLat,
         ApiParam.paramPickupLongitude: pickupLong,
         ApiParam.paramDropLatitude: destinationLat,
         ApiParam.paramDropLongitude: destinationLong,
         ApiParam.paramWaypoint: jsonEncode(points),
-      },
+      }),
     );
     return response;
   }
@@ -54,7 +70,7 @@ class GoogleApiRepo {
   Future geoCodingApiCall(double latitude, double longitude) async {
     final response = await _apiBaseHelper.post(
       ApiConst.endPointGoogleMap,
-      body: {ApiParam.paramUrl: getGeoCodingQuery(latitude: latitude, longitude: longitude)},
+      body: _authBody({ApiParam.paramUrl: getGeoCodingQuery(latitude: latitude, longitude: longitude)}),
     );
     return response;
   }

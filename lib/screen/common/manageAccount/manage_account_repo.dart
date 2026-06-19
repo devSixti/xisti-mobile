@@ -8,6 +8,7 @@ class ManageAccountRepo {
     final response = await _apiBaseHelper.post(
       ApiConst.endPointLogout,
       body: {ApiParam.paramUserId: getIntFromUserInfoBox(hiveUserId), ApiParam.paramAccessToken: getStringFromSettingBox(hiveAccessToken)},
+      showServerErrorOnFailure: false,
     );
     return response;
   }

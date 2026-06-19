@@ -53,7 +53,7 @@ class OtpVerifyBloc extends Bloc {
             if (pendingSocialSignup) {
               clearPendingSignupData();
             }
-            manageLoginResponse(context, response);
+            await manageLoginResponse(context, response);
           }
         } else {
           openSimpleSnackbar(context, message);
@@ -87,7 +87,7 @@ class OtpVerifyBloc extends Bloc {
       if (!context.mounted) return;
       if (isApiStatus(context, response.status ?? 0, message, false, messageCode: response.messageCode ?? 0)) {
         clearPendingSignupData();
-        setDataInHive(response);
+        await setDataInHive(response);
         putDataInSettingBox(hiveIsLoggedIn, true);
         unawaited(SessionRestoreService.enableBiometricLoginIfAvailable());
         getGoogleMapKeyForApiCall();

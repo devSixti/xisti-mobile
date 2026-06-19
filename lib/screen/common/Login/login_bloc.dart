@@ -45,7 +45,7 @@ class LoginBloc extends Bloc {
         );
         subject.sink.add(ApiResponse.completed(response));
         if (!context.mounted) return;
-        manageLoginResponse(context, response);
+        await manageLoginResponse(context, response);
       } catch (e) {
         subject.sink.add(ApiResponse.error(e.toString()));
       }
@@ -98,7 +98,7 @@ class LoginBloc extends Bloc {
         subject.sink.add(ApiResponse.completed(response));
 
         if (!context.mounted) return;
-        manageLoginResponse(context, response);
+        await manageLoginResponse(context, response);
       } catch (e) {
         subject.sink.add(ApiResponse.error(e.toString()));
       }

@@ -131,10 +131,10 @@ void clearPendingSignupData() {
   putDataInUserInfoBox(hivePendingSignupReferral, '');
 }
 
-void manageLoginResponse(BuildContext context, LoginPojo response) {
+Future<void> manageLoginResponse(BuildContext context, LoginPojo response) async {
   final message = getApiMsg(response.message, response.messageCode);
   if (isApiStatus(context, response.status ?? 0, message, false, messageCode: response.messageCode ?? 0)) {
-    setDataInHive(response);
+    await setDataInHive(response);
     final loginType = response.loginType ?? getStringFromUserInfoBox(hiveLoginType);
     final hasPhone = (response.contactNumber ?? '').trim().isNotEmpty;
 
@@ -244,9 +244,9 @@ IconData getPaymentTypeIcon(int paymentType) {
   }
 }
 
-void setDataInHive(LoginPojo body) {
+Future<void> setDataInHive(LoginPojo body) async {
   putDataInUserInfoBox(hiveUserId, body.userId ?? 0);
-  putDataInSettingBox(hiveAccessToken, body.accessToken.toString());
+  await putDataInSettingBox(hiveAccessToken, body.accessToken.toString());
   putDataInUserInfoBox(hiveUserName, body.userName ?? "");
   putDataInUserInfoBox(hiveEmail, body.email ?? "");
   putDataInSettingBox(hiveUniqueId, body.uniqueId ?? "");
@@ -399,7 +399,8 @@ void showProfileImageRequiredSheet(BuildContext context) {
 }
 
 double getDoubleFromDynamic(dynamic value) {
-  return double.parse(value.toString());
+  if (value == null) return 0;
+  return double.tryParse(value.toString()) ?? 0;
 }
 
 String getAmountWithCurrency(dynamic amount, {int numberAfterPoint = 2}) {

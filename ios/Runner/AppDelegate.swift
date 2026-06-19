@@ -26,8 +26,12 @@ import flutter_local_notifications
             GeneratedPluginRegistrant.register(with: registry)
         }
 
-        // Google Maps
-        GMSServices.provideAPIKey("AIzaSyCoWZtj82AFUj6uCjoe2k04DQtFS_xfGao")
+        // Google Maps — use Firebase iOS key from GoogleService-Info.plist
+        if let path = Bundle.main.path(forResource: "GoogleService-Info", ofType: "plist"),
+           let dict = NSDictionary(contentsOfFile: path),
+           let apiKey = dict["API_KEY"] as? String, !apiKey.isEmpty {
+            GMSServices.provideAPIKey(apiKey)
+        }
 
         // Notification delegate (NO optional cast)
         UNUserNotificationCenter.current().delegate = self

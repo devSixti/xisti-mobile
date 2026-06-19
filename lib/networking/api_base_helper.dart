@@ -80,14 +80,14 @@ class ApiBaseHelper {
     return responseJson;
   }
 
-  Future<dynamic> post(String url, {dynamic body}) async {
+  Future<dynamic> post(String url, {dynamic body, bool showServerErrorOnFailure = true}) async {
     dynamic responseJson;
     try {
       Response response = await _dio.post(url, data: jsonEncode(body));
       responseJson = _returnResponse(response);
     } catch (e) {
       // throw FetchDataException('No Internet connection');
-      throw _handleError(e);
+      throw _handleError(e, showServerErrorOnFailure: showServerErrorOnFailure);
     }
     return responseJson;
   }
@@ -227,7 +227,7 @@ dynamic _returnResponse(Response response) {
   }
 }
 
-String _handleError(dynamic error) {
+String _handleError(dynamic error, {bool showServerErrorOnFailure = true}) {
   String errorDescription = "";
   if (error is DioException) {
     DioException dioError = error;
@@ -245,7 +245,12 @@ String _handleError(dynamic error) {
         errorDescription = languages.apiErrorReceiveTimeoutMsg;
         break;
       case DioExceptionType.badResponse:
-        showServerErrorDialog(navigatorKey.currentContext!, isShowMapSessionMsg: [400, 429].contains(dioError.response?.statusCode));
+        final statusCode = dioError.response?.statusCode;
+        final context = navigatorKey.currentContext;
+        // 401/403 are session/auth failures, not generic server outages.
+        if (showServerErrorOnFailure && context != null && statusCode != 401 && statusCode != 403) {
+          showServerErrorDialog(context, isShowMapSessionMsg: [400, 429].contains(statusCode));
+        }
         // errorDescription = "${languages.apiErrorResponseMsg}: ${dioError.response?.statusCode}";
         break;
       case DioExceptionType.sendTimeout:

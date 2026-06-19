@@ -24,16 +24,15 @@ class ManageAccountBloc extends Bloc {
     if (await isNetworkConnected(onRetryPressedCallApi: () => logoutApiCall())) {
       subjectLogout.sink.add(ApiResponse.loading());
       try {
-        var response = BaseModel.fromJson(await _repo.callLogoutApi());
+        final response = BaseModel.fromJson(await _repo.callLogoutApi());
         if (!context.mounted) return;
-        if (isApiStatus(context, response.status, response.message, true, showMess: false)) {
-          subjectLogout.sink.add(ApiResponse.completed(response));
-          logout(context);
-        } else {
-          subjectLogout.sink.add(ApiResponse.error(response.message));
-        }
+        subjectLogout.sink.add(ApiResponse.completed(response));
       } catch (e) {
-        subjectLogout.sink.add(ApiResponse.error(e.toString()));
+        if (!context.mounted) return;
+        subjectLogout.sink.add(ApiResponse.completed(BaseModel(status: 1)));
+      }
+      if (context.mounted) {
+        logout(context);
       }
     }
   }

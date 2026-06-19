@@ -163,6 +163,14 @@ class PassengerRunningRideBloc extends Bloc {
 
         if (!context.mounted) return;
         if (isApiStatus(context, response.status, message, true)) {
+          ActiveRideOfflineService.instance.clearRideSnapshot();
+          pushNotificationService.dismissRideNotification(rideId);
+          addressList = [];
+          _rideStatusPollTimer?.cancel();
+          if (cancelContext?.mounted ?? false) {
+            Navigator.pop(cancelContext!);
+            cancelContext = null;
+          }
           openScreenWithClearPrevious(context, const PassengerHome());
         }
       } catch (e) {
@@ -255,6 +263,11 @@ class PassengerRunningRideBloc extends Bloc {
   }
 
   Future<void> mapApiCall() async {
+    if (addressList.isEmpty) {
+      polyLinesController.sink.add({});
+      markersListController.sink.add([]);
+      return;
+    }
     List<LatLng> latLngs = [];
     int locationListLength = addressList.length;
     for (int i = 0; i < locationListLength; i++) {
@@ -278,8 +291,12 @@ class PassengerRunningRideBloc extends Bloc {
   }
 
   Future<void> setMarkers() async {
+    if (addressList.isEmpty) {
+      markersListController.sink.add([]);
+      return;
+    }
     List<LatLng> latLngs = [];
-    int locationListLength = subjectRideDetail.valueOrNull?.data?.addressList?.length ?? 0;
+    int locationListLength = addressList.length;
     for (int i = 0; i < locationListLength; i++) {
       LatLng stopLatLng = LatLng(getDoubleFromDynamic(addressList[i].addressLat ?? "0"), getDoubleFromDynamic(addressList[i].addressLong ?? "0"));
       if (i != 0 && i != (locationListLength - 1)) {
@@ -329,8 +346,8 @@ class PassengerRunningRideBloc extends Bloc {
 
   void changePolylineColorPerTheme() {
     Map<PolylineId, Polyline> polyLines = polyLinesController.valueOrNull ?? {};
-    if (polyLines.isNotEmpty) {
-      final oldPolyline = polyLines[PolylineId("poly")]!;
+    final oldPolyline = polyLines[PolylineId("poly")];
+    if (oldPolyline != null) {
       final updatedPolyline = oldPolyline.copyWith(colorParam: getCurrentTheme(context).colorBlack);
       polyLines[PolylineId("poly")] = updatedPolyline;
     }

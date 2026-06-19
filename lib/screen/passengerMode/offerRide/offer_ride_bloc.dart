@@ -180,6 +180,8 @@ class OfferRideBloc extends Bloc {
         String message = getApiMsg(response.message);
         if (!context.mounted) return;
         if (isApiStatus(context, response.status, message, true)) {
+          stopTimer();
+          pushNotificationService.dismissRideNotification(rideId);
           cancelRideSubject.sink.add(ApiResponse.completed(response));
           openScreenWithClearPrevious(context, const PassengerHome());
         } else {

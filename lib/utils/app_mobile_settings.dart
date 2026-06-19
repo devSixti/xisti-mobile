@@ -183,6 +183,25 @@ double applyRegionalMinFareFloor(dynamic apiMinFare) {
   return api < regional ? regional : api;
 }
 
+/// Keeps recommended/min/max fare coherent after regional floors (moto short trips).
+({double recommended, double minPrice, double maxPrice}) normalizePassengerFareRange({
+  required dynamic recommendedFare,
+  required dynamic minPrice,
+  required dynamic maxPrice,
+}) {
+  final step = getFareNegotiationStepFromSettings();
+  var min = applyRegionalMinFareFloor(minPrice);
+  var max = double.tryParse(maxPrice?.toString() ?? '') ?? 0;
+  var recommended = double.tryParse(recommendedFare?.toString() ?? '') ?? 0;
+  if (recommended < min) {
+    recommended = min;
+  }
+  if (max < min) {
+    max = min + step;
+  }
+  return (recommended: recommended, minPrice: min, maxPrice: max);
+}
+
 double getVatRateOnCommissionPercent() {
   final stored = getDoubleFromSettingBox(hiveVatRateOnCommission, defaultValue: 0);
   return stored > 0 ? stored : 19;
