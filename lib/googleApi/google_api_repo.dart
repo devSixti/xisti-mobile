@@ -28,6 +28,7 @@ class GoogleApiRepo {
         ApiParam.paramLatitude: currentLatLng.latitude,
         ApiParam.paramLongitude: currentLatLng.longitude,
       }),
+      showServerErrorOnFailure: false,
     );
     return response;
   }
@@ -37,6 +38,7 @@ class GoogleApiRepo {
       final response = await _apiBaseHelper.post(
         ApiConst.endPointPlaceDetail,
         body: _authBody({ApiParam.paramPlaceID: placeID}),
+        showServerErrorOnFailure: false,
       );
       return response;
     }
@@ -59,6 +61,7 @@ class GoogleApiRepo {
         ApiParam.paramDropLongitude: destinationLong,
         ApiParam.paramWaypoint: jsonEncode(points),
       }),
+      showServerErrorOnFailure: false,
     );
     return response;
   }
@@ -71,6 +74,7 @@ class GoogleApiRepo {
     final response = await _apiBaseHelper.post(
       ApiConst.endPointGoogleMap,
       body: _authBody({ApiParam.paramUrl: getGeoCodingQuery(latitude: latitude, longitude: longitude)}),
+      showServerErrorOnFailure: false,
     );
     return response;
   }

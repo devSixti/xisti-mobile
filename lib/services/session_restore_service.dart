@@ -65,7 +65,10 @@ class SessionRestoreService {
       }
       if (isApiStatus(context, response.status ?? 0, message, false, messageCode: response.messageCode ?? 0)) {
         await setDataInHive(response);
-        if (response.isRegister == 1 && isUserVerified()) {
+        if (response.isRegister == 1) {
+          if (!isUserVerified()) {
+            putDataInSettingBox(hiveUserVerified, 1);
+          }
           putDataInSettingBox(hiveIsLoggedIn, true);
           await enableBiometricLoginIfAvailable();
           return true;

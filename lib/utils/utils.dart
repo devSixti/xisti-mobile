@@ -35,6 +35,7 @@ import '../main.dart';
 import '../networking/api_constant.dart';
 import '../networking/base_dl.dart';
 import '../screen/common/Login/login_dl.dart';
+import '../screen/common/otpVerify/otp_verify_repo.dart';
 import '../screen/common/otpVerify/otp_verify_screen.dart';
 import '../screen/common/profile/profile.dart';
 import '../screen/common/signup/signup_screen.dart';
@@ -135,19 +136,14 @@ Future<void> manageLoginResponse(BuildContext context, LoginPojo response) async
   final message = getApiMsg(response.message, response.messageCode);
   if (isApiStatus(context, response.status ?? 0, message, false, messageCode: response.messageCode ?? 0)) {
     await setDataInHive(response);
+    unawaited(getGoogleMapKeyForApiCall());
     final loginType = response.loginType ?? getStringFromUserInfoBox(hiveLoginType);
     final hasPhone = (response.contactNumber ?? '').trim().isNotEmpty;
 
-    if (!isUserVerified()) {
-      if (isSocialLoginType(loginType) && !hasPhone) {
-        openScreenWithClearPrevious(context, const SignupScreen());
-      } else {
-        openScreen(context, const OtpVerifyScreen());
-      }
-      return;
-    }
-
     if (response.isRegister == 1) {
+      if (!isUserVerified()) {
+        putDataInSettingBox(hiveUserVerified, 1);
+      }
       putDataInSettingBox(hiveIsLoggedIn, true);
       putDataInSettingBox(hiveAppMode, response.activeMode ?? AppMode.passenger);
       unawaited(SessionRestoreService.enableBiometricLoginIfAvailable());
@@ -158,9 +154,23 @@ Future<void> manageLoginResponse(BuildContext context, LoginPojo response) async
       } else {
         openScreenWithClearPrevious(context, const PassengerHome(isFromLogin: true));
       }
-    } else {
-      openScreenWithClearPrevious(context, const SignupScreen());
+      return;
     }
+
+    if (!isUserVerified()) {
+      if (isSocialLoginType(loginType) && !hasPhone) {
+        openScreenWithClearPrevious(context, const SignupScreen());
+      } else {
+        try {
+          await OtpVerifyRepo().callResendOtpApi();
+        } catch (_) {}
+        if (!context.mounted) return;
+        openScreen(context, const OtpVerifyScreen());
+      }
+      return;
+    }
+
+    openScreenWithClearPrevious(context, const SignupScreen());
   }
 }
 

@@ -39,7 +39,9 @@ class ApiBaseHelper {
           if ((getStringFromSettingBox(hiveAuthKey)).isNotEmpty) {
             options.headers[ApiParam.headerAuth] = getStringFromSettingBox(hiveAuthKey);
           }
-          options.headers[ApiParam.headerSignupPhoneOtp] = ApiParam.headerSignupPhoneOtpValue;
+          if (getIntFromUserInfoBox(hiveIsRegister) != 1) {
+            options.headers[ApiParam.headerSignupPhoneOtp] = ApiParam.headerSignupPhoneOtpValue;
+          }
           return handler.next(options);
         },
         onResponse: (response, handler) {
@@ -249,7 +251,7 @@ String _handleError(dynamic error, {bool showServerErrorOnFailure = true}) {
         final context = navigatorKey.currentContext;
         // 401/403 are session/auth failures, not generic server outages.
         if (showServerErrorOnFailure && context != null && statusCode != 401 && statusCode != 403) {
-          showServerErrorDialog(context, isShowMapSessionMsg: [400, 429].contains(statusCode));
+          showServerErrorDialog(context, isShowMapSessionMsg: statusCode == 429);
         }
         // errorDescription = "${languages.apiErrorResponseMsg}: ${dioError.response?.statusCode}";
         break;
