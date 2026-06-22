@@ -328,7 +328,7 @@ Future<void> initAppConfig() async {
   if (await isNetworkConnected()) setDeviceIpAddressInPref();
 }
 
-void setAuthKey(String text) => mobile_auth.setAuthKey(text);
+Future<void> setAuthKey(String text) => mobile_auth.setAuthKey(text);
 
 String getRandomString(int length) {
   const chars = 'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890';

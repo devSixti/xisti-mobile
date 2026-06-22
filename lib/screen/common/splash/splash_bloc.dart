@@ -58,8 +58,8 @@ class SplashBloc extends Bloc {
 
       if (!context.mounted) return;
       if (isApiStatus(context, response.status, message, true)) {
-        applyBuildTimeAppKeyIfConfigured();
-        applyMobileAppKeyFromApi(response.appKey);
+        await applyBuildTimeAppKeyIfConfigured();
+        await applyMobileAppKeyFromApi(response.appKey);
         if (kDebugMode && getStringFromSettingBox(hiveAuthKey).isEmpty) {
           debugPrint('$tag: XISTI_APP_KEY not configured — protected APIs will fail.');
         }
@@ -79,10 +79,10 @@ class SplashBloc extends Bloc {
     }
   }
 
-  void _continueAfterBootstrapFailure() {
+  Future<void> _continueAfterBootstrapFailure() async {
     if (!context.mounted) return;
-    applyBootstrapDefaultsWhenApiUnavailable();
-    unawaited(ensureMobileAppAuthConfigured());
+    await applyBootstrapDefaultsWhenApiUnavailable();
+    await ensureMobileAppAuthConfigured();
     openForceFullyUpdateDialog("0", 0);
   }
 

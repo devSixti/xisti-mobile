@@ -29,8 +29,8 @@ class ApiBaseHelper {
     _dio.options.receiveTimeout = receiveTimeout ?? const Duration(minutes: 3);
     _dio.interceptors.add(
       InterceptorsWrapper(
-        onRequest: (options, handler) {
-          applyBuildTimeAppKeyIfConfigured();
+        onRequest: (options, handler) async {
+          await applyBuildTimeAppKeyIfConfigured();
           if (deviceIpAddress.trim().isEmpty) {
             setDeviceIpAddressInPref();
           }

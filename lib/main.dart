@@ -55,7 +55,7 @@ void main() async {
 
   ///initializing boxes and register adapters for hive...
   await initBox();
-  applyBuildTimeAppKeyIfConfigured();
+  await applyBuildTimeAppKeyIfConfigured();
 
   tz.initializeTimeZones();
   await initSharedPreferences();

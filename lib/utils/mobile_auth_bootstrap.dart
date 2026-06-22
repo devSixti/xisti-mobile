@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import '../hive/hive_helper.dart';
 import '../networking/api_base_helper.dart';
 import '../networking/api_constant.dart';
@@ -9,35 +11,45 @@ bool isMobileAppAuthConfigured() {
 }
 
 /// Applies [rawKey] from bootstrap APIs unless a compile-time key is configured.
-void applyMobileAppKeyFromApi(String? rawKey) {
+Future<void> applyMobileAppKeyFromApi(String? rawKey) async {
   if (buildTimeAppKey.isNotEmpty) {
-    applyBuildTimeAppKeyIfConfigured();
+    await applyBuildTimeAppKeyIfConfigured();
     return;
   }
   final key = (rawKey ?? '').trim();
   if (key.isEmpty) {
     return;
   }
-  setAuthKey(key);
+  await setAuthKey(key);
 }
 
 /// Ensures Authorization header can be built (build-time key or bootstrap API).
 Future<bool> ensureMobileAppAuthConfigured() async {
-  applyBuildTimeAppKeyIfConfigured();
+  await applyBuildTimeAppKeyIfConfigured();
   if (isMobileAppAuthConfigured()) {
     return true;
   }
 
-  try {
-    final response = await ApiBaseHelper().post(
-      ApiConst.endPointCountryCurrency,
-      body: {},
-      showServerErrorOnFailure: false,
-    );
-    if (response is Map) {
-      applyMobileAppKeyFromApi(response['app_key']?.toString());
-    }
-  } catch (_) {}
+  for (final endpoint in [ApiConst.endPointCountryCurrency, ApiConst.endPointAppVersionCheck]) {
+    try {
+      final response = await ApiBaseHelper().post(
+        endpoint,
+        body: endpoint == ApiConst.endPointAppVersionCheck
+            ? {
+                ApiParam.paramLoginDevice: Platform.isAndroid ? 1 : 2,
+                ApiParam.paramAppType: 0,
+              }
+            : {},
+        showServerErrorOnFailure: false,
+      );
+      if (response is Map) {
+        await applyMobileAppKeyFromApi(response['app_key']?.toString());
+      }
+      if (isMobileAppAuthConfigured()) {
+        return true;
+      }
+    } catch (_) {}
+  }
 
   return isMobileAppAuthConfigured();
 }

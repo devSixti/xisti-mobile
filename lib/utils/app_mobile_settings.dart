@@ -76,21 +76,21 @@ String get buildTimeAppKey {
   return kQaAppKey;
 }
 
-void applyBuildTimeAppKeyIfConfigured() {
+Future<void> applyBuildTimeAppKeyIfConfigured() async {
   final key = buildTimeAppKey;
   if (key.isEmpty) {
     return;
   }
-  setAuthKey(key);
+  await setAuthKey(key);
 }
 
-void _applyQaAppKeyIfConfigured() {
-  applyBuildTimeAppKeyIfConfigured();
+Future<void> _applyQaAppKeyIfConfigured() async {
+  await applyBuildTimeAppKeyIfConfigured();
 }
 
 /// Defaults when app-version-check is unreachable (DNS down, offline, etc.).
-void applyBootstrapDefaultsWhenApiUnavailable() {
-  _applyQaAppKeyIfConfigured();
+Future<void> applyBootstrapDefaultsWhenApiUnavailable() async {
+  await _applyQaAppKeyIfConfigured();
   applySocialLoginSettingsFromApi({
     'is_google_login': 1,
     'is_facebook_login': 1,
