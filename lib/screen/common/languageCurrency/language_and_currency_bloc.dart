@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../../../blocs/bloc.dart';
 import '../../../hive/hive_helper.dart';
 import '../../../networking/base_dl.dart';
+import '../../../utils/mobile_auth_bootstrap.dart';
 import '../../../utils/utils.dart';
 import '../../driverMode/driverHome/driver_home.dart';
 import '../../passengerMode/passengerHome/passenger_home.dart';
@@ -98,6 +99,7 @@ class LanguageAndCurrencyBloc extends Bloc {
         var response = LanguageAndCurrencyResponse.fromJson(await _languageAndCurrencyRepo.getLanguageAndCurrency());
         if (!context.mounted) return;
         if (isApiStatus(context, response.status, response.message, true)) {
+          applyMobileAppKeyFromApi(response.appKey);
           final currencies = response.currencyList.isNotEmpty ? response.currencyList : _fallbackCurrencies;
           if (currencies.isNotEmpty) {
             int index = currencies.indexWhere((element) => element.currencySymbol == getStringFromSettingBox(hiveSelectedCurrency));

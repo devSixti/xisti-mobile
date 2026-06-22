@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../../blocs/bloc.dart';
 import '../../../commonView/customCountryCodePicker/country_code.dart';
+import '../../../utils/api_message_localizer.dart';
+import '../../../utils/mobile_auth_bootstrap.dart';
 import '../../../utils/phone_util.dart';
 import '../../../utils/utils.dart';
 import '../../../utils/validator.dart';
@@ -32,6 +34,16 @@ class LoginBloc extends Bloc {
   }) async {
     if (loginType == LoginType.email) {
       clearPendingSignupData();
+    }
+    if (!await ensureMobileAppAuthConfigured()) {
+      if (context.mounted) {
+        openSimpleSnackbar(
+          context,
+          resolveApiMessage(messageCode: 401),
+        );
+      }
+      subject.sink.add(ApiResponse.error(resolveApiMessage(messageCode: 401)));
+      return;
     }
     if (await isNetworkConnected(
       onRetryPressedCallApi: () {

@@ -7,6 +7,7 @@ import 'package:flutter_pretty_dio_logger/flutter_pretty_dio_logger.dart';
 
 import '../bottomSheet/server_error_sheet.dart';
 import '../hive/hive_helper.dart';
+import '../utils/app_mobile_settings.dart';
 import '../utils/utils.dart';
 import 'api_constant.dart';
 import 'api_exceptions.dart';
@@ -29,6 +30,7 @@ class ApiBaseHelper {
     _dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) {
+          applyBuildTimeAppKeyIfConfigured();
           if (deviceIpAddress.trim().isEmpty) {
             setDeviceIpAddressInPref();
           }

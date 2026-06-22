@@ -13,6 +13,7 @@ import '../../../bottomSheet/location_disclosure_sheet.dart';
 import '../../../hive/hive_helper.dart';
 import '../../../services/market_config_repo.dart';
 import '../../../utils/app_mobile_settings.dart';
+import '../../../utils/mobile_auth_bootstrap.dart';
 import '../../../services/session_restore_service.dart';
 import '../../../utils/utils.dart';
 import '../../driverMode/driverHome/driver_home.dart';
@@ -58,6 +59,7 @@ class SplashBloc extends Bloc {
       if (!context.mounted) return;
       if (isApiStatus(context, response.status, message, true)) {
         applyBuildTimeAppKeyIfConfigured();
+        applyMobileAppKeyFromApi(response.appKey);
         if (kDebugMode && getStringFromSettingBox(hiveAuthKey).isEmpty) {
           debugPrint('$tag: XISTI_APP_KEY not configured — protected APIs will fail.');
         }
@@ -80,6 +82,7 @@ class SplashBloc extends Bloc {
   void _continueAfterBootstrapFailure() {
     if (!context.mounted) return;
     applyBootstrapDefaultsWhenApiUnavailable();
+    unawaited(ensureMobileAppAuthConfigured());
     openForceFullyUpdateDialog("0", 0);
   }
 

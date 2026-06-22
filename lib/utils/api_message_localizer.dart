@@ -12,6 +12,8 @@ String? spanishApiMessageForCode(int code) {
       return 'Tu cuenta está bloqueada y no tienes acceso a la aplicación';
     case 4:
       return 'Tu sesión expiró. Por favor inicia sesión de nuevo';
+    case 401:
+      return 'No pudimos verificar la aplicación. Actualiza XISTI desde la tienda o reinstala la app.';
     case 5:
       return 'Usuario no encontrado';
     case 9:
