@@ -139,10 +139,17 @@ Future<void> manageLoginResponse(BuildContext context, LoginPojo response) async
     unawaited(getGoogleMapKeyForApiCall());
     final loginType = response.loginType ?? getStringFromUserInfoBox(hiveLoginType);
     final hasPhone = (response.contactNumber ?? '').trim().isNotEmpty;
+    final isPhoneLogin = loginType == LoginType.email;
+    final needsOtp = (response.userVerified ?? 0) == 0;
 
     if (response.isRegister == 1) {
-      if (!isUserVerified()) {
-        putDataInSettingBox(hiveUserVerified, 1);
+      if (isPhoneLogin && needsOtp) {
+        try {
+          await OtpVerifyRepo().callResendOtpApi();
+        } catch (_) {}
+        if (!context.mounted) return;
+        openScreen(context, const OtpVerifyScreen());
+        return;
       }
       putDataInSettingBox(hiveIsLoggedIn, true);
       putDataInSettingBox(hiveAppMode, response.activeMode ?? AppMode.passenger);
