@@ -22,6 +22,8 @@ import '../../passengerMode/offerRide/offer_ride_screen.dart';
 import '../../passengerMode/passengerHome/passenger_home.dart';
 import '../../passengerMode/passengerRunningRide/passenger_running_ride.dart';
 import '../languageCurrency/language_currency_screen.dart';
+import '../otpVerify/otp_verify_repo.dart';
+import '../otpVerify/otp_verify_screen.dart';
 import 'splash_dl.dart';
 import 'splash_repo.dart';
 
@@ -188,18 +190,10 @@ class SplashBloc extends Bloc {
             );
           }
         } else {
-          if (response.status == 0 || response.status == 1 || isLoggedIn()) {
-            _timer = Timer(const Duration(milliseconds: 5000), () {
-              if (!context.mounted) return;
-              openScreenWithClearPrevious(context, const DriverHome(isFromLogin: false));
-            });
-          }
+          _handleRunningServiceFailure(response.status, messageCode: response.messageCode, isDriver: true);
         }
       } catch (e) {
-        _timer = Timer(const Duration(milliseconds: 5000), () {
-          if (!context.mounted) return;
-          openScreenWithClearPrevious(context, const DriverHome(isFromLogin: false));
-        });
+        _handleRunningServiceFailure(null, isDriver: true);
         debugPrint(e.toString());
       }
     }
@@ -247,25 +241,60 @@ class SplashBloc extends Bloc {
             });
           }
         } else {
-          if (response.status == 0 || response.status == 1 || isLoggedIn()) {
-            _timer = Timer(const Duration(milliseconds: 5000), () {
-              if (!context.mounted) return;
-              openScreenWithClearPrevious(context, const PassengerHome());
-            });
-          }
+          _handleRunningServiceFailure(response.status, messageCode: response.messageCode, isDriver: false);
         }
       } catch (e) {
         debugPrint('$tag callPassengerRunningServiceApi: $e');
-        _timer = Timer(const Duration(milliseconds: 3000), () {
-          if (!context.mounted) return;
-          openScreenWithClearPrevious(context, const PassengerHome());
-        });
+        _handleRunningServiceFailure(null, isDriver: false);
       }
     }
   }
 
+  void _handleRunningServiceFailure(int? status, {int? messageCode, required bool isDriver}) {
+    if (needsPhoneOtpCompletion() || status == 2) {
+      unawaited(_resumePendingOtp());
+      return;
+    }
+    if (status == 4 || status == 5) {
+      unawaited(clearSessionCredentials());
+      _openWelcomeAfterDelay();
+      return;
+    }
+    if (isLoggedIn()) {
+      _timer = Timer(const Duration(milliseconds: 5000), () {
+        if (!context.mounted) return;
+        openScreenWithClearPrevious(
+          context,
+          isDriver ? const DriverHome(isFromLogin: false) : const PassengerHome(),
+        );
+      });
+      return;
+    }
+    _openWelcomeAfterDelay();
+  }
+
+  Future<void> _resumePendingOtp() async {
+    try {
+      await OtpVerifyRepo().callResendOtpApi();
+    } catch (_) {}
+    if (!context.mounted) return;
+    openScreenWithClearPrevious(context, const OtpVerifyScreen());
+  }
+
+  void _openWelcomeAfterDelay() {
+    _timer = Timer(const Duration(milliseconds: 3000), () {
+      if (!context.mounted) return;
+      openScreenWithClearPrevious(context, const LanguageAndCurrency(isFromHome: false));
+    });
+  }
+
   Future<void> splashAction() async {
     SessionRestoreService.syncLoggedInFlagFromStoredCredentials();
+
+    if (needsPhoneOtpCompletion()) {
+      await _resumePendingOtp();
+      return;
+    }
 
     if (!isLoggedIn() && SessionRestoreService.canRestoreBiometricSession()) {
       final restored = await SessionRestoreService.tryRestoreSessionWithBiometrics(context);
@@ -284,10 +313,7 @@ class SplashBloc extends Bloc {
         callPassengerRunningServiceApi();
       }
     } else {
-      _timer = Timer(const Duration(milliseconds: 3000), () {
-        if (!context.mounted) return;
-        openScreenWithClearPrevious(context, const LanguageAndCurrency(isFromHome: false));
-      });
+      _openWelcomeAfterDelay();
     }
   }
 

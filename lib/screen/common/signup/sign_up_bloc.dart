@@ -118,7 +118,7 @@ class SignUpBloc extends Bloc {
         if (isApiStatus(context, response.status ?? 0, message, false, messageCode: response.messageCode ?? 0)) {
           clearPendingSignupData();
           await setDataInHive(response);
-          putDataInSettingBox(hiveIsLoggedIn, true);
+          await markSessionAuthenticated();
           unawaited(SessionRestoreService.enableBiometricLoginIfAvailable());
           getGoogleMapKeyForApiCall();
           openScreenWithClearPrevious(context, const PassengerHome());

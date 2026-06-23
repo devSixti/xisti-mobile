@@ -89,7 +89,6 @@ String getLanguageFromUserPrefBox() {
 ///Clearing all boxes with remaining some
 Future<void> hiveClearWithRemainSomeData({required bool isAccountDelete}) async {
   String selectedCurrency = getStringFromSettingBox(hiveSelectedCurrency);
-  int userId = getIntFromUserInfoBox(hiveUserId);
   bool isShownOnBoarding = getBoolFromSettingBox(hiveIsShownOnBoarding);
   String authKeyGoogleMap = getStringFromSettingBox(hiveUniqueIdGoogleApiCall);
   int sessionLastKey = getIntFromSettingBox(hiveSessionLastKey);
@@ -107,10 +106,12 @@ Future<void> hiveClearWithRemainSomeData({required bool isAccountDelete}) async 
   await SecureTokenStorage.clearAccessToken();
 
   putDataInSettingBox(hiveSelectedCurrency, selectedCurrency);
-  putDataInUserInfoBox(hiveUserId, userId);
   putDataInSettingBox(hiveIsShownOnBoarding, isShownOnBoarding);
   putDataInSettingBox(hiveUniqueIdGoogleApiCall, authKeyGoogleMap);
   putDataInSettingBox(hiveSessionLastKey, sessionLastKey);
+  putDataInSettingBox(hiveIsLoggedIn, false);
+  putDataInSettingBox(hivePendingPhoneOtp, false);
+  putDataInSettingBox(hiveUserVerified, 0);
 
   if (!isAccountDelete) {
     putDataInSettingBox(hiveUniqueId, uniqueId);

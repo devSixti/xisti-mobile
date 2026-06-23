@@ -44,7 +44,7 @@ class OtpVerifyBloc extends Bloc {
         subjectVerify.sink.add(ApiResponse.completed(response));
         if (!context.mounted) return;
         if (isApiStatus(context, response.status ?? 0, message, true, messageCode: response.messageCode ?? 0)) {
-          putDataInSettingBox(hiveUserVerified, 1);
+          await markSessionAuthenticated();
           final pendingSocialSignup = getBoolFromSettingBox(hivePendingSignupAfterOtp);
           final registrationComplete = (response.isRegister ?? 0) == 1;
           if (pendingSocialSignup && !registrationComplete) {
@@ -88,7 +88,7 @@ class OtpVerifyBloc extends Bloc {
       if (isApiStatus(context, response.status ?? 0, message, false, messageCode: response.messageCode ?? 0)) {
         clearPendingSignupData();
         await setDataInHive(response);
-        putDataInSettingBox(hiveIsLoggedIn, true);
+        await markSessionAuthenticated();
         unawaited(SessionRestoreService.enableBiometricLoginIfAvailable());
         getGoogleMapKeyForApiCall();
         openScreenWithClearPrevious(context, const PassengerHome());

@@ -8,7 +8,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # ex. 1.0.1+1
 # ex. 1.0.5+5
 # ex. 1.1.0+10
-version: 1.0.3+31
+version: 1.0.3+32
 
 # Used Flutter SDK 3.41.2
 environment:

@@ -9,14 +9,11 @@ import '../utils/utils.dart';
 /// Restores a persisted mobile session from Hive and optional biometric re-auth.
 class SessionRestoreService {
   static void syncLoggedInFlagFromStoredCredentials() {
-    if (getBoolFromSettingBox(hiveIsLoggedIn)) {
+    if (getBoolFromSettingBox(hivePendingPhoneOtp) || !hasStoredCredentials() || !isUserVerified()) {
+      putDataInSettingBox(hiveIsLoggedIn, false);
       return;
     }
-    final userId = getIntFromUserInfoBox(hiveUserId);
-    final token = getStringFromSettingBox(hiveAccessToken);
-    if (userId > 0 && token.trim().isNotEmpty) {
-      putDataInSettingBox(hiveIsLoggedIn, true);
-    }
+    putDataInSettingBox(hiveIsLoggedIn, true);
   }
 
   static bool canRestoreBiometricSession() {
@@ -66,6 +63,7 @@ class SessionRestoreService {
       if (isApiStatus(context, response.status ?? 0, message, false, messageCode: response.messageCode ?? 0)) {
         await setDataInHive(response);
         if (response.isRegister == 1) {
+          await markSessionAuthenticated();
           await manageLoginResponse(context, response);
           return true;
         }

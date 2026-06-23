@@ -35,6 +35,7 @@ import '../main.dart';
 import '../networking/api_constant.dart';
 import '../networking/base_dl.dart';
 import '../screen/common/Login/login_dl.dart';
+import '../screen/common/languageCurrency/language_currency_screen.dart';
 import '../screen/common/otpVerify/otp_verify_repo.dart';
 import '../screen/common/otpVerify/otp_verify_screen.dart';
 import '../screen/common/profile/profile.dart';
@@ -101,17 +102,59 @@ String getApiMsg(String? defaultMsg, [int? messageCode]) {
   return resolveApiMessage(message: defaultMsg, messageCode: messageCode);
 }
 
-bool isLoggedIn() {
-  if (getBoolFromSettingBox(hiveIsLoggedIn)) {
-    return true;
-  }
+bool hasStoredCredentials() {
   final userId = getIntFromUserInfoBox(hiveUserId);
   final token = getStringFromSettingBox(hiveAccessToken);
-  if (userId > 0 && token.trim().isNotEmpty) {
-    putDataInSettingBox(hiveIsLoggedIn, true);
-    return true;
+  return userId > 0 && token.trim().isNotEmpty;
+}
+
+bool needsPhoneOtpCompletion() {
+  if (!hasStoredCredentials()) {
+    return false;
   }
-  return false;
+  return getBoolFromSettingBox(hivePendingPhoneOtp) || !isUserVerified();
+}
+
+Future<void> markPhoneOtpPending() async {
+  await putDataInSettingBox(hiveIsLoggedIn, false);
+  await putDataInSettingBox(hivePendingPhoneOtp, true);
+}
+
+Future<void> markSessionAuthenticated() async {
+  await putDataInSettingBox(hivePendingPhoneOtp, false);
+  await putDataInSettingBox(hiveUserVerified, 1);
+  await putDataInSettingBox(hiveIsLoggedIn, true);
+}
+
+Future<void> clearSessionCredentials() async {
+  await putDataInSettingBox(hiveIsLoggedIn, false);
+  await putDataInSettingBox(hivePendingPhoneOtp, false);
+  await putDataInSettingBox(hiveUserVerified, 0);
+  await putDataInSettingBox(hiveAccessToken, '');
+  putDataInUserInfoBox(hiveUserId, 0);
+}
+
+Future<void> navigateToOtpResume(BuildContext context) async {
+  try {
+    await OtpVerifyRepo().callResendOtpApi();
+  } catch (_) {}
+  if (!context.mounted) return;
+  openScreenWithClearPrevious(context, const OtpVerifyScreen());
+}
+
+Future<void> navigateToWelcome(BuildContext context) async {
+  if (!context.mounted) return;
+  openScreenWithClearPrevious(context, const LanguageAndCurrency(isFromHome: false));
+}
+
+bool isLoggedIn() {
+  if (getBoolFromSettingBox(hivePendingPhoneOtp)) {
+    return false;
+  }
+  if (!getBoolFromSettingBox(hiveIsLoggedIn)) {
+    return false;
+  }
+  return isUserVerified() && hasStoredCredentials();
 }
 
 bool isSocialLoginType([String? loginType]) {
@@ -144,14 +187,15 @@ Future<void> manageLoginResponse(BuildContext context, LoginPojo response) async
 
     if (response.isRegister == 1) {
       if (isPhoneLogin && needsOtp) {
+        await markPhoneOtpPending();
         try {
           await OtpVerifyRepo().callResendOtpApi();
         } catch (_) {}
         if (!context.mounted) return;
-        openScreen(context, const OtpVerifyScreen());
+        openScreenWithClearPrevious(context, const OtpVerifyScreen());
         return;
       }
-      putDataInSettingBox(hiveIsLoggedIn, true);
+      await markSessionAuthenticated();
       putDataInSettingBox(hiveAppMode, response.activeMode ?? AppMode.passenger);
       unawaited(SessionRestoreService.enableBiometricLoginIfAvailable());
       changeSubscribeTopic();
@@ -168,11 +212,12 @@ Future<void> manageLoginResponse(BuildContext context, LoginPojo response) async
       if (isSocialLoginType(loginType) && !hasPhone) {
         openScreenWithClearPrevious(context, const SignupScreen());
       } else {
+        await markPhoneOtpPending();
         try {
           await OtpVerifyRepo().callResendOtpApi();
         } catch (_) {}
         if (!context.mounted) return;
-        openScreen(context, const OtpVerifyScreen());
+        openScreenWithClearPrevious(context, const OtpVerifyScreen());
       }
       return;
     }
@@ -205,6 +250,9 @@ bool isApiStatus(
       return true;
     case 2:
       showApiMessage(context, showMess, message, messageCode, hideMessOnCodeList);
+      if (hasStoredCredentials() && !isUserVerified()) {
+        unawaited(markPhoneOtpPending());
+      }
       return false;
     case 3:
       showSimpleDialogWithMessAndLogout(context: context, message: message);
