@@ -1,16 +1,39 @@
 #!/usr/bin/env python3
-"""Build launcher + splash logo assets from logo_full (keeps Fácil & Seguro visible)."""
+"""Build launcher, adaptive-icon, splash, Android mipmaps, and iOS AppIcon assets."""
+
+from __future__ import annotations
+
+import json
 from pathlib import Path
 
 from PIL import Image
 
+from xisti_brand_icon import LOGO_FULL, fit_crop_in_square, load_brand_crop
+
 ROOT = Path(__file__).resolve().parent.parent
-SRC = ROOT / "assets/images/xisti/logo_full.png"
 OUT_DIR = ROOT / "assets/images/xisti"
 DARK = ROOT / "assets/images/dark"
 LIGHT = ROOT / "assets/images/light"
+RES = ROOT / "android/app/src/main/res"
+IOS_ICON_DIR = ROOT / "ios/Runner/Assets.xcassets/AppIcon.appiconset"
 SIZE = 1024
 BG = (11, 11, 11)
+
+MIPMAP_SIZES = {
+    "mipmap-mdpi": 48,
+    "mipmap-hdpi": 72,
+    "mipmap-xhdpi": 96,
+    "mipmap-xxhdpi": 144,
+    "mipmap-xxxhdpi": 192,
+}
+
+FOREGROUND_SIZES = {
+    "drawable-mdpi": 108,
+    "drawable-hdpi": 162,
+    "drawable-xhdpi": 216,
+    "drawable-xxhdpi": 324,
+    "drawable-xxxhdpi": 432,
+}
 
 
 def fit_center(canvas: Image.Image, src: Image.Image, scale: float, y_offset: int = 0) -> None:
@@ -25,24 +48,53 @@ def fit_center(canvas: Image.Image, src: Image.Image, scale: float, y_offset: in
         canvas.paste(resized.convert("RGB"), (x, y))
 
 
-def main() -> None:
-    src = Image.open(SRC).convert("RGBA")
+def write_resized_png(src: Image.Image, path: Path, size: int) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    src.resize((size, size), Image.Resampling.LANCZOS).save(path, optimize=True)
 
-    # iOS + legacy Android icon — full logo with small margin so tagline is never clipped
-    launcher = Image.new("RGB", (SIZE, SIZE), BG)
-    fit_center(launcher, src, scale=0.94, y_offset=-8)
+
+def generate_ios_icons(launcher: Image.Image) -> None:
+    contents_path = IOS_ICON_DIR / "Contents.json"
+    if not contents_path.exists():
+        return
+    data = json.loads(contents_path.read_text())
+    for entry in data.get("images", []):
+        filename = entry.get("filename")
+        scale = float(str(entry.get("scale", "1x")).replace("x", ""))
+        base = float(str(entry.get("size", "0x0")).split("x")[0])
+        px = int(round(base * scale))
+        write_resized_png(launcher, IOS_ICON_DIR / filename, px)
+        print(f"✓ ios/{filename} ({px}px)")
+
+
+def main() -> None:
+    brand_crop = load_brand_crop(include_tagline=True)
+    src = Image.open(LOGO_FULL).convert("RGBA")
+
+    # Full square icon — cropped wordmark fills the circle (like ZIMO).
+    launcher = fit_crop_in_square(brand_crop, SIZE, fill=0.94, background=BG)
     launcher.save(OUT_DIR / "app_launcher.png", optimize=True)
 
-    # Adaptive icon foreground — ~58% safe zone so Android mask does not cut tagline
-    foreground = Image.new("RGBA", (SIZE, SIZE), (0, 0, 0, 0))
-    fit_center(foreground, src, scale=0.58, y_offset=0)
+    # Adaptive foreground — no extra inset in XML; fill ~94% of the mask.
+    foreground = fit_crop_in_square(brand_crop, SIZE, fill=0.94, background=None)
     foreground.save(OUT_DIR / "app_launcher_foreground.png", optimize=True)
 
-    # Splash / in-app logo (transparent outside map tile)
     splash = Image.new("RGBA", (1600, 1600), (0, 0, 0, 0))
     fit_center(splash, src, scale=1.35, y_offset=0)
     splash.save(DARK / "splash_logo.png", optimize=True)
     splash.save(LIGHT / "splash_logo.png", optimize=True)
+
+    for folder, px in MIPMAP_SIZES.items():
+        target = RES / folder / "launcher_icon.png"
+        write_resized_png(launcher, target, px)
+        print(f"✓ {folder}/launcher_icon.png ({px}px)")
+
+    for folder, px in FOREGROUND_SIZES.items():
+        target = RES / folder / "ic_launcher_foreground.png"
+        write_resized_png(foreground, target, px)
+        print(f"✓ {folder}/ic_launcher_foreground.png ({px}px)")
+
+    generate_ios_icons(launcher)
 
     print("✓ app_launcher.png")
     print("✓ app_launcher_foreground.png")
