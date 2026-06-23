@@ -8,7 +8,7 @@ from pathlib import Path
 
 from PIL import Image
 
-from xisti_brand_icon import LOGO_FULL, fit_crop_in_square, load_brand_crop
+from xisti_brand_icon import LOGO_FULL, fit_crop_in_circle, load_brand_crop
 
 ROOT = Path(__file__).resolve().parent.parent
 OUT_DIR = ROOT / "assets/images/xisti"
@@ -71,12 +71,12 @@ def main() -> None:
     brand_crop = load_brand_crop(include_tagline=True)
     src = Image.open(LOGO_FULL).convert("RGBA")
 
-    # Full square icon — cropped wordmark fills the circle (like ZIMO).
-    launcher = fit_crop_in_square(brand_crop, SIZE, fill=0.94, background=BG)
+    # Full square icon — wordmark fits inside the circular mask (no clipping).
+    launcher = fit_crop_in_circle(brand_crop, SIZE, circle_margin=0.86, background=BG)
     launcher.save(OUT_DIR / "app_launcher.png", optimize=True)
 
-    # Adaptive foreground — no extra inset in XML; fill ~94% of the mask.
-    foreground = fit_crop_in_square(brand_crop, SIZE, fill=0.94, background=None)
+    # Adaptive foreground — same circle-safe scale as launcher.
+    foreground = fit_crop_in_circle(brand_crop, SIZE, circle_margin=0.86, background=None)
     foreground.save(OUT_DIR / "app_launcher_foreground.png", optimize=True)
 
     splash = Image.new("RGBA", (1600, 1600), (0, 0, 0, 0))

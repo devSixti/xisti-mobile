@@ -2,12 +2,17 @@
 
 from __future__ import annotations
 
+import math
 from pathlib import Path
 
 from PIL import Image
 
 ROOT = Path(__file__).resolve().parents[1]
 LOGO_FULL = ROOT / "assets/images/xisti/logo_full.png"
+
+# Inscribed-circle margin: 0.86 keeps the full wordmark + tagline inside Android/iOS masks.
+LAUNCHER_CIRCLE_MARGIN = 0.86
+NOTIFICATION_CIRCLE_MARGIN = 0.88
 
 
 def is_brand_green(r: int, g: int, b: int, a: int) -> bool:
@@ -58,6 +63,36 @@ def load_brand_crop(*, include_tagline: bool = True) -> Image.Image:
     return src.crop((left, top, right + 1, bottom + 1))
 
 
+def fit_crop_in_circle(
+    crop: Image.Image,
+    size: int,
+    *,
+    circle_margin: float = LAUNCHER_CIRCLE_MARGIN,
+    background: tuple[int, int, int] | tuple[int, int, int, int] | None = None,
+) -> Image.Image:
+    """Scale crop so every pixel fits inside the circular launcher/notification mask."""
+    radius = size / 2
+    max_half_diagonal = radius * circle_margin
+    half_diagonal = math.hypot(crop.width / 2, crop.height / 2)
+    scale = max_half_diagonal / max(1.0, half_diagonal)
+    w = max(1, int(crop.width * scale))
+    h = max(1, int(crop.height * scale))
+    resized = crop.resize((w, h), Image.Resampling.LANCZOS)
+
+    if background is None:
+        canvas = Image.new("RGBA", (size, size), (0, 0, 0, 0))
+        canvas.paste(resized, ((size - w) // 2, (size - h) // 2), resized)
+        return canvas
+
+    if len(background) == 3:
+        canvas = Image.new("RGB", (size, size), background)
+        canvas.paste(resized.convert("RGB"), ((size - w) // 2, (size - h) // 2))
+    else:
+        canvas = Image.new("RGBA", (size, size), background)
+        canvas.paste(resized, ((size - w) // 2, (size - h) // 2), resized)
+    return canvas
+
+
 def fit_crop_in_square(
     crop: Image.Image,
     size: int,
@@ -65,7 +100,7 @@ def fit_crop_in_square(
     fill: float = 0.94,
     background: tuple[int, int, int] | tuple[int, int, int, int] | None = None,
 ) -> Image.Image:
-    """Scale crop to fill a square canvas (circle mask uses ~94% of radius)."""
+    """Scale crop to fill a square canvas (legacy helper)."""
     max_side = max(1, int(size * fill))
     scale = min(max_side / crop.width, max_side / crop.height)
     w = max(1, int(crop.width * scale))

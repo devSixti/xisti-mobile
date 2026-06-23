@@ -7,7 +7,7 @@ from pathlib import Path
 
 from PIL import Image
 
-from xisti_brand_icon import brand_white_silhouette, fit_crop_in_square, load_brand_crop
+from xisti_brand_icon import NOTIFICATION_CIRCLE_MARGIN, brand_white_silhouette, fit_crop_in_circle, load_brand_crop
 
 ROOT = Path(__file__).resolve().parents[1]
 RES = ROOT / "android/app/src/main/res"
@@ -19,14 +19,14 @@ SIZES = {
     "drawable-xxxhdpi": 96,
 }
 
-# Fill the circular notification badge (same proportion as launcher).
-NOTIFICATION_FILL = 0.92
+# Fill the circular notification badge without clipping the wordmark.
+NOTIFICATION_FILL = NOTIFICATION_CIRCLE_MARGIN
 
 
 def make_icon(size: int) -> Image.Image:
     crop = load_brand_crop(include_tagline=False)
     silhouette = brand_white_silhouette(crop)
-    return fit_crop_in_square(silhouette, size, fill=NOTIFICATION_FILL, background=None)
+    return fit_crop_in_circle(silhouette, size, circle_margin=NOTIFICATION_FILL, background=None)
 
 
 def main() -> None:
