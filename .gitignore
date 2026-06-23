@@ -30,6 +30,7 @@
 .pub-cache/
 .pub/
 /build/
+android/build/
 android/app/release/
 
 # Web related
@@ -68,3 +69,4 @@ dist/*.apk
 **/ios/Flutter/ephemeral/
 **/ios/Flutter/Generated.xcconfig
 **/ios/Flutter/flutter_export_environment.sh
+android/build/
