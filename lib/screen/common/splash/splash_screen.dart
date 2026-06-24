@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../commonView/common_view.dart';
+import '../../../utils/rotating_splash_assets.dart';
 import '../../../utils/utils.dart';
 import 'splash_bloc.dart';
 
@@ -14,6 +14,13 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen> {
   SplashBloc? _bloc;
+  late final String _splashAsset;
+
+  @override
+  void initState() {
+    super.initState();
+    _splashAsset = RotatingSplashAssets.selected;
+  }
 
   @override
   void didChangeDependencies() {
@@ -32,50 +39,25 @@ class _SplashScreenState extends State<SplashScreen> {
     return Scaffold(
       extendBody: true,
       extendBodyBehindAppBar: true,
-      appBar: CommonAppBar(toolbarHeight: 0, backgroundColor: Colors.transparent, systemOverlayStyle: AppThemeColors.dark().systemUiOverlayStyle),
-      body: SafeArea(
-        top: false,
-        child: Container(
-          color: const Color(0xFF0B0B0B),
-          child: Stack(
-            children: [
-              Positioned.fill(
-                child: Image.asset(
-                  'assets/images/splash_bg.png',
-                  fit: BoxFit.cover,
-                  filterQuality: FilterQuality.medium,
-                  errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
-                ),
-              ),
-              Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.black.withValues(alpha: 0.35),
-                      Colors.black.withValues(alpha: 0.15),
-                      Colors.black.withValues(alpha: 0.55),
-                    ],
-                  ),
-                ),
-              ),
-              Container(
-                alignment: Alignment.center,
-                padding: EdgeInsets.symmetric(horizontal: commonHorizontalPadding),
-                child: Image.asset(
-                  'assets/images/xisti/logo_full.png',
-                  width: 300.w,
-                  fit: BoxFit.contain,
-                  filterQuality: FilterQuality.high,
-                  errorBuilder: (context, error, stackTrace) => Image.asset(
-                    setImagesBasedOnTheme(context, 'splash_logo.png'),
-                    width: 300.w,
-                    fit: BoxFit.contain,
-                  ),
-                ),
-              ),
-            ],
+      appBar: CommonAppBar(
+        toolbarHeight: 0,
+        backgroundColor: Colors.transparent,
+        systemOverlayStyle: AppThemeColors.dark().systemUiOverlayStyle,
+      ),
+      body: ColoredBox(
+        color: const Color(0xFF0B0B0B),
+        child: Image.asset(
+          _splashAsset,
+          fit: BoxFit.cover,
+          width: double.infinity,
+          height: double.infinity,
+          filterQuality: FilterQuality.high,
+          gaplessPlayback: true,
+          errorBuilder: (context, error, stackTrace) => Image.asset(
+            'assets/images/splash_bg.png',
+            fit: BoxFit.cover,
+            width: double.infinity,
+            height: double.infinity,
           ),
         ),
       ),
