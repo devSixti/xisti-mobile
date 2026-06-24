@@ -89,7 +89,7 @@ class ItemVehicleType extends StatelessWidget {
                   context: context,
                   textColor: isSelected ? accent : theme.colorTextCommon,
                   fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                  fontSize: textSize11px,
+                  fontSize: textSize12px,
                 ),
               ),
             ),

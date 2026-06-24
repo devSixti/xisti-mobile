@@ -245,7 +245,7 @@ class _PassengerHomeState extends State<PassengerHome> {
   }
 
   /// Bottom booking panel — modes, zones, vehicles, route, CTA (ZIMO structure, XISTI skin).
-  Widget _bottomBookingPanelContent() {
+  List<Widget> _bottomBookingPanelContent() {
     return [
       _panelHandle(),
       serviceModeSelector(),
