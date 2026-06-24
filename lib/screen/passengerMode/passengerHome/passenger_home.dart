@@ -21,8 +21,6 @@ import 'item_vehicle_type.dart';
 import 'passenger_home_bloc.dart';
 import 'passenger_home_booking_sheet.dart';
 import 'passenger_home_dl.dart';
-import 'passenger_home_search_card.dart';
-import 'passenger_home_service_chips_bar.dart';
 import 'encomienda_quick_fields.dart';
 import 'delivery_quick_fields.dart';
 import '../../../utils/service_mode_util.dart';
@@ -148,71 +146,6 @@ class _PassengerHomeState extends State<PassengerHome> {
           child: Icon(CustomIcons.pickupLocation, size: 24.sp, color: XistiBrand.green),
         ),
       ),
-    );
-  }
-
-  Widget _modernServiceChipsBar() {
-    return StreamBuilder<String>(
-      stream: _bloc?.selectedServiceModeSubject,
-      builder: (context, snapMode) {
-        return StreamBuilder<ApiResponse<ServiceTypeModel>>(
-          stream: _bloc?.subjectServiceData,
-          builder: (context, snapHome) {
-            final groups = snapHome.data?.data?.serviceModes ??
-                ServiceModeKind.groupsFromFlatServices(snapHome.data?.data?.services ?? []);
-            return PassengerHomeServiceChipsBar(
-              selectedMode: snapMode.data ?? ServiceModeKind.transport,
-              groups: groups,
-              onModeSelected: (mode) => _bloc?.selectServiceMode(mode),
-              embeddedInCard: true,
-            );
-          },
-        );
-      },
-    );
-  }
-
-  Widget _modernMapOverlayColumn({required double topInset}) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        StreamBuilder<String>(
-          stream: _bloc?.selectedServiceModeSubject,
-          builder: (context, modeSnap) {
-            return StreamBuilder<SearchedLocation?>(
-              stream: _bloc?.fromAddressController,
-              builder: (context, fromSnap) {
-                return StreamBuilder<SearchedLocation?>(
-                  stream: _bloc?.toAddressController,
-                  builder: (context, toSnap) {
-                    return StreamBuilder<List<Map<String, dynamic>>>(
-                      stream: _bloc?.locationHistorySubject,
-                      builder: (context, historySnap) {
-                        return PassengerHomeSearchCard(
-                          serviceMode: modeSnap.data,
-                          pickup: fromSnap.data,
-                          dropoff: toSnap.data,
-                          recentTrips: historySnap.data ?? [],
-                          onPickupTap: () => _bloc?.selectAddress(selectedIndex: 1),
-                          onDropoffTap: () => _bloc?.selectAddress(selectedIndex: 2),
-                          onClearPickup: () => _bloc?.fromAddressController.sink.add(null),
-                          onClearDropoff: () {
-                            _bloc?.toAddressController.sink.add(null);
-                            _bloc?.clearMapData();
-                          },
-                          onRecentDestinationTap: (entry) => _bloc?.applyRecentDestinationEntry(entry),
-                          modeSelectorFooter: _modernServiceChipsBar(),
-                          compactModern: true,
-                        );
-                      },
-                    );
-                  },
-                );
-              },
-            );
-          },
-        ),
-      ],
     );
   }
 

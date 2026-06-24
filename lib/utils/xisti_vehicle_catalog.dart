@@ -67,7 +67,6 @@ abstract final class XistiVehicleCatalog {
   static List<ServiceTypeItem> mergeTransportApi(List<ServiceTypeItem> apiRows) {
     final catalog = transportOptions();
     if (apiRows.isEmpty) return catalog;
-    final byVariant = {for (final c in catalog) c.deliveryVariant ?? '': c};
     final byService = <int, ServiceTypeItem>{};
     for (final row in apiRows) {
       byService[row.serviceId ?? 0] = row;
@@ -105,9 +104,6 @@ abstract final class XistiVehicleCatalog {
               ))
           .toList();
     }
-    final apiByVariant = {
-      for (final o in apiOptions) o.deliveryVariant ?? '': o,
-    };
     return catalog.map((c) {
       final variant = c.deliveryVariant ?? '';
       return ServiceTypeItem(
