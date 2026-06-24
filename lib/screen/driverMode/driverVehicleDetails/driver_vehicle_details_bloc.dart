@@ -8,6 +8,7 @@ import '../../../blocs/bloc.dart';
 import '../../../commonView/image_selection.dart';
 import '../../../hive/hive_helper.dart';
 import '../../../utils/utils.dart';
+import '../../../utils/xisti_vehicle_catalog.dart';
 import '../driverDocumentScreen/require_document_screen.dart';
 import 'driver_vehicle_details_dl.dart';
 import 'driver_vehicle_details_repo.dart';
@@ -77,8 +78,8 @@ class DriverVehicleDetailsBloc extends Bloc {
         if (!context.mounted) return;
         String message = getApiMsg(response.message);
         if (isApiStatus(context, response.status, message, true)) {
-          serviceList = response.serviceList;
-          if (response.serviceList.isNotEmpty) {
+          serviceList = XistiVehicleCatalog.mergeDriverServiceApi(response.serviceList);
+          if (serviceList.isNotEmpty) {
             serviceTypeSelection.sink.add(serviceList.first);
           }
           getVehicleDetailApi();

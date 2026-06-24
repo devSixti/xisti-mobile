@@ -8,12 +8,14 @@ class ServiceModeSelector extends StatelessWidget {
   final String selectedMode;
   final List<ServiceModeGroup> groups;
   final ValueChanged<String> onModeSelected;
+  final bool useSlimRail;
 
   const ServiceModeSelector({
     super.key,
     required this.selectedMode,
     required this.groups,
     required this.onModeSelected,
+    this.useSlimRail = false,
   });
 
   @override
@@ -37,6 +39,42 @@ class ServiceModeSelector extends StatelessWidget {
           compact: visible.length > 2,
         ),
     ];
+
+    if (useSlimRail) {
+      return Padding(
+        padding: EdgeInsetsDirectional.only(
+          start: commonHorizontalPadding,
+          end: commonHorizontalPadding,
+          bottom: 8.h,
+        ),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: getCurrentTheme(context).colorScaffoldBg,
+            borderRadius: BorderRadius.circular(24.r),
+            border: Border.all(color: getCurrentTheme(context).colorDarkBorder.withValues(alpha: 0.6)),
+          ),
+          child: Padding(
+            padding: EdgeInsets.all(4.w),
+            child: Row(
+              children: [
+                for (var i = 0; i < visible.length; i++) ...[
+                  if (i > 0) SizedBox(width: 4.w),
+                  Expanded(
+                    child: _SlimModePill(
+                      context: context,
+                      title: visible[i].label,
+                      icon: _iconFor(visible[i].mode),
+                      selected: selectedMode == visible[i].mode,
+                      onTap: () => onModeSelected(visible[i].mode),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ),
+      );
+    }
 
     if (visible.length <= 2) {
       return Padding(
@@ -100,6 +138,58 @@ class ServiceModeSelector extends StatelessWidget {
       default:
         return CustomIcons.car;
     }
+  }
+}
+
+class _SlimModePill extends StatelessWidget {
+  final BuildContext context;
+  final String title;
+  final IconData icon;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _SlimModePill({
+    required this.context,
+    required this.title,
+    required this.icon,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = getCurrentTheme(context);
+    return Material(
+      color: selected ? theme.colorPrimary : Colors.transparent,
+      borderRadius: BorderRadius.circular(20.r),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(20.r),
+        child: Padding(
+          padding: EdgeInsets.symmetric(vertical: 10.h),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, size: 18.sp, color: selected ? theme.colorWhite : theme.colorIconCommon),
+              SizedBox(width: 6.w),
+              Flexible(
+                child: Text(
+                  title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: bodyText(
+                    context: context,
+                    fontSize: textSize13px,
+                    fontWeight: FontWeight.w700,
+                    textColor: selected ? theme.colorWhite : theme.colorTextCommon,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
 

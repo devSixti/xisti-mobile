@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../../../appThemeManager/app_theme_colors.dart';
 import '../../../bottomSheet/vehicle_information_sheet.dart';
-import '../../../commonView/load_image_with_placeholder.dart';
-import '../../../constant/dimensions.dart';
-import '../../../utils/custom_icons.dart';
-import '../../../utils/style_util.dart';
+import '../../../commonView/xisti_vehicle_image.dart';
+import '../../../utils/utils.dart';
+import '../../../utils/xisti_vehicle_catalog.dart';
 import 'driver_vehicle_details_dl.dart';
 
 class DriverVehicleServiceIcon extends StatelessWidget {
@@ -22,82 +20,97 @@ class DriverVehicleServiceIcon extends StatelessWidget {
     return selected.serviceId == item.serviceId && selected.deliveryVariant == item.deliveryVariant;
   }
 
+  String _resolvedIcon() {
+    final local = serviceTypeItem.serviceIcon;
+    if (local.startsWith('assets/')) return local;
+    return XistiVehicleCatalog.iconForDriver(
+      serviceId: serviceTypeItem.serviceId,
+      variant: serviceTypeItem.deliveryVariant,
+      fallbackUrl: local,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      alignment: AlignmentDirectional.center,
-      width: 80.w,
+    final selected = _isSameServiceSelection(selectedServiceTypeItem, serviceTypeItem);
+    final theme = getCurrentTheme(context);
+    final accent = theme.colorPrimary;
+
+    return SizedBox(
+      width: 92.w,
       child: Column(
         mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Stack(
-            children: [
-              AspectRatio(
-                aspectRatio: 1.0,
-                child: Container(
-                  width: double.maxFinite,
-                  height: double.maxFinite,
-                  padding: EdgeInsetsDirectional.only(start: 15.w, end: 15.w, top: 10.h, bottom: 5.h),
-                  decoration: BoxDecoration(
-                    color:
-                        _isSameServiceSelection(selectedServiceTypeItem, serviceTypeItem)
-                            ? getCurrentTheme(context).colorSelectionPrimaryOpc
-                            : getCurrentTheme(context).colorScaffoldBg,
-                    borderRadius: BorderRadius.circular(15.r),
-                    border: Border.all(
-                      color:
-                          _isSameServiceSelection(selectedServiceTypeItem, serviceTypeItem)
-                              ? getCurrentTheme(context).colorPrimary
-                              : getCurrentTheme(context).colorBorder,
-                      width: 0.5.sp,
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            width: 88.w,
+            height: 88.w,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: Colors.transparent,
+              borderRadius: BorderRadius.circular(18.r),
+              border: selected
+                  ? Border.all(color: accent, width: 2.w)
+                  : Border.all(color: theme.colorBorder.withValues(alpha: 0.5), width: 1.w),
+            ),
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                if (selected)
+                  Container(
+                    width: 56.w,
+                    height: 56.w,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: accent.withValues(alpha: 0.35),
+                          blurRadius: 16,
+                          spreadRadius: 1,
+                        ),
+                      ],
                     ),
                   ),
-                  child: LoadImageWithPlaceHolder(
-                    width: double.maxFinite,
-                    height: double.maxFinite,
-                    imageFit: BoxFit.contain,
-                    image: serviceTypeItem.serviceIcon,
-                    defaultAssetImage: "assets/images/app_icon.png",
-                    borderRadius: BorderRadius.zero,
-                  ),
+                XistiVehicleImage(
+                  imagePath: _resolvedIcon(),
+                  size: 76.w,
                 ),
-              ),
-              if (_isSameServiceSelection(selectedServiceTypeItem, serviceTypeItem))
-                Align(
-                  alignment: AlignmentDirectional.topEnd,
-                  child: GestureDetector(
-                    onTap: () {
-                      showModalBottomSheet(
-                        context: context,
-                        backgroundColor: Colors.transparent,
-                        isScrollControlled: true,
-                        builder: (context) {
-                          return VehicleInformationSheet(
+                if (selected)
+                  Align(
+                    alignment: AlignmentDirectional.topEnd,
+                    child: GestureDetector(
+                      onTap: () {
+                        showModalBottomSheet(
+                          context: context,
+                          backgroundColor: Colors.transparent,
+                          isScrollControlled: true,
+                          builder: (context) => VehicleInformationSheet(
                             serviceName: serviceTypeItem.serviceName,
-                            serviceIcon: serviceTypeItem.serviceIcon,
+                            serviceIcon: _resolvedIcon(),
                             serviceDescription: serviceTypeItem.serviceDescription,
-                          );
-                        },
-                      );
-                    },
-                    child: Container(
-                      margin: EdgeInsetsDirectional.only(top: 3.h, end: 5.w),
-                      child: Icon(CustomIcons.information, size: 15.sp, color: getCurrentTheme(context).colorIconCommon),
+                          ),
+                        );
+                      },
+                      child: Padding(
+                        padding: EdgeInsetsDirectional.only(top: 4.h, end: 4.w),
+                        child: Icon(CustomIcons.information, size: 14.sp, color: theme.colorIconCommon),
+                      ),
                     ),
                   ),
-                ),
-            ],
+              ],
+            ),
           ),
-          SizedBox(height: 5.h),
-          Flexible(
-            child: Text(
-              serviceTypeItem.serviceName,
-              textAlign: TextAlign.start,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: bodyText(context: context, textColor: getCurrentTheme(context).colorTextCommon, fontWeight: FontWeight.w500, fontSize: textSize14px),
+          SizedBox(height: 6.h),
+          Text(
+            serviceTypeItem.serviceName,
+            textAlign: TextAlign.center,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: bodyText(
+              context: context,
+              textColor: selected ? accent : theme.colorTextCommon,
+              fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+              fontSize: textSize12px,
             ),
           ),
         ],

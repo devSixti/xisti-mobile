@@ -18,6 +18,7 @@ import 'passenger_home_barrio_shortcuts.dart';
 import 'passenger_home_barrio_shortcuts_ui.dart';
 import '../../common/account/account_screen.dart';
 import 'item_vehicle_type.dart';
+import 'passenger_vehicle_deck.dart';
 import 'passenger_home_bloc.dart';
 import 'passenger_home_booking_sheet.dart';
 import 'passenger_home_dl.dart';
@@ -96,11 +97,10 @@ class _PassengerHomeState extends State<PassengerHome> {
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
               serviceModeSelector(),
-              deliveryLegalNoticeBanner(),
+              addressSelection(),
               serviceData(),
               deliveryFields(),
               encomiendaFields(),
-              addressSelection(),
               confirmBtnAndOtherOption(),
             ],
           ),
@@ -177,20 +177,22 @@ class _PassengerHomeState extends State<PassengerHome> {
     );
   }
 
-  /// Bottom booking panel — modes, zones, vehicles, route, CTA (ZIMO structure, XISTI skin).
+  /// Bottom booking panel — route-first flow with XISTI vehicle spotlight deck.
   List<Widget> _bottomBookingPanelContent() {
     return [
       _panelHandle(),
       serviceModeSelector(),
-      deliveryLegalNoticeBanner(),
+      Padding(
+        padding: EdgeInsetsDirectional.only(top: 4.h, bottom: 8.h),
+        child: addressSelection(),
+      ),
+      serviceData(fillAvailable: false),
       Padding(
         padding: EdgeInsetsDirectional.only(bottom: 8.h),
         child: _cityZoneShortcuts(),
       ),
-      serviceData(fillAvailable: false),
       deliveryFields(),
       encomiendaFields(),
-      addressSelection(),
       confirmBtnAndOtherOption(),
       SizedBox(height: 4.h),
       activityHubCard(),
@@ -819,6 +821,7 @@ class _PassengerHomeState extends State<PassengerHome> {
             selectedMode: snapMode.data ?? ServiceModeKind.transport,
             groups: groups,
             onModeSelected: (mode) => _bloc?.selectServiceMode(mode),
+            useSlimRail: isXistiNewHomeLayoutEnabled(),
           );
         },
       );
@@ -851,26 +854,18 @@ class _PassengerHomeState extends State<PassengerHome> {
               }
 
               final useModern = isXistiNewHomeLayoutEnabled();
-              final usePhotoTile = useModern;
 
-              if (usePhotoTile) {
-                return SizedBox(
-                  height: 128.h,
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    padding: EdgeInsetsDirectional.only(start: commonHorizontalPadding, end: commonHorizontalPadding),
-                    clipBehavior: Clip.none,
-                    itemCount: serviceTypeList.length,
-                    itemBuilder: (context, position) => Padding(
-                      padding: EdgeInsetsDirectional.only(end: 14.w),
-                      child: _vehicleTile(
-                        serviceTypeList,
-                        position,
-                        modeSnap.data,
-                        photoTile: true,
-                      ),
-                    ),
-                  ),
+              if (useModern) {
+                return StreamBuilder<ServiceTypeItem?>(
+                  stream: _bloc?.subjectSelectedServiceData,
+                  builder: (context, snapSelected) {
+                    return PassengerVehicleDeck(
+                      vehicles: serviceTypeList,
+                      selected: snapSelected.data,
+                      serviceMode: modeSnap.data,
+                      onSelect: (index) => _bloc?.vehicleSelect(index),
+                    );
+                  },
                 );
               }
 

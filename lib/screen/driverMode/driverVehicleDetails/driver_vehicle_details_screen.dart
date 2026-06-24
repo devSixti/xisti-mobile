@@ -118,7 +118,7 @@ class _DriverVehicleDetailsScreenState extends State<DriverVehicleDetailsScreen>
 
   Widget _vehicleServiceSelectionView({required List<ServiceList> serviceList, required ServiceList selectServiceListItem}) {
     return Container(
-      height: 107.h,
+      height: 130.h,
       margin: EdgeInsetsDirectional.only(bottom: 20.h),
       child: ListView.separated(
         padding: EdgeInsetsDirectional.zero,

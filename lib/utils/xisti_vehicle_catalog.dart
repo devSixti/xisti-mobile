@@ -1,4 +1,5 @@
 import '../constant/constant.dart';
+import '../screen/driverMode/driverVehicleDetails/driver_vehicle_details_dl.dart';
 import '../screen/passengerMode/passengerHome/passenger_home_dl.dart';
 import 'service_mode_util.dart';
 
@@ -152,4 +153,87 @@ abstract final class XistiVehicleCatalog {
     final v = variant ?? '';
     return v == carroEco || v == carroEconomico;
   }
+
+  /// Local bundled icon for a driver service row (variant slug or service id).
+  static String iconForDriver({
+    int? serviceId,
+    String? variant,
+    String? fallbackUrl,
+  }) {
+    final v = (variant ?? '').trim();
+    if (v.isNotEmpty) {
+      for (final e in [...transportOptions(), ...deliveryServiceItems()]) {
+        if ((e.deliveryVariant ?? '') == v && (e.serviceIcon ?? '').startsWith('assets/')) {
+          return e.serviceIcon!;
+        }
+      }
+    }
+    switch (serviceId) {
+      case ServiceType.taxi:
+        return iconAsset(carroEco);
+      case ServiceType.bike:
+        return iconAsset(motoMedio);
+      case ServiceType.courier:
+        return iconAsset(bicicleta);
+      default:
+        break;
+    }
+    return (fallbackUrl ?? '').trim();
+  }
+
+  static List<_DriverCatalogRow> _driverCatalogRows() => [
+        _DriverCatalogRow(ServiceType.taxi, 'Carro eco', carroEco, false, true),
+        _DriverCatalogRow(ServiceType.taxi, 'Carro cómodo', carroComodo, false, false),
+        _DriverCatalogRow(ServiceType.taxi, 'Carro económico', carroEconomico, false, true),
+        _DriverCatalogRow(ServiceType.bike, 'Moto alto cilindraje', motoAlto, false, false),
+        _DriverCatalogRow(ServiceType.bike, 'Moto bajo cilindraje', motoBajo, false, false),
+        _DriverCatalogRow(ServiceType.bike, 'Moto', motoMedio, true, false),
+        _DriverCatalogRow(ServiceType.taxi, 'Carro', carroEconomico, true, false),
+        _DriverCatalogRow(ServiceType.courier, 'Bicicleta', bicicleta, true, false),
+      ];
+
+  /// Ensures every catalog vehicle appears for drivers with transparent local icons.
+  static List<ServiceList> mergeDriverServiceApi(List<ServiceList> apiRows) {
+    final byVariant = <String, ServiceList>{};
+    final typesByServiceId = <int, List<VehicleTypeList>>{};
+    for (final row in apiRows) {
+      final v = row.deliveryVariant.trim();
+      if (v.isNotEmpty) byVariant[v] = row;
+      if (row.vehicleTypeList.isNotEmpty) {
+        typesByServiceId.putIfAbsent(row.serviceId, () => row.vehicleTypeList);
+      }
+    }
+
+    final merged = <ServiceList>[];
+    for (final c in _driverCatalogRows()) {
+      final existing = byVariant[c.variant];
+      final vehicleTypes = existing?.vehicleTypeList ??
+          typesByServiceId[c.serviceId] ??
+          typesByServiceId[ServiceType.taxi] ??
+          [];
+      merged.add(ServiceList(
+        serviceId: c.serviceId,
+        serviceName: existing?.serviceName.isNotEmpty == true ? existing!.serviceName : c.label,
+        serviceIcon: iconAsset(c.variant),
+        serviceDescription: existing?.serviceDescription ?? '',
+        vehicleTypeList: vehicleTypes,
+        supportsPassengerTransportToggle: existing?.supportsPassengerTransportToggle ?? c.deliveryOnly,
+        isDeliveryOnlyService: existing?.isDeliveryOnlyService ?? c.deliveryOnly,
+        requiresTechnicalInspection:
+            existing?.requiresTechnicalInspection ?? (c.serviceId == ServiceType.taxi && !c.deliveryOnly),
+        deliveryVariant: c.variant,
+      ));
+    }
+    return merged;
+  }
+}
+
+class _DriverCatalogRow {
+  final int serviceId;
+  final String label;
+  final String variant;
+  final bool deliveryOnly;
+  final bool isTaxi;
+
+  const _DriverCatalogRow(this.serviceId, this.label, this.variant, this.deliveryOnly, this.isTaxi);
 }
