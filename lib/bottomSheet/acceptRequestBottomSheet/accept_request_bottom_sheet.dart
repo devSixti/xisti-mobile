@@ -149,6 +149,9 @@ class _AcceptRequestBottomSheetState extends State<AcceptRequestBottomSheet> {
                                 serviceMode: widget.rideListItem.serviceMode,
                                 isDelivery: widget.rideListItem.isDelivery,
                                 isEncomienda: widget.rideListItem.isEncomienda,
+                                serviceName: widget.rideListItem.serviceName,
+                                vehicleVariant: widget.rideListItem.vehicleVariant,
+                                isTaxi: widget.rideListItem.isTaxi,
                               ),
                               SizedBox(width: 8.w),
                               GestureDetector(

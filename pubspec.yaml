@@ -8,7 +8,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # ex. 1.0.1+1
 # ex. 1.0.5+5
 # ex. 1.1.0+10
-version: 1.0.3+34
+version: 1.0.3+35
 
 # Used Flutter SDK 3.41.2
 environment:
@@ -135,6 +135,7 @@ flutter:
     - assets/images/
     - assets/images/payment_methods/
     - assets/images/xisti/
+    - assets/images/vehicle_home/
 #    - assets/gifs/
     - assets/images/light/
     - assets/images/dark/

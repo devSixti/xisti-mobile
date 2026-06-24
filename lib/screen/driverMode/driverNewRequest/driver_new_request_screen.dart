@@ -161,6 +161,9 @@ class _DriverNewRequestScreenState extends State<DriverNewRequestScreen> with Wi
                                 child: RideRequestTypeChip(
                                   serviceId: newRequestPojo.serviceId,
                                   isDelivery: newRequestPojo.isDelivery,
+                                  serviceName: newRequestPojo.serviceName,
+                                  vehicleVariant: newRequestPojo.vehicleVariant,
+                                  isTaxi: newRequestPojo.isTaxi,
                                 ),
                               ),
                               if (ServiceModeKind.isDeliveryRideRequest(

@@ -336,6 +336,9 @@ class RideList {
     String? serviceMode,
     int? childSeat,
     int? handicap,
+    String? serviceName,
+    String? vehicleVariant,
+    int? isTaxi,
   }) {
     _rideId = rideId;
     _rideNo = rideNo;
@@ -377,6 +380,9 @@ class RideList {
     _serviceMode = serviceMode;
     _childSeat = childSeat;
     _handicap = handicap;
+    _serviceName = serviceName;
+    _vehicleVariant = vehicleVariant;
+    _isTaxi = isTaxi;
   }
 
   RideList.fromJson(dynamic json) {
@@ -419,6 +425,9 @@ class RideList {
     _isEncomienda = json['is_encomienda'] is int ? json['is_encomienda'] : int.tryParse('${json['is_encomienda'] ?? 0}');
     _childSeat = json['child_seat'] is int ? json['child_seat'] : int.tryParse('${json['child_seat'] ?? 0}');
     _handicap = json['handicap'] is int ? json['handicap'] : int.tryParse('${json['handicap'] ?? 0}');
+    _serviceName = json['service_name']?.toString();
+    _vehicleVariant = json['vehicle_variant']?.toString() ?? json['delivery_variant']?.toString();
+    _isTaxi = json['is_taxi'] is int ? json['is_taxi'] : int.tryParse('${json['is_taxi'] ?? 0}');
     if (json['address_list'] != null) {
       _addressList = [];
       json['address_list'].forEach((v) {
@@ -467,6 +476,9 @@ class RideList {
   String? _serviceMode;
   int? _childSeat;
   int? _handicap;
+  String? _serviceName;
+  String? _vehicleVariant;
+  int? _isTaxi;
 
   int get rideId => _rideId ?? 0;
 
@@ -547,6 +559,12 @@ class RideList {
   int get childSeat => _childSeat ?? 0;
 
   int get handicap => _handicap ?? 0;
+
+  String get serviceName => _serviceName ?? '';
+
+  String get vehicleVariant => _vehicleVariant ?? '';
+
+  int get isTaxi => _isTaxi ?? 0;
 
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{};

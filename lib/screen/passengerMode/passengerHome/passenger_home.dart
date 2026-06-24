@@ -133,40 +133,20 @@ class _PassengerHomeState extends State<PassengerHome> {
     final theme = getCurrentTheme(context);
     return Positioned(
       left: commonHorizontalPadding,
-      right: commonHorizontalPadding,
       bottom: 14.h,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          GestureDetector(
-            onTap: () => _bloc?.focusCurrentPosition(),
-            child: Container(
-              width: 48.w,
-              height: 48.w,
-              decoration: BoxDecoration(
-                color: theme.colorWhite,
-                shape: BoxShape.circle,
-                border: Border.all(color: XistiBrand.green.withValues(alpha: 0.55), width: 1.5.w),
-                boxShadow: XistiUiTokens.floatingShadow(context, theme.colorBorder),
-              ),
-              child: Icon(CustomIcons.pickupLocation, size: 24.sp, color: XistiBrand.green),
-            ),
+      child: GestureDetector(
+        onTap: () => _bloc?.focusCurrentPosition(),
+        child: Container(
+          width: 48.w,
+          height: 48.w,
+          decoration: BoxDecoration(
+            color: theme.colorWhite,
+            shape: BoxShape.circle,
+            border: Border.all(color: XistiBrand.green.withValues(alpha: 0.55), width: 1.5.w),
+            boxShadow: XistiUiTokens.floatingShadow(context, theme.colorBorder),
           ),
-          GestureDetector(
-            onTap: () => openScreen(context, AccountScreen()),
-            child: Container(
-              width: 48.w,
-              height: 48.w,
-              decoration: BoxDecoration(
-                color: theme.colorScaffoldBg.withValues(alpha: 0.98),
-                borderRadius: BorderRadius.circular(12.r),
-                border: Border.all(color: XistiBrand.green.withValues(alpha: 0.45), width: 1.5.w),
-                boxShadow: XistiUiTokens.floatingShadow(context, theme.colorBorder),
-              ),
-              child: Icon(CustomIcons.menu, size: 24.sp, color: theme.colorIconCommon),
-            ),
-          ),
-        ],
+          child: Icon(CustomIcons.pickupLocation, size: 24.sp, color: XistiBrand.green),
+        ),
       ),
     );
   }
@@ -248,42 +228,49 @@ class _PassengerHomeState extends State<PassengerHome> {
     );
   }
 
+  Widget _panelHandle() {
+    return Padding(
+      padding: EdgeInsetsDirectional.only(top: 8.h, bottom: 6.h),
+      child: Center(
+        child: Container(
+          width: 48.w,
+          height: 4.h,
+          decoration: BoxDecoration(
+            color: getCurrentTheme(context).colorIndicatorOff,
+            borderRadius: BorderRadius.circular(4.r),
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Bottom booking panel — modes, zones, vehicles, route, CTA (ZIMO structure, XISTI skin).
+  Widget _bottomBookingPanelContent() {
+    return [
+      _panelHandle(),
+      serviceModeSelector(),
+      deliveryLegalNoticeBanner(),
+      Padding(
+        padding: EdgeInsetsDirectional.only(bottom: 8.h),
+        child: _cityZoneShortcuts(),
+      ),
+      serviceData(fillAvailable: false),
+      deliveryFields(),
+      encomiendaFields(),
+      addressSelection(),
+      confirmBtnAndOtherOption(),
+      SizedBox(height: 4.h),
+      activityHubCard(),
+    ];
+  }
+
   Widget _modernBookingPanel() {
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Padding(
-          padding: EdgeInsetsDirectional.fromSTEB(0, 2.h, 0, 0),
-          child: _cityZoneShortcuts(),
-        ),
-        SizedBox(height: 8.h),
-        SizedBox(
-          height: XistiUiTokens.wireframeVehicleRowHeight,
-          child: ClipRect(
-            child: Align(
-              alignment: AlignmentDirectional.topStart,
-              child: serviceData(fillAvailable: true),
-            ),
-          ),
-        ),
-        encomiendaFields(),
-        confirmBtnAndOtherOption(),
-      ],
+      children: _bottomBookingPanelContent(),
     );
   }
-
-  List<Widget> _modernBookingSheetChildren() => [
-        Padding(
-          padding: EdgeInsetsDirectional.only(bottom: 6.h),
-          child: _cityZoneShortcuts(),
-        ),
-        serviceData(),
-        deliveryFields(),
-        encomiendaFields(),
-        confirmBtnAndOtherOption(),
-        activityHubCard(),
-      ];
 
   Widget activityHubCard() => StreamBuilder(
         stream: _bloc?.activityHubSubject,
@@ -296,20 +283,31 @@ class _PassengerHomeState extends State<PassengerHome> {
       );
 
   Widget _modernBodyPortrait() {
-    final topInset = MediaQuery.paddingOf(context).top;
+    final maxPanelH = MediaQuery.sizeOf(context).height * 0.58;
 
     return Column(
       children: [
         Expanded(
-          flex: XistiUiTokens.wireframeMapFlex,
           child: Stack(
             children: [
               _modernMapStack(),
               Positioned(
-                top: topInset + 4.h,
-                left: 0,
-                right: 0,
-                child: _modernMapOverlayColumn(topInset: topInset),
+                top: MediaQuery.paddingOf(context).top + 8.h,
+                right: commonHorizontalPadding,
+                child: GestureDetector(
+                  onTap: () => openScreen(context, AccountScreen()),
+                  child: Container(
+                    width: 44.w,
+                    height: 44.w,
+                    decoration: BoxDecoration(
+                      color: getCurrentTheme(context).colorScaffoldBg.withValues(alpha: 0.96),
+                      borderRadius: BorderRadius.circular(12.r),
+                      border: Border.all(color: XistiBrand.green.withValues(alpha: 0.45), width: 1.5.w),
+                      boxShadow: XistiUiTokens.floatingShadow(context, getCurrentTheme(context).colorBorder),
+                    ),
+                    child: Icon(CustomIcons.menu, size: 22.sp, color: getCurrentTheme(context).colorIconCommon),
+                  ),
+                ),
               ),
               _mapFloatingActions(),
             ],
@@ -318,12 +316,18 @@ class _PassengerHomeState extends State<PassengerHome> {
         StreamBuilder<String>(
           stream: _bloc?.selectedServiceModeSubject,
           builder: (context, modeSnap) {
-            return AnimatedSwitcher(
-              duration: const Duration(milliseconds: 280),
-              child: PassengerHomeBookingSheet(
-                key: ValueKey(modeSnap.data ?? ServiceModeKind.transport),
-                expandToFill: false,
-                body: _modernBookingPanel(),
+            return ConstrainedBox(
+              constraints: BoxConstraints(maxHeight: maxPanelH),
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 280),
+                child: PassengerHomeBookingSheet(
+                  key: ValueKey(modeSnap.data ?? ServiceModeKind.transport),
+                  expandToFill: false,
+                  body: SingleChildScrollView(
+                    physics: const BouncingScrollPhysics(),
+                    child: _modernBookingPanel(),
+                  ),
+                ),
               ),
             );
           },
@@ -333,8 +337,6 @@ class _PassengerHomeState extends State<PassengerHome> {
   }
 
   Widget _modernBodyTablet() {
-    final topInset = MediaQuery.paddingOf(context).top;
-
     return Row(
       children: [
         Expanded(
@@ -343,10 +345,21 @@ class _PassengerHomeState extends State<PassengerHome> {
             children: [
               _modernMapStack(),
               Positioned(
-                top: topInset + 6.h,
-                left: 0,
-                right: 0,
-                child: _modernMapOverlayColumn(topInset: topInset),
+                top: MediaQuery.paddingOf(context).top + 8.h,
+                right: commonHorizontalPadding,
+                child: GestureDetector(
+                  onTap: () => openScreen(context, AccountScreen()),
+                  child: Container(
+                    width: 44.w,
+                    height: 44.w,
+                    decoration: BoxDecoration(
+                      color: getCurrentTheme(context).colorScaffoldBg.withValues(alpha: 0.96),
+                      borderRadius: BorderRadius.circular(12.r),
+                      border: Border.all(color: XistiBrand.green.withValues(alpha: 0.45)),
+                    ),
+                    child: Icon(CustomIcons.menu, size: 22.sp),
+                  ),
+                ),
               ),
               _mapFloatingActions(),
             ],
@@ -368,8 +381,8 @@ class _PassengerHomeState extends State<PassengerHome> {
                   duration: const Duration(milliseconds: 280),
                   child: ListView(
                     key: ValueKey(modeSnap.data ?? ServiceModeKind.transport),
-                    padding: EdgeInsetsDirectional.only(top: 12.h, bottom: getBottomMargin()),
-                    children: _modernBookingSheetChildren(),
+                    padding: EdgeInsetsDirectional.only(top: 8.h, bottom: getBottomMargin()),
+                    children: _bottomBookingPanelContent(),
                   ),
                 );
               },
@@ -905,50 +918,26 @@ class _PassengerHomeState extends State<PassengerHome> {
               }
 
               final useModern = isXistiNewHomeLayoutEnabled();
-              final usePhotoTile = useModern && fillAvailable;
+              final usePhotoTile = useModern;
 
               if (usePhotoTile) {
-                final boxSize = XistiUiTokens.wireframeVehicleBoxSize;
-                return Align(
-                  alignment: AlignmentDirectional.centerStart,
-                  child: serviceTypeList.length <= 2
-                      ? Padding(
-                          padding: EdgeInsetsDirectional.only(start: commonHorizontalPadding),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              for (var position = 0; position < serviceTypeList.length; position++) ...[
-                                if (position > 0) SizedBox(width: 20.w),
-                                _vehicleTile(
-                                  serviceTypeList,
-                                  position,
-                                  modeSnap.data,
-                                  photoTile: true,
-                                  photoTileHeight: boxSize,
-                                ),
-                              ],
-                            ],
-                          ),
-                        )
-                      : SizedBox(
-                          height: XistiUiTokens.wireframeVehicleRowHeight,
-                          child: ListView.builder(
-                            scrollDirection: Axis.horizontal,
-                            padding: EdgeInsetsDirectional.only(start: commonHorizontalPadding, end: commonHorizontalPadding),
-                            itemCount: serviceTypeList.length,
-                            itemBuilder: (context, position) => Padding(
-                              padding: EdgeInsetsDirectional.only(end: 16.w),
-                              child: _vehicleTile(
-                                serviceTypeList,
-                                position,
-                                modeSnap.data,
-                                photoTile: true,
-                                photoTileHeight: boxSize,
-                              ),
-                            ),
-                          ),
-                        ),
+                return SizedBox(
+                  height: 128.h,
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    padding: EdgeInsetsDirectional.only(start: commonHorizontalPadding, end: commonHorizontalPadding),
+                    clipBehavior: Clip.none,
+                    itemCount: serviceTypeList.length,
+                    itemBuilder: (context, position) => Padding(
+                      padding: EdgeInsetsDirectional.only(end: 14.w),
+                      child: _vehicleTile(
+                        serviceTypeList,
+                        position,
+                        modeSnap.data,
+                        photoTile: true,
+                      ),
+                    ),
+                  ),
                 );
               }
 

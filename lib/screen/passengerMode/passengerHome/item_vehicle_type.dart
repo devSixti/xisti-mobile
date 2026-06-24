@@ -7,13 +7,13 @@ import '../../../commonView/load_image_with_placeholder.dart';
 import '../../../bottomSheet/vehicle_information_sheet.dart';
 import 'passenger_home_dl.dart';
 
+/// Vehicle tile for passenger home — large icon, transparent fill (ZIMO-style sizing).
 class ItemVehicleType extends StatelessWidget {
   final ServiceTypeItem serviceTypeItem;
   final bool isSelected;
   final String? serviceMode;
   final bool expanded;
   final bool wireframeTile;
-  /// Home moderno: cuadrado compacto + nombre debajo (referencia wireframe).
   final bool photoTile;
   final double? photoTileHeight;
 
@@ -30,150 +30,116 @@ class ItemVehicleType extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (photoTile) {
-      return _referenceHomeTile(context);
-    }
-    if (wireframeTile) {
-      return _wireframeTile(context);
+    if (photoTile || wireframeTile) {
+      return _panelTile(context);
     }
     return _legacyTile(context);
   }
 
-  Widget _referenceHomeTile(BuildContext context) {
+  Widget _panelTile(BuildContext context) {
     final theme = getCurrentTheme(context);
     final accent = XistiUiTokens.accentForMode(serviceMode);
-    final boxSize = photoTileHeight ?? XistiUiTokens.wireframeVehicleBoxSize;
+    final tileW = expanded ? double.infinity : 88.w;
+    final boxSize = photoTileHeight ?? 88.w;
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: boxSize,
-          height: boxSize,
-          decoration: BoxDecoration(
-            color: theme.colorScaffoldBg,
-            borderRadius: BorderRadius.circular(12.r),
-            border: Border.all(
-              color: isSelected ? accent : theme.colorDarkBorder,
-              width: isSelected ? 2.w : 1.w,
-            ),
-          ),
-          child: Stack(
-            children: [
-              Center(
-                child: Padding(
-                  padding: EdgeInsets.all(6.w),
-                  child: LoadImageWithPlaceHolder(
-                    width: boxSize - 12.w,
-                    height: boxSize - 12.w,
-                    imageFit: BoxFit.contain,
-                    image: serviceTypeItem.serviceIcon ?? "",
-                    defaultAssetImage: "assets/images/app_icon.png",
-                    borderRadius: BorderRadius.zero,
-                  ),
-                ),
+    return SizedBox(
+      width: tileW,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            width: boxSize,
+            height: boxSize,
+            decoration: BoxDecoration(
+              color: isSelected ? accent.withValues(alpha: 0.12) : Colors.transparent,
+              borderRadius: BorderRadius.circular(16.r),
+              border: Border.all(
+                color: isSelected ? accent : theme.colorDarkBorder,
+                width: isSelected ? 2.5.w : 1.5.w,
               ),
-              if (isSelected)
-                Align(
-                  alignment: AlignmentDirectional.topEnd,
-                  child: GestureDetector(
-                    onTap: () {
-                      showModalBottomSheet(
-                        context: context,
-                        backgroundColor: Colors.transparent,
-                        isScrollControlled: true,
-                        builder: (context) {
-                          return VehicleInformationSheet(
-                            serviceName: serviceTypeItem.serviceName ?? "",
-                            serviceIcon: serviceTypeItem.serviceIcon ?? "",
-                            serviceDescription: serviceTypeItem.serviceDescription ?? "",
-                          );
-                        },
-                      );
-                    },
-                    child: Container(
-                      margin: EdgeInsetsDirectional.only(top: 3.h, end: 3.w),
-                      padding: EdgeInsets.all(2.sp),
-                      decoration: BoxDecoration(
-                        color: theme.colorScaffoldBg.withValues(alpha: 0.92),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(CustomIcons.information, size: 11.sp, color: accent),
+            ),
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(10.w),
+                    child: Transform.scale(
+                      scale: 0.76,
+                      child: _vehicleImage(boxSize - 20.w, serviceTypeItem),
                     ),
                   ),
                 ),
-            ],
-          ),
-        ),
-        SizedBox(height: XistiUiTokens.wireframeVehicleLabelGap),
-        SizedBox(
-          width: boxSize,
-          child: Text(
-            serviceTypeItem.serviceName ?? "-",
-            textAlign: TextAlign.center,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: bodyText(
-              context: context,
-              textColor: isSelected ? accent : theme.colorTextCommon,
-              fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-              fontSize: textSize10px,
+                if (isSelected) _infoButton(context, theme, accent),
+              ],
             ),
           ),
-        ),
-      ],
-    );
-  }
-
-  Widget _wireframeTile(BuildContext context) {
-    final theme = getCurrentTheme(context);
-    final accent = XistiUiTokens.accentForMode(serviceMode);
-    final tileH = XistiUiTokens.wireframeVehicleTileHeight;
-
-    return Container(
-      width: expanded ? double.infinity : 88.w,
-      height: tileH,
-      margin: EdgeInsetsDirectional.only(end: expanded ? 0 : 8.w),
-      decoration: BoxDecoration(
-        color: theme.colorScaffoldBg,
-        borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(
-          color: isSelected ? accent : theme.colorDarkBorder,
-          width: isSelected ? 2.w : 1.w,
-        ),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
+          SizedBox(height: 6.h),
           SizedBox(
-            height: 22.h,
-            width: 36.w,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(4.r),
-              child: LoadImageWithPlaceHolder(
-                width: 36.w,
-                height: 22.h,
-                imageFit: BoxFit.contain,
-                image: serviceTypeItem.serviceIcon ?? "",
-                defaultAssetImage: "assets/images/app_icon.png",
-                borderRadius: BorderRadius.zero,
+            width: boxSize + 12.w,
+            height: 34.h,
+            child: Center(
+              child: Text(
+                serviceTypeItem.serviceName ?? '-',
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: bodyText(
+                  context: context,
+                  textColor: isSelected ? accent : theme.colorTextCommon,
+                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                  fontSize: textSize11px,
+                ),
               ),
             ),
           ),
-          SizedBox(height: 3.h),
-          Text(
-            serviceTypeItem.serviceName ?? "-",
-            textAlign: TextAlign.center,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: bodyText(
-              context: context,
-              textColor: isSelected ? accent : theme.colorTextCommon,
-              fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-              fontSize: textSize10px,
-            ),
-          ),
         ],
+      ),
+    );
+  }
+
+  Widget _vehicleImage(double size, ServiceTypeItem item) {
+    final src = item.serviceIcon ?? '';
+    final isAsset = src.startsWith('assets/');
+    return LoadImageWithPlaceHolder(
+      width: size,
+      height: size,
+      imageFit: BoxFit.contain,
+      isNetworkImage: !isAsset,
+      image: isAsset ? src : src,
+      defaultAssetImage: 'assets/images/app_icon.png',
+      borderRadius: BorderRadius.zero,
+    );
+  }
+
+  Widget _infoButton(BuildContext context, dynamic theme, Color accent) {
+    return Align(
+      alignment: AlignmentDirectional.topEnd,
+      child: GestureDetector(
+        onTap: () {
+          showModalBottomSheet(
+            context: context,
+            backgroundColor: Colors.transparent,
+            isScrollControlled: true,
+            builder: (context) {
+              return VehicleInformationSheet(
+                serviceName: serviceTypeItem.serviceName ?? '',
+                serviceIcon: serviceTypeItem.serviceIcon ?? '',
+                serviceDescription: serviceTypeItem.serviceDescription ?? '',
+              );
+            },
+          );
+        },
+        child: Container(
+          margin: EdgeInsetsDirectional.only(top: 4.h, end: 4.w),
+          padding: EdgeInsets.all(3.sp),
+          decoration: BoxDecoration(
+            color: theme.colorScaffoldBg.withValues(alpha: 0.92),
+            shape: BoxShape.circle,
+          ),
+          child: Icon(CustomIcons.information, size: 11.sp, color: accent),
+        ),
       ),
     );
   }
@@ -206,54 +172,18 @@ class ItemVehicleType extends StatelessWidget {
                   radius: 16.r,
                 ),
                 child: Center(
-                  child: SizedBox(
-                    height: 44.h,
-                    width: 44.h,
-                    child: LoadImageWithPlaceHolder(
-                      width: 44.h,
-                      height: 44.h,
-                      imageFit: BoxFit.contain,
-                      image: serviceTypeItem.serviceIcon ?? "",
-                      defaultAssetImage: "assets/images/app_icon.png",
-                      borderRadius: BorderRadius.zero,
-                    ),
+                  child: Transform.scale(
+                    scale: 0.76,
+                    child: _vehicleImage(44.h, serviceTypeItem),
                   ),
                 ),
               ),
-              if (isSelected)
-                Align(
-                  alignment: AlignmentDirectional.topEnd,
-                  child: GestureDetector(
-                    onTap: () {
-                      showModalBottomSheet(
-                        context: context,
-                        backgroundColor: Colors.transparent,
-                        isScrollControlled: true,
-                        builder: (context) {
-                          return VehicleInformationSheet(
-                            serviceName: serviceTypeItem.serviceName ?? "",
-                            serviceIcon: serviceTypeItem.serviceIcon ?? "",
-                            serviceDescription: serviceTypeItem.serviceDescription ?? "",
-                          );
-                        },
-                      );
-                    },
-                    child: Container(
-                      margin: EdgeInsetsDirectional.only(top: 3.h, end: 3.w),
-                      padding: EdgeInsets.all(3.sp),
-                      decoration: BoxDecoration(
-                        color: theme.colorScaffoldBg.withValues(alpha: 0.9),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(CustomIcons.information, size: 12.sp, color: accent),
-                    ),
-                  ),
-                ),
+              if (isSelected) _infoButton(context, theme, accent),
             ],
           ),
           SizedBox(height: 5.h),
           Text(
-            serviceTypeItem.serviceName ?? "-",
+            serviceTypeItem.serviceName ?? '-',
             textAlign: TextAlign.center,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,

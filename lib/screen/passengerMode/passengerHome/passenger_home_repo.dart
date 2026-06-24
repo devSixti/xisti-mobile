@@ -46,6 +46,7 @@ class PassengerHomeRepo {
     required String packageLengthCm,
     int requestedVehicleServiceId = 0,
     String errandType = '',
+    String deliveryVariant = '',
   }) async {
     final response = await _apiBaseHelper.post(
       ApiConst.endPointTransportRideBooking,
@@ -79,6 +80,7 @@ class PassengerHomeRepo {
         ApiParam.paramPackageLengthCm: packageLengthCm,
         if (requestedVehicleServiceId > 0) ApiParam.paramRequestedVehicleServiceId: requestedVehicleServiceId,
         if (errandType.isNotEmpty) ApiParam.paramErrandType: errandType,
+        if (deliveryVariant.trim().isNotEmpty) ApiParam.paramDeliveryVariant: deliveryVariant.trim(),
       },
     );
     return response;

@@ -21,6 +21,7 @@ import '../../../utils/destination_payment_util.dart';
 import '../../../utils/get_route_utils.dart';
 import '../../../services/passenger_location_history_service.dart';
 import '../../../utils/service_mode_util.dart';
+import '../../../utils/xisti_vehicle_catalog.dart';
 import '../../../utils/utils.dart';
 import '../../common/splash/splash_dl.dart';
 import '../../common/splash/splash_repo.dart';
@@ -186,6 +187,9 @@ class PassengerHomeBloc extends Bloc {
         if (!context.mounted) return;
         if (isApiStatus(context, response.status ?? 0, message, true)) {
           deliveryVehicleOptions = response.deliveryVehicleOptions ?? [];
+          if (deliveryVehicleOptions.length < XistiVehicleCatalog.deliveryOptions().length) {
+            deliveryVehicleOptions = XistiVehicleCatalog.deliveryOptions();
+          }
           deliveryPassengerDisclaimer = response.deliveryPassengerDisclaimer ?? '';
           encomiendaPassengerDisclaimer = response.encomiendaPassengerDisclaimer ?? '';
           if (deliveryVehicleOptions.isNotEmpty) {
@@ -318,6 +322,8 @@ class PassengerHomeBloc extends Bloc {
           addressList.addAll(addStopAddressList.valueOrNull ?? []);
         }
         addressList.add(toAddressController.value!);
+        final selectedService = subjectSelectedServiceData.valueOrNull;
+        final bookVariant = (selectedService?.deliveryVariant ?? '').trim();
         var response = RideBookPojo.fromJson(
           await _passengerHomeRepo.bookRide(
             addressList: jsonEncode(addressList),
@@ -361,6 +367,7 @@ class PassengerHomeBloc extends Bloc {
             packageLengthCm: deliveryLike && !encomienda ? packageLengthController.valueOrNull ?? "" : "",
             requestedVehicleServiceId: deliveryLike ? (selectedDeliveryVehicleServiceId.valueOrNull ?? bookServiceId) : 0,
             errandType: encomienda ? 'encomienda' : (deliveryLike ? 'delivery' : ''),
+            deliveryVariant: bookVariant,
           ),
         );
         String message = getApiMsg(response.message, response.messageCode);
@@ -522,8 +529,8 @@ class PassengerHomeBloc extends Bloc {
   }
 
   void _refreshFilteredServices(List<ServiceModeGroup> groups, String mode) {
-    if (ServiceModeKind.isDeliveryLikeMode(mode) && deliveryVehicleOptions.isNotEmpty) {
-      final list = ServiceModeKind.serviceItemsFromDeliveryOptions(
+    if (ServiceModeKind.isDeliveryLikeMode(mode)) {
+      final list = XistiVehicleCatalog.mergeDeliveryApi(
         deliveryVehicleOptions,
         serviceMode: mode,
       );
@@ -550,11 +557,10 @@ class PassengerHomeBloc extends Bloc {
           .where((s) => s.serviceId != ServiceType.rickshaw)
           .toList();
     }
-    if (list.isEmpty && deliveryVehicleOptions.isNotEmpty) {
-      list = ServiceModeKind.serviceItemsFromDeliveryOptions(
-        deliveryVehicleOptions,
-        serviceMode: mode,
-      );
+    if (mode == ServiceModeKind.transport) {
+      list = XistiVehicleCatalog.mergeTransportApi(list);
+    } else if (list.isEmpty && deliveryVehicleOptions.isNotEmpty) {
+      list = XistiVehicleCatalog.mergeDeliveryApi(deliveryVehicleOptions);
     }
     list.sort(_serviceDisplayOrder);
     filteredServicesSubject.add(list);

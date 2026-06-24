@@ -187,6 +187,8 @@ class NewRequestPojo {
     _packageWidthCm = json['package_width_cm'];
     _packageLengthCm = json['package_length_cm'];
     _isDelivery = json['is_delivery'] is int ? json['is_delivery'] : int.tryParse('${json['is_delivery'] ?? 0}');
+    _vehicleVariant = json['vehicle_variant']?.toString() ?? json['delivery_variant']?.toString();
+    _isTaxi = json['is_taxi'] is int ? json['is_taxi'] : int.tryParse('${json['is_taxi'] ?? 0}');
   }
 
   int? _status;
@@ -223,6 +225,8 @@ class NewRequestPojo {
   dynamic _packageWidthCm;
   dynamic _packageLengthCm;
   int? _isDelivery;
+  String? _vehicleVariant;
+  int? _isTaxi;
 
   int get status => _status ?? 0;
 
@@ -291,6 +295,10 @@ class NewRequestPojo {
   String get packageLengthCm => "${_packageLengthCm ?? ''}";
 
   int get isDelivery => _isDelivery ?? 0;
+
+  String get vehicleVariant => _vehicleVariant ?? '';
+
+  int get isTaxi => _isTaxi ?? 0;
 
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{};
