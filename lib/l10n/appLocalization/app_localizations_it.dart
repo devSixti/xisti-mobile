@@ -252,6 +252,13 @@ class AppLocalizationsIt extends AppLocalizations {
       'Un nuovo OTP è stato inviato al tuo numero di telefono registrato';
 
   @override
+  String get resendOtpWhatsappSuccessMsg => 'We sent a new code via WhatsApp';
+
+  @override
+  String get otpSentViaWhatsappHint =>
+      'If your carrier blocks SMS, the code may arrive via WhatsApp.';
+
+  @override
   String get yourName => 'Il tuo Nome';
 
   @override

@@ -247,6 +247,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'Fresh OTP has been sent to your registered phone number';
 
   @override
+  String get resendOtpWhatsappSuccessMsg => 'We sent a new code via WhatsApp';
+
+  @override
+  String get otpSentViaWhatsappHint =>
+      'If your carrier blocks SMS, the code may arrive via WhatsApp.';
+
+  @override
   String get yourName => 'Your Name';
 
   @override
@@ -360,7 +367,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get wallet => 'Wallet';
 
   @override
-  String get offerMyFare => 'Offer My Fare';
+  String get offerMyFare => 'Offer fare';
 
   @override
   String get fetchingLocation => 'Fetching Location';

@@ -1,5 +1,7 @@
 {
   "fr": [
+    "resendOtpWhatsappSuccessMsg",
+    "otpSentViaWhatsappHint",
     "privacyPolicy",
     "platformConnectionNotice",
     "driverIndependentNotice",
@@ -10,6 +12,8 @@
   ],
 
   "it": [
+    "resendOtpWhatsappSuccessMsg",
+    "otpSentViaWhatsappHint",
     "privacyPolicy",
     "platformConnectionNotice",
     "driverIndependentNotice",

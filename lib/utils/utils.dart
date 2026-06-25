@@ -134,10 +134,18 @@ Future<void> clearSessionCredentials() async {
   putDataInUserInfoBox(hiveUserId, 0);
 }
 
-Future<void> navigateToOtpResume(BuildContext context) async {
+Future<void> syncOtpDeliveryChannelFromResend() async {
   try {
-    await OtpVerifyRepo().callResendOtpApi();
+    final response = BaseModel.fromJson(await OtpVerifyRepo().callResendOtpApi());
+    final channel = response.otpDeliveryChannel;
+    if (channel.isNotEmpty) {
+      await putDataInSettingBox(hiveOtpDeliveryChannel, channel);
+    }
   } catch (_) {}
+}
+
+Future<void> navigateToOtpResume(BuildContext context) async {
+  await syncOtpDeliveryChannelFromResend();
   if (!context.mounted) return;
   openScreenWithClearPrevious(context, const OtpVerifyScreen());
 }
@@ -188,9 +196,7 @@ Future<void> manageLoginResponse(BuildContext context, LoginPojo response) async
     if (response.isRegister == 1) {
       if (isPhoneLogin && needsOtp) {
         await markPhoneOtpPending();
-        try {
-          await OtpVerifyRepo().callResendOtpApi();
-        } catch (_) {}
+        await syncOtpDeliveryChannelFromResend();
         if (!context.mounted) return;
         openScreenWithClearPrevious(context, const OtpVerifyScreen());
         return;
@@ -213,9 +219,7 @@ Future<void> manageLoginResponse(BuildContext context, LoginPojo response) async
         openScreenWithClearPrevious(context, const SignupScreen());
       } else {
         await markPhoneOtpPending();
-        try {
-          await OtpVerifyRepo().callResendOtpApi();
-        } catch (_) {}
+        await syncOtpDeliveryChannelFromResend();
         if (!context.mounted) return;
         openScreenWithClearPrevious(context, const OtpVerifyScreen());
       }
@@ -333,6 +337,11 @@ Future<void> setDataInHive(LoginPojo body) async {
   }
   putDataInSettingBox(hiveServerTimeZone, body.serverTimeZone ?? "");
   putDataInSettingBox(hiveUserVerified, body.userVerified ?? 0);
+  if ((body.otpDeliveryChannel ?? '').isNotEmpty) {
+    putDataInSettingBox(hiveOtpDeliveryChannel, body.otpDeliveryChannel!);
+  } else if ((body.userVerified ?? 0) == 0) {
+    putDataInSettingBox(hiveOtpDeliveryChannel, 'sms');
+  }
   putDataInUserInfoBox(hiveReferralCode, body.referralCode ?? "");
   putDataInUserInfoBox(hiveEmergencyContact, body.emergencyContact ?? "");
   putDataInUserInfoBox(hiveEmergencyContactName, body.emergencyContactName ?? "");

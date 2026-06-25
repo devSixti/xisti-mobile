@@ -9,18 +9,21 @@ class PassengerHomeBookingSheet extends StatelessWidget {
   final List<Widget>? children;
   final Widget? body;
   final bool expandToFill;
+  final Color? accentColor;
 
   const PassengerHomeBookingSheet({
     super.key,
     this.children,
     this.body,
     this.expandToFill = false,
+    this.accentColor,
   }) : assert(children != null || body != null, 'Provide children or body');
 
   @override
   Widget build(BuildContext context) {
     final theme = getCurrentTheme(context);
     final bottomInset = MediaQuery.paddingOf(context).bottom;
+    final accent = accentColor ?? XistiBrand.green;
 
     final inner = body ??
         SingleChildScrollView(
@@ -47,7 +50,7 @@ class PassengerHomeBookingSheet extends StatelessWidget {
           color: theme.colorScaffoldBg,
           borderRadius: BorderRadius.vertical(top: Radius.circular(XistiUiTokens.sheetRadius)),
           border: Border(
-            top: BorderSide(color: XistiBrand.green.withValues(alpha: 0.85), width: 2.w),
+            top: BorderSide(color: accent.withValues(alpha: 0.85), width: 2.w),
           ),
         ),
         child: expandToFill

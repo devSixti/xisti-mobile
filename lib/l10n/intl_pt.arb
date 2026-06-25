@@ -74,6 +74,8 @@
   "changeNumber": "Alterar Número",
   "sendAgain": "Enviar Novamente",
   "resendOtpSuccessMsg": "Um novo OTP foi enviado para seu número de telefone registrado",
+  "resendOtpWhatsappSuccessMsg": "Enviamos um novo código pelo WhatsApp",
+  "otpSentViaWhatsappHint": "Se sua operadora bloquear SMS, o código pode chegar pelo WhatsApp.",
   "yourName": "Seu Nome",
   "email": "Endereço de e-mail",
   "referralCode": "Código de Indicação",

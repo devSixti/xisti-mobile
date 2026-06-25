@@ -35,6 +35,7 @@ const String hivePaymentTypeWallet = "paymentTypeWallet";
 const String hiveServiceId = "serviceId";
 const String hiveIsLoggedIn = "isLoggedIn";
 const String hivePendingPhoneOtp = "pendingPhoneOtp";
+const String hiveOtpDeliveryChannel = "otpDeliveryChannel";
 const String hiveAppMode = "AppMode";
 const String hiveDriverCurrentStatus = "driverCurrentStatus";
 const String hiveDisclosureDialogOpen = "disclosureDialogOpen";

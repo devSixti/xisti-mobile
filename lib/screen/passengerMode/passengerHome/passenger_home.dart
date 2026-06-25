@@ -99,7 +99,6 @@ class _PassengerHomeState extends State<PassengerHome> {
               serviceModeSelector(),
               addressSelection(),
               serviceData(),
-              deliveryFields(),
               encomiendaFields(),
               confirmBtnAndOtherOption(),
             ],
@@ -128,34 +127,69 @@ class _PassengerHomeState extends State<PassengerHome> {
 
   /// Wireframe: círculo recalcular (izq) y menú cuadrado (der), flotando sobre el panel fijo.
   Widget _mapFloatingActions() {
-    final theme = getCurrentTheme(context);
-    return Positioned(
-      left: commonHorizontalPadding,
-      bottom: 14.h,
-      child: GestureDetector(
-        onTap: () => _bloc?.focusCurrentPosition(),
-        child: Container(
-          width: 48.w,
-          height: 48.w,
-          decoration: BoxDecoration(
-            color: theme.colorWhite,
-            shape: BoxShape.circle,
-            border: Border.all(color: XistiBrand.green.withValues(alpha: 0.55), width: 1.5.w),
-            boxShadow: XistiUiTokens.floatingShadow(context, theme.colorBorder),
+    return StreamBuilder<String>(
+      stream: _bloc?.selectedServiceModeSubject,
+      builder: (context, modeSnap) {
+        final theme = getCurrentTheme(context);
+        final accent = XistiUiTokens.accentForMode(modeSnap.data);
+        return Positioned(
+          left: commonHorizontalPadding,
+          bottom: 14.h,
+          child: GestureDetector(
+            onTap: () => _bloc?.focusCurrentPosition(),
+            child: Container(
+              width: 48.w,
+              height: 48.w,
+              decoration: BoxDecoration(
+                color: theme.colorWhite,
+                shape: BoxShape.circle,
+                border: Border.all(color: accent.withValues(alpha: 0.55), width: 1.5.w),
+                boxShadow: XistiUiTokens.floatingShadow(context, theme.colorBorder),
+              ),
+              child: Icon(CustomIcons.pickupLocation, size: 24.sp, color: accent),
+            ),
           ),
-          child: Icon(CustomIcons.pickupLocation, size: 24.sp, color: XistiBrand.green),
-        ),
-      ),
+        );
+      },
+    );
+  }
+
+  Widget _accountMenuButton() {
+    return StreamBuilder<String>(
+      stream: _bloc?.selectedServiceModeSubject,
+      builder: (context, modeSnap) {
+        final accent = XistiUiTokens.accentForMode(modeSnap.data);
+        return GestureDetector(
+          onTap: () => openScreen(context, AccountScreen()),
+          child: Container(
+            width: 44.w,
+            height: 44.w,
+            decoration: BoxDecoration(
+              color: getCurrentTheme(context).colorScaffoldBg.withValues(alpha: 0.96),
+              borderRadius: BorderRadius.circular(12.r),
+              border: Border.all(color: accent.withValues(alpha: 0.45), width: 1.5.w),
+              boxShadow: XistiUiTokens.floatingShadow(context, getCurrentTheme(context).colorBorder),
+            ),
+            child: Icon(CustomIcons.menu, size: 22.sp, color: getCurrentTheme(context).colorIconCommon),
+          ),
+        );
+      },
     );
   }
 
   Widget _cityZoneShortcuts() {
-    return StreamBuilder<List<XistiBarrioShortcut>>(
-      stream: _bloc?.activeCityZonesSubject,
-      builder: (context, snap) {
-        return PassengerHomeBarrioShortcuts(
-          shortcuts: snap.data ?? kXistiBarrioShortcutsDefault,
-          onBarrioSelected: (b) => _bloc?.flyToBarrio(b),
+    return StreamBuilder<String>(
+      stream: _bloc?.selectedServiceModeSubject,
+      builder: (context, modeSnap) {
+        return StreamBuilder<List<XistiBarrioShortcut>>(
+          stream: _bloc?.activeCityZonesSubject,
+          builder: (context, snap) {
+            return PassengerHomeBarrioShortcuts(
+              shortcuts: snap.data ?? kXistiBarrioShortcutsDefault,
+              onBarrioSelected: (b) => _bloc?.flyToBarrio(b),
+              accentColor: XistiUiTokens.accentForMode(modeSnap.data),
+            );
+          },
         );
       },
     );
@@ -191,7 +225,6 @@ class _PassengerHomeState extends State<PassengerHome> {
         padding: EdgeInsetsDirectional.only(bottom: 8.h),
         child: _cityZoneShortcuts(),
       ),
-      deliveryFields(),
       encomiendaFields(),
       confirmBtnAndOtherOption(),
       SizedBox(height: 4.h),
@@ -229,20 +262,7 @@ class _PassengerHomeState extends State<PassengerHome> {
               Positioned(
                 top: MediaQuery.paddingOf(context).top + 8.h,
                 right: commonHorizontalPadding,
-                child: GestureDetector(
-                  onTap: () => openScreen(context, AccountScreen()),
-                  child: Container(
-                    width: 44.w,
-                    height: 44.w,
-                    decoration: BoxDecoration(
-                      color: getCurrentTheme(context).colorScaffoldBg.withValues(alpha: 0.96),
-                      borderRadius: BorderRadius.circular(12.r),
-                      border: Border.all(color: XistiBrand.green.withValues(alpha: 0.45), width: 1.5.w),
-                      boxShadow: XistiUiTokens.floatingShadow(context, getCurrentTheme(context).colorBorder),
-                    ),
-                    child: Icon(CustomIcons.menu, size: 22.sp, color: getCurrentTheme(context).colorIconCommon),
-                  ),
-                ),
+                child: _accountMenuButton(),
               ),
               _mapFloatingActions(),
             ],
@@ -258,6 +278,7 @@ class _PassengerHomeState extends State<PassengerHome> {
                 child: PassengerHomeBookingSheet(
                   key: ValueKey(modeSnap.data ?? ServiceModeKind.transport),
                   expandToFill: false,
+                  accentColor: XistiUiTokens.accentForMode(modeSnap.data),
                   body: SingleChildScrollView(
                     physics: const BouncingScrollPhysics(),
                     child: _modernBookingPanel(),
@@ -282,19 +303,7 @@ class _PassengerHomeState extends State<PassengerHome> {
               Positioned(
                 top: MediaQuery.paddingOf(context).top + 8.h,
                 right: commonHorizontalPadding,
-                child: GestureDetector(
-                  onTap: () => openScreen(context, AccountScreen()),
-                  child: Container(
-                    width: 44.w,
-                    height: 44.w,
-                    decoration: BoxDecoration(
-                      color: getCurrentTheme(context).colorScaffoldBg.withValues(alpha: 0.96),
-                      borderRadius: BorderRadius.circular(12.r),
-                      border: Border.all(color: XistiBrand.green.withValues(alpha: 0.45)),
-                    ),
-                    child: Icon(CustomIcons.menu, size: 22.sp),
-                  ),
-                ),
+                child: _accountMenuButton(),
               ),
               _mapFloatingActions(),
             ],
@@ -312,12 +321,20 @@ class _PassengerHomeState extends State<PassengerHome> {
             child: StreamBuilder<String>(
               stream: _bloc?.selectedServiceModeSubject,
               builder: (context, modeSnap) {
+                final accent = XistiUiTokens.accentForMode(modeSnap.data);
                 return AnimatedSwitcher(
                   duration: const Duration(milliseconds: 280),
-                  child: ListView(
+                  child: Container(
                     key: ValueKey(modeSnap.data ?? ServiceModeKind.transport),
-                    padding: EdgeInsetsDirectional.only(top: 8.h, bottom: getBottomMargin()),
-                    children: _bottomBookingPanelContent(),
+                    decoration: BoxDecoration(
+                      border: Border(
+                        top: BorderSide(color: accent.withValues(alpha: 0.85), width: 2.w),
+                      ),
+                    ),
+                    child: ListView(
+                      padding: EdgeInsetsDirectional.only(top: 8.h, bottom: getBottomMargin()),
+                      children: _bottomBookingPanelContent(),
+                    ),
                   ),
                 );
               },
@@ -687,6 +704,16 @@ class _PassengerHomeState extends State<PassengerHome> {
   );
 
   Widget confirmBtnAndOtherOption() {
+    return StreamBuilder<String>(
+      stream: _bloc?.selectedServiceModeSubject,
+      builder: (context, modeSnap) {
+        final accent = XistiUiTokens.accentForMode(modeSnap.data);
+        return _confirmBtnAndOtherOptionContent(accent);
+      },
+    );
+  }
+
+  Widget _confirmBtnAndOtherOptionContent(Color accent) {
     return StreamBuilder<ServiceTypeItem?>(
       stream: _bloc?.subjectSelectedServiceData,
       builder: (context, snapService) {
@@ -753,6 +780,8 @@ class _PassengerHomeState extends State<PassengerHome> {
                                       });
                                     },
                               setProgress: (isCalculateLoading || isBookLoading || isMapLoad),
+                              bgColor: accent,
+                              textColor: XistiBrand.dark,
                             );
                           },
                         );

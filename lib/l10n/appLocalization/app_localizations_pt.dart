@@ -250,6 +250,14 @@ class AppLocalizationsPt extends AppLocalizations {
       'Um novo OTP foi enviado para seu número de telefone registrado';
 
   @override
+  String get resendOtpWhatsappSuccessMsg =>
+      'Enviamos um novo código pelo WhatsApp';
+
+  @override
+  String get otpSentViaWhatsappHint =>
+      'Se sua operadora bloquear SMS, o código pode chegar pelo WhatsApp.';
+
+  @override
   String get yourName => 'Seu Nome';
 
   @override

@@ -548,6 +548,18 @@ abstract class AppLocalizations {
   /// **'Fresh OTP has been sent to your registered phone number'**
   String get resendOtpSuccessMsg;
 
+  /// No description provided for @resendOtpWhatsappSuccessMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'We sent a new code via WhatsApp'**
+  String get resendOtpWhatsappSuccessMsg;
+
+  /// No description provided for @otpSentViaWhatsappHint.
+  ///
+  /// In en, this message translates to:
+  /// **'If your carrier blocks SMS, the code may arrive via WhatsApp.'**
+  String get otpSentViaWhatsappHint;
+
   /// No description provided for @yourName.
   ///
   /// In en, this message translates to:
@@ -767,7 +779,7 @@ abstract class AppLocalizations {
   /// No description provided for @offerMyFare.
   ///
   /// In en, this message translates to:
-  /// **'Offer My Fare'**
+  /// **'Offer fare'**
   String get offerMyFare;
 
   /// No description provided for @fetchingLocation.

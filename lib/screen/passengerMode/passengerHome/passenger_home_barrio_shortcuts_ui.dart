@@ -10,11 +10,13 @@ import 'passenger_home_barrio_shortcuts.dart';
 class PassengerHomeBarrioShortcuts extends StatelessWidget {
   final List<XistiBarrioShortcut> shortcuts;
   final ValueChanged<XistiBarrioShortcut> onBarrioSelected;
+  final Color? accentColor;
 
   const PassengerHomeBarrioShortcuts({
     super.key,
     required this.shortcuts,
     required this.onBarrioSelected,
+    this.accentColor,
   });
 
   @override
@@ -22,6 +24,7 @@ class PassengerHomeBarrioShortcuts extends StatelessWidget {
     if (shortcuts.isEmpty) return const SizedBox.shrink();
 
     final theme = getCurrentTheme(context);
+    final accent = accentColor ?? XistiBrand.purple;
 
     return SizedBox(
       height: 24.h,
@@ -59,7 +62,7 @@ class PassengerHomeBarrioShortcuts extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: theme.colorScaffoldBg.withValues(alpha: 0.88),
                       borderRadius: BorderRadius.circular(16.r),
-                      border: Border.all(color: XistiBrand.purple.withValues(alpha: 0.45)),
+                      border: Border.all(color: accent.withValues(alpha: 0.45)),
                     ),
                     child: Text(
                       barrio.label,

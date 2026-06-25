@@ -8,6 +8,7 @@ import '../../../commonView/custom_rounded_button.dart';
 import '../../../hive/hive_helper.dart';
 import '../../../networking/api_response.dart';
 import '../../../utils/utils.dart';
+import '../../../utils/xisti_ui_tokens.dart';
 import '../Login/login_dl.dart';
 import '../Login/login_screen.dart';
 import '../signup/signup_screen.dart';
@@ -88,6 +89,34 @@ class _OtpVerifyScreenState extends State<OtpVerifyScreen> {
                   Text(
                     languages.enterOTPVerifyAccount,
                     style: bodyText(context: context, fontSize: textSize14px),
+                  ),
+                  StreamBuilder<String>(
+                    stream: _bloc?.otpDeliveryChannelSubject,
+                    builder: (context, channelSnap) {
+                      if (channelSnap.data != 'whatsapp') {
+                        return const SizedBox.shrink();
+                      }
+                      return Padding(
+                        padding: EdgeInsetsDirectional.only(top: 10.h),
+                        child: Container(
+                          width: double.infinity,
+                          padding: EdgeInsetsDirectional.all(12.w),
+                          decoration: BoxDecoration(
+                            color: XistiBrand.purple.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(12.r),
+                            border: Border.all(color: XistiBrand.purple.withValues(alpha: 0.35)),
+                          ),
+                          child: Text(
+                            languages.otpSentViaWhatsappHint,
+                            style: bodyText(
+                              context: context,
+                              fontSize: textSize12px,
+                              textColor: XistiBrand.purple,
+                            ),
+                          ),
+                        ),
+                      );
+                    },
                   ),
                   StreamBuilder<String>(
                     stream: _bloc?.otpController,

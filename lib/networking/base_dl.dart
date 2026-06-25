@@ -8,6 +8,7 @@ class BaseModel {
   int? _status;
   String? _message;
   int? _messageCode;
+  String? _otpDeliveryChannel;
 
   int get status => _status ?? 0;
 
@@ -15,16 +16,20 @@ class BaseModel {
 
   int get messageCode => _messageCode ?? 0;
 
-  BaseModel({int? status, String? message, int? messageCode}) {
+  String get otpDeliveryChannel => _otpDeliveryChannel ?? '';
+
+  BaseModel({int? status, String? message, int? messageCode, String? otpDeliveryChannel}) {
     _status = status;
     _message = message;
     _messageCode = messageCode;
+    _otpDeliveryChannel = otpDeliveryChannel;
   }
 
   BaseModel.fromJson(dynamic json) {
     _status = json["status"];
     _message = json["message"];
     _messageCode = json["message_code"];
+    _otpDeliveryChannel = json["otp_delivery_channel"]?.toString();
   }
 
   Map<String, dynamic> toJson() {
@@ -32,6 +37,7 @@ class BaseModel {
     map["status"] = _status;
     map["message"] = _message;
     map["message_code"] = _messageCode;
+    map["otp_delivery_channel"] = _otpDeliveryChannel;
     return map;
   }
 }

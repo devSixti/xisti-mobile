@@ -16,7 +16,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get splashScreenMsg =>
-      'Fácil y Seguro — negocia tu valor y muévete en Medellín.';
+      'Fácil y Seguro — acuerda tu tarifa y muévete en Medellín.';
 
   @override
   String get year => 'año';
@@ -152,7 +152,7 @@ class AppLocalizationsEs extends AppLocalizations {
       'Marca tu destino en Medellín y encuentra conductor urbano en minutos.';
 
   @override
-  String get obTitle2 => 'Negocia tu valor';
+  String get obTitle2 => 'Indica tu tarifa';
 
   @override
   String get obMsg2 =>
@@ -250,6 +250,14 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get resendOtpSuccessMsg =>
       'Se envió un nuevo código a tu número registrado';
+
+  @override
+  String get resendOtpWhatsappSuccessMsg =>
+      'Te enviamos un nuevo código por WhatsApp';
+
+  @override
+  String get otpSentViaWhatsappHint =>
+      'Si tu operador bloquea SMS, el código puede llegarte por WhatsApp.';
 
   @override
   String get yourName => 'Tu nombre';
@@ -365,7 +373,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get wallet => 'Billetera';
 
   @override
-  String get offerMyFare => 'Proponer valor';
+  String get offerMyFare => 'Ofertar valor';
 
   @override
   String get fetchingLocation => 'Obteniendo ubicación';
@@ -428,39 +436,39 @@ class AppLocalizationsEs extends AppLocalizations {
   String get selectStop => 'Seleccionar punto de parada';
 
   @override
-  String get offerAmount => 'Monto a ofrecer';
+  String get offerAmount => 'Monto ofertado';
 
   @override
-  String get enterFareValue => 'Ingresa el valor';
+  String get enterFareValue => 'Indica tu tarifa';
 
   @override
   String offerFareMin(String amount) {
-    return 'Debes pagar un mínimo de $amount';
+    return 'El mínimo para esta solicitud es $amount';
   }
 
   @override
   String offerFareMax(String amount) {
-    return 'Puedes ofrecer un máximo de $amount';
+    return 'Puedes ofertar hasta $amount';
   }
 
   @override
-  String get scheduleRide => 'Programar un viaje';
+  String get scheduleRide => 'Agendar recorrido';
 
   @override
   String get autoAcceptDriverRide =>
       'Aceptar automáticamente al conductor independiente más cercano para tu oferta';
 
   @override
-  String get findDrive => 'Buscar conductor';
+  String get findDrive => 'Conectar conductor';
 
   @override
-  String get recommendedFare => 'Valor sugerido';
+  String get recommendedFare => 'Precio orientativo';
 
   @override
-  String get minFare => 'Valor mínimo sugerido';
+  String get minFare => 'Mínimo orientativo';
 
   @override
-  String get maxFare => 'Valor máximo sugerido';
+  String get maxFare => 'Máximo orientativo';
 
   @override
   String get recipientName => 'Nombre del destinatario';
@@ -760,7 +768,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get other => 'Otro';
 
   @override
-  String get offerFare => 'Proponer valor';
+  String get offerFare => 'Ofertar valor';
 
   @override
   String get requiredMess => 'Por favor completa los datos a continuación.';

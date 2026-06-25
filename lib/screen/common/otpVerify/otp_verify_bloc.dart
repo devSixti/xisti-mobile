@@ -21,9 +21,13 @@ class OtpVerifyBloc extends Bloc {
   final OtpVerifyRepo _otpVerifyRepo = OtpVerifyRepo();
   final SignUpRepo _signUpRepo = SignUpRepo();
 
-  OtpVerifyBloc(this.context);
+  OtpVerifyBloc(this.context) {
+    final stored = getStringFromSettingBox(hiveOtpDeliveryChannel);
+    otpDeliveryChannelSubject.add(stored.isEmpty ? 'sms' : stored);
+  }
 
   final otpController = BehaviorSubject<String>();
+  final otpDeliveryChannelSubject = BehaviorSubject<String>.seeded('sms');
   final resendOTPController = BehaviorSubject<bool>.seeded(false);
   final subjectResend = BehaviorSubject<ApiResponse<BaseModel>>();
   final subjectVerify = BehaviorSubject<ApiResponse<LoginPojo>>();
@@ -113,7 +117,15 @@ class OtpVerifyBloc extends Bloc {
         if (!context.mounted) return;
         if (isApiStatus(context, response.status, message, true)) {
           subjectResend.sink.add(ApiResponse.completed(response));
-          openSimpleSnackbar(context, languages.resendOtpSuccessMsg);
+          if (response.otpDeliveryChannel == 'whatsapp') {
+            putDataInSettingBox(hiveOtpDeliveryChannel, 'whatsapp');
+            otpDeliveryChannelSubject.add('whatsapp');
+            openSimpleSnackbar(context, languages.resendOtpWhatsappSuccessMsg);
+          } else {
+            putDataInSettingBox(hiveOtpDeliveryChannel, 'sms');
+            otpDeliveryChannelSubject.add('sms');
+            openSimpleSnackbar(context, languages.resendOtpSuccessMsg);
+          }
           timer = DateTime.now();
           resendOTPController.sink.add(true);
         } else {
@@ -128,6 +140,7 @@ class OtpVerifyBloc extends Bloc {
 
   @override
   void dispose() {
+    otpDeliveryChannelSubject.close();
     resendOTPController.close();
     otpController.close();
     subjectResend.close();

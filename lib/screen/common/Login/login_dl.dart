@@ -33,6 +33,7 @@ class LoginPojo {
   dynamic vatRateOnCommission;
   dynamic adminCommissionPercent;
   dynamic driverCancelUntilStatus;
+  String? otpDeliveryChannel;
 
   LoginPojo({
     this.status,
@@ -101,6 +102,7 @@ class LoginPojo {
     vatRateOnCommission = json['vat_rate_on_commission'];
     adminCommissionPercent = json['admin_commission_percent'];
     driverCancelUntilStatus = json['driver_cancel_until_status'];
+    otpDeliveryChannel = json['otp_delivery_channel']?.toString();
   }
 
   Map<String, dynamic> toJson() {
@@ -139,6 +141,7 @@ class LoginPojo {
     map['vat_rate_on_commission'] = vatRateOnCommission;
     map['admin_commission_percent'] = adminCommissionPercent;
     map['driver_cancel_until_status'] = driverCancelUntilStatus;
+    map['otp_delivery_channel'] = otpDeliveryChannel;
     return map;
   }
 }
