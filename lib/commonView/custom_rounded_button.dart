@@ -67,16 +67,22 @@ class CustomRoundedButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Color mainBgColor = bgColor ?? getCurrentTheme(context).colorScaffoldBg;
-    mainBgColor = onPressed == null ? lighten(mainBgColor) : mainBgColor;
+    final theme = getCurrentTheme(context);
+    final Color? resolvedBg;
+    if (!setBorder && bgColor == null) {
+      resolvedBg = null;
+    } else {
+      final base = bgColor ?? (setBorder ? theme.colorScaffoldBg : theme.colorPrimary);
+      resolvedBg = onPressed == null ? lighten(base) : base;
+    }
 
     return Container(
       margin: margin,
       child: CustomBorderRoundedButton(
         onPressed: setProgress ? null : onPressed,
         border: roundedRectangleBorder ?? RoundedRectangleBorder(borderRadius: BorderRadius.circular(50.r)),
-        borderColor: setBorder ? (borderColor ?? getCurrentTheme(context).colorTextCommon) : null,
-        bgColor: (setBorder && bgColor == null) ? getCurrentTheme(context).colorScaffoldBg : mainBgColor,
+        borderColor: setBorder ? (borderColor ?? theme.colorTextCommon) : null,
+        bgColor: resolvedBg,
         icon: icon,
         minHeight: minHeight ?? commonBtnHeight45h,
         minWidth: minWidth ?? double.maxFinite,

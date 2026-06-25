@@ -185,23 +185,24 @@ void clearPendingSignupData() {
 
 Future<void> manageLoginResponse(BuildContext context, LoginPojo response) async {
   final message = getApiMsg(response.message, response.messageCode);
-  if (isApiStatus(context, response.status ?? 0, message, false, messageCode: response.messageCode ?? 0)) {
+    if (isApiStatus(context, response.status ?? 0, message, false, messageCode: response.messageCode ?? 0)) {
     await setDataInHive(response);
     unawaited(getGoogleMapKeyForApiCall());
     final loginType = response.loginType ?? getStringFromUserInfoBox(hiveLoginType);
     final hasPhone = (response.contactNumber ?? '').trim().isNotEmpty;
     final isPhoneLogin = loginType == LoginType.email;
-    final needsOtp = (response.userVerified ?? 0) == 0;
+    final phoneVerified = (response.userVerified ?? 0) == 1;
+
+    if (isPhoneLogin && !phoneVerified) {
+      await putDataInSettingBox(hiveUserVerified, 0);
+      await markPhoneOtpPending();
+      await syncOtpDeliveryChannelFromResend();
+      if (!context.mounted) return;
+      openScreenWithClearPrevious(context, const OtpVerifyScreen());
+      return;
+    }
 
     if (response.isRegister == 1) {
-      if (isPhoneLogin && needsOtp) {
-        await putDataInSettingBox(hiveUserVerified, 0);
-        await markPhoneOtpPending();
-        await syncOtpDeliveryChannelFromResend();
-        if (!context.mounted) return;
-        openScreenWithClearPrevious(context, const OtpVerifyScreen());
-        return;
-      }
       await markSessionAuthenticated();
       putDataInSettingBox(hiveAppMode, response.activeMode ?? AppMode.passenger);
       unawaited(SessionRestoreService.enableBiometricLoginIfAvailable());

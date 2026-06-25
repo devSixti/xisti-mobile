@@ -23,6 +23,7 @@ class DriverVehicleDetailsBloc extends Bloc {
   final DriverVehicleDetailsRepo _repo = DriverVehicleDetailsRepo();
 
   DriverVehicleDetailsBloc(this.context) {
+    serviceTypeSelection.listen(_onTransportVariantChanged);
     callVehicleServiceListApi();
     getCurrentLocation();
   }
@@ -81,6 +82,7 @@ class DriverVehicleDetailsBloc extends Bloc {
           serviceList = XistiVehicleCatalog.mergeDriverTransportRegistrationApi(response.serviceList);
           if (serviceList.isNotEmpty) {
             serviceTypeSelection.sink.add(serviceList.first);
+            _syncVehicleTypeForService(serviceList.first);
           }
           getVehicleDetailApi();
           driverVehicleListSubject.sink.add(ApiResponse.completed(response));
@@ -248,8 +250,14 @@ class DriverVehicleDetailsBloc extends Bloc {
 
   void setVehicleDetails(VehicleDetailsPojo vehicleDetailsPojo) {
     if (serviceList.isNotEmpty) {
+      final variant = vehicleDetailsPojo.deliveryVariant.trim();
       ServiceList serviceListItem = serviceList.firstWhere(
-        (service) => service.serviceId == vehicleDetailsPojo.serviceId && !service.isDeliveryOnlyService,
+        (service) {
+          if (variant.isNotEmpty) {
+            return service.deliveryVariant.trim() == variant;
+          }
+          return service.serviceId == vehicleDetailsPojo.serviceId && !service.isDeliveryOnlyService;
+        },
         orElse: () => serviceList.firstWhere(
           (service) => service.serviceId == vehicleDetailsPojo.serviceId,
           orElse: () => serviceList.first,
@@ -305,6 +313,31 @@ class DriverVehicleDetailsBloc extends Bloc {
     vehicleTypeTEC.text = vehicleTypeList?.vehicleTypeName ?? "";
   }
 
+  void _onTransportVariantChanged(ServiceList variant) {
+    vehicleTypeTEC.text = variant.serviceName;
+    _syncVehicleTypeForService(variant);
+  }
+
+  void selectTransportVariant(ServiceList variant) {
+    serviceTypeSelection.sink.add(variant);
+  }
+
+  void _syncVehicleTypeForService(ServiceList service) {
+    final types = service.vehicleTypeList;
+    if (types.isEmpty) {
+      setSelectedVehicleType(null);
+      return;
+    }
+    final current = vehicleTypeSelection.valueOrNull;
+    final keepCurrent = current != null &&
+        types.any((t) => t.vehicleTypeId == current.vehicleTypeId);
+    setSelectedVehicleType(keepCurrent ? current : types.first);
+  }
+
+  List<ServiceList> variantsForFamily(int serviceId) {
+    return serviceList.where((s) => s.serviceId == serviceId).toList();
+  }
+
   void setSelectedVehicleYear(String? year) {
     vehicleYearSelection.sink.add(year);
     vehicleYearTEC.text = year ?? "";
@@ -326,6 +359,8 @@ class DriverVehicleDetailsBloc extends Bloc {
 
   void serviceSelect(int position, {bool isResetData = false}) {
     final selected = serviceList[position];
+    serviceTypeSelection.sink.add(selected);
+    _syncVehicleTypeForService(selected);
     if (oldVehicleDetailsPojo != null &&
         oldVehicleDetailsPojo?.serviceId == selected.serviceId &&
         !selected.isDeliveryOnlyService) {

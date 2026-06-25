@@ -31,6 +31,8 @@ class DriverVehicleListPojo {
 
   List<ServiceList> get serviceList => _serviceList ?? [];
 
+  set serviceList(List<ServiceList> value) => _serviceList = value;
+
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{};
     map['status'] = _status;
@@ -229,6 +231,7 @@ class VehicleDetailsPojo {
     _childSafetySeat = json['child_safety_seat'];
     _handyCapSeat = json['handy_cap_seat'];
     _technicalInspectionExpiry = json['technical_inspection_expiry']?.toString();
+    _deliveryVariant = json['delivery_variant']?.toString() ?? '';
   }
 
   int? _status;
@@ -248,6 +251,7 @@ class VehicleDetailsPojo {
   int? _childSafetySeat;
   int? _handyCapSeat;
   String? _technicalInspectionExpiry;
+  String? _deliveryVariant;
 
   int get status => _status ?? 0;
 
@@ -282,6 +286,8 @@ class VehicleDetailsPojo {
   int get handyCapSeat => _handyCapSeat ?? 0;
 
   String get technicalInspectionExpiry => _technicalInspectionExpiry ?? '';
+
+  String get deliveryVariant => _deliveryVariant ?? '';
 
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{};

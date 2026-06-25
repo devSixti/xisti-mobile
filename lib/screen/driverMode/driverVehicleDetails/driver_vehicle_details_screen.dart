@@ -9,13 +9,13 @@ import '../../../commonView/custom_drop_down_with_text_filed_custom.dart';
 import '../../../commonView/custom_rounded_button.dart';
 import '../../../commonView/custom_text_field.dart';
 import '../../../commonView/no_record_found.dart';
+import '../../../commonView/xisti_vehicle_image.dart';
 import '../../../constant/constant.dart';
 import '../../../utils/utils.dart';
 import '../../../utils/xisti_vehicle_catalog.dart';
 import '../../../utils/validator.dart';
 import 'driver_vehicle_details_bloc.dart';
 import 'driver_vehicle_details_dl.dart';
-import 'driver_vehicle_details_item.dart';
 import 'driver_vehicle_details_shimmer.dart';
 
 class DriverVehicleDetailsScreen extends StatefulWidget {
@@ -57,11 +57,14 @@ class _DriverVehicleDetailsScreenState extends State<DriverVehicleDetailsScreen>
       body: StreamBuilder<ApiResponse<DriverVehicleListPojo>>(
         stream: _bloc?.driverVehicleListSubject,
         builder: (context, snapDriverVehicleList) {
-          List<ServiceList> serviceList = snapDriverVehicleList.data?.data?.serviceList ?? [];
+          final serviceList = _bloc?.serviceList ?? [];
           switch (snapDriverVehicleList.data?.status ?? Status.loading) {
             case Status.loading:
               return DriverVehicleDetailsShimmer();
             case Status.completed:
+              if (serviceList.isEmpty) {
+                return NoRecordFound(message: snapDriverVehicleList.data?.message ?? "");
+              }
               return _buildManageVehicleScreen(serviceList);
             case Status.error:
               return NoRecordFound(message: snapDriverVehicleList.data?.message ?? "");
@@ -87,8 +90,8 @@ class _DriverVehicleDetailsScreenState extends State<DriverVehicleDetailsScreen>
                 children: [
                   Text(languages.vehicleInformation, style: bodyText(context: context, fontWeight: FontWeight.w600, fontSize: textSize22px)),
                   SizedBox(height: 15.h),
-                  _vehicleServiceSelectionView(serviceList: serviceList, selectServiceListItem: selectServiceListItem),
-                  _vehicleServiceDataView(vehicleTypeList: selectServiceListItem.vehicleTypeList),
+                  _vehicleFamilySelectionView(allServices: serviceList, selected: selectServiceListItem),
+                  _vehicleServiceDataView(),
                 ],
               ),
             ),
@@ -118,32 +121,91 @@ class _DriverVehicleDetailsScreenState extends State<DriverVehicleDetailsScreen>
     );
   }
 
-  Widget _vehicleServiceSelectionView({required List<ServiceList> serviceList, required ServiceList selectServiceListItem}) {
-    return Container(
-      height: 130.h,
-      margin: EdgeInsetsDirectional.only(bottom: 20.h),
-      child: ListView.separated(
-        padding: EdgeInsetsDirectional.zero,
-        scrollDirection: Axis.horizontal,
-        itemBuilder: (context, index) {
-          ServiceList serviceListItem = serviceList[index];
-          return GestureDetector(
-            onTap: () {
-              _bloc?.serviceSelect(index, isResetData: true);
-              _bloc?.serviceTypeSelection.sink.add(serviceListItem);
-            },
-            child: DriverVehicleServiceIcon(serviceTypeItem: serviceListItem, selectedServiceTypeItem: selectServiceListItem),
-          );
-        },
-        separatorBuilder: (context, index) {
-          return SizedBox(width: 15.w);
-        },
-        itemCount: serviceList.length,
-      ),
+  Widget _vehicleFamilySelectionView({required List<ServiceList> allServices, required ServiceList selected}) {
+    final isMoto = selected.serviceId == ServiceType.bike;
+    final isCar = selected.serviceId == ServiceType.taxi;
+
+    Widget familyChip({required String label, required String iconVariant, required bool active, required VoidCallback onTap}) {
+      final theme = getCurrentTheme(context);
+      return Expanded(
+        child: GestureDetector(
+          onTap: onTap,
+          child: Container(
+            margin: EdgeInsetsDirectional.only(end: 8.w),
+            padding: EdgeInsetsDirectional.symmetric(vertical: 14.h),
+            decoration: BoxDecoration(
+              color: Colors.transparent,
+              borderRadius: BorderRadius.circular(18.r),
+              border: Border.all(
+                color: active ? theme.colorPrimary : theme.colorBorder.withValues(alpha: 0.5),
+                width: active ? 2.w : 1.w,
+              ),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                XistiVehicleImage(imagePath: XistiVehicleCatalog.iconAsset(iconVariant), size: 56.w),
+                SizedBox(height: 8.h),
+                Text(label, style: bodyText(context: context, fontWeight: active ? FontWeight.w700 : FontWeight.w500)),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Padding(
+      padding: EdgeInsetsDirectional.only(bottom: 20.h),
+      child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            familyChip(
+              label: 'Moto',
+              iconVariant: XistiVehicleCatalog.motoMedio,
+              active: isMoto,
+              onTap: () {
+                final variants = _bloc?.variantsForFamily(ServiceType.bike) ?? [];
+                if (variants.isNotEmpty) _bloc?.selectTransportVariant(variants.first);
+              },
+            ),
+            familyChip(
+              label: 'Carro',
+              iconVariant: XistiVehicleCatalog.carroEco,
+              active: isCar,
+              onTap: () {
+                final variants = _bloc?.variantsForFamily(ServiceType.taxi) ?? [];
+                if (variants.isNotEmpty) _bloc?.selectTransportVariant(variants.first);
+              },
+            ),
+          ],
+        ),
+        SizedBox(height: 16.h),
+        _vehicleVariantSelection(selected: selected),
+      ],
+    ),
     );
   }
 
-  Widget _vehicleServiceDataView({required List<VehicleTypeList> vehicleTypeList}) {
+  Widget _vehicleVariantSelection({required ServiceList selected}) {
+    final variants = _bloc?.variantsForFamily(selected.serviceId) ?? [];
+    if (variants.isEmpty) return const SizedBox.shrink();
+
+    return CustomDropDownFieldWithTextFieldCustom<ServiceList>(
+      selectionItemList: variants,
+      selectedItemStream: _bloc?.serviceTypeSelection,
+      selectedItemTEC: _bloc?.vehicleTypeTEC ?? TextEditingController(),
+      getLabel: (item) => item.serviceName,
+      isSelected: (item, selectedItem) =>
+          item.serviceId == selectedItem.serviceId && item.deliveryVariant == selectedItem.deliveryVariant,
+      commonPrefixIcon: CustomIcons.vehicleInformation,
+      hintText: languages.selectVehicleType,
+      validator: (value) => validateEmptyField(value, languages.selectVehicleType),
+    );
+  }
+
+  Widget _vehicleServiceDataView() {
     return Form(
       key: _bloc?.formKey,
       child: Column(
@@ -152,7 +214,6 @@ class _DriverVehicleDetailsScreenState extends State<DriverVehicleDetailsScreen>
         crossAxisAlignment: CrossAxisAlignment.start,
 
         children: [
-          Padding(padding: EdgeInsetsDirectional.only(bottom: 20.h), child: _vehicleTypeSelection(selectionItemList: vehicleTypeList)),
           Padding(
             padding: EdgeInsetsDirectional.only(bottom: 20.h),
             child: TextFormFieldCustom(
@@ -399,26 +460,6 @@ class _DriverVehicleDetailsScreenState extends State<DriverVehicleDetailsScreen>
             },
           ),
         );
-      },
-    );
-  }
-
-  Widget _vehicleTypeSelection({required List<VehicleTypeList> selectionItemList}) {
-    if (selectionItemList.isEmpty) return SizedBox(height: 0, width: 0);
-    return CustomDropDownFieldWithTextFieldCustom<VehicleTypeList>(
-      selectionItemList: selectionItemList,
-      selectedItemStream: _bloc?.vehicleTypeSelection,
-      selectedItemTEC: _bloc?.vehicleTypeTEC ?? TextEditingController(),
-      getLabel: (item) {
-        return item.vehicleTypeName ?? "";
-      },
-      isSelected: (item, selectedItem) {
-        return item.vehicleTypeId == selectedItem.vehicleTypeId;
-      },
-      commonPrefixIcon: CustomIcons.vehicleInformation,
-      hintText: languages.selectVehicleType,
-      validator: (value) {
-        return validateEmptyField(value, languages.selectVehicleType);
       },
     );
   }
