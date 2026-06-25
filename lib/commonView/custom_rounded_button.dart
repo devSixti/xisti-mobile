@@ -177,6 +177,26 @@ class CustomBorderRoundedButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var borderRadiusDirectional = BorderRadiusDirectional.circular(8.sp);
+    if (!setBorder && bgColor != null) {
+      return ElevatedButton(
+        style: OutlinedButton.styleFrom(
+          tapTargetSize: tapTargetSize,
+          backgroundColor: onPressed != null ? bgColor : lighten(bgColor!),
+          surfaceTintColor: Colors.transparent,
+          elevation: elevation ?? 0,
+          padding: padding,
+          minimumSize: Size(minWidth, minHeight),
+          shape: border ?? RoundedRectangleBorder(borderRadius: BorderRadius.circular(50.r)),
+        ),
+        onPressed: onPressed != null
+            ? () {
+                FocusManager.instance.primaryFocus?.unfocus();
+                onPressed?.call();
+              }
+            : null,
+        child: child,
+      );
+    }
     return !setBorder
         ? Container(
           decoration: BoxDecoration(

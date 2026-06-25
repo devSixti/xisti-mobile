@@ -9,7 +9,7 @@ import '../../../commonView/custom_drop_down_with_text_filed_custom.dart';
 import '../../../commonView/custom_rounded_button.dart';
 import '../../../commonView/custom_text_field.dart';
 import '../../../commonView/no_record_found.dart';
-import '../../../utils/utils.dart';
+import '../../../utils/xisti_vehicle_catalog.dart';
 import '../../../utils/validator.dart';
 import 'driver_vehicle_details_bloc.dart';
 import 'driver_vehicle_details_dl.dart';
@@ -234,119 +234,120 @@ class _DriverVehicleDetailsScreenState extends State<DriverVehicleDetailsScreen>
           _vehiclePhotoRow('Foto frontal', _bloc?.vehicleImageFrontFile, _bloc?.vehicleImageFrontUrl, () => _bloc?.addVehiclePhoto(_bloc!.vehicleImageFrontFile)),
           _vehiclePhotoRow('Foto lateral', _bloc?.vehicleImageSideFile, _bloc?.vehicleImageSideUrl, () => _bloc?.addVehiclePhoto(_bloc!.vehicleImageSideFile)),
           _vehiclePhotoRow('Foto trasera', _bloc?.vehicleImageRearFile, _bloc?.vehicleImageRearUrl, () => _bloc?.addVehiclePhoto(_bloc!.vehicleImageRearFile)),
-          _alsoTransportPassengersToggle(),
-          StreamBuilder<ServiceList>(
-            stream: _bloc?.serviceTypeSelection,
-            builder: (context, snapService) {
-              ServiceList? serviceList = snapService.data;
-              final showPassengerExtras = serviceList?.supportsPassengerTransportToggle == true;
-              return StreamBuilder<bool>(
-                stream: _bloc?.alsoTransportPassengersController,
-                builder: (context, toggleSnap) {
-                  if (!showPassengerExtras || !(toggleSnap.data ?? false)) {
-                    return const SizedBox.shrink();
-                  }
-                  return Column(
-                    children: [
-                      if (serviceList?.serviceId == ServiceType.taxi) ...[
-                        Padding(
-                          padding: EdgeInsetsDirectional.only(bottom: 20.h),
-                          child: StreamBuilder<bool>(
-                            stream: _bloc?.childSafetyController,
-                            builder: (context, snap) {
-                              bool value = snap.data ?? false;
-                              return GestureDetector(
-                                onTap: () {
-                                  _bloc?.childSafetyController.sink.add(!value);
-                                },
-                                child: Row(
-                                  children: [
-                                    Expanded(child: Text(languages.childSeatSafety, style: bodyText(context: context, fontWeight: FontWeight.w500))),
-                                    Transform.scale(
-                                      scale: 1.2,
-                                      child: Checkbox(
-                                        tristate: false,
-                                        value: snap.data ?? false,
-                                        visualDensity: VisualDensity.compact,
-                                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                        checkColor: getCurrentTheme(context).colorWhite,
-                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5.r)),
-                                        side: BorderSide(color: getCurrentTheme(context).colorBorder, width: 1.sp),
-                                        onChanged: (value) {
-                                          _bloc?.childSafetyController.sink.add(value ?? false);
-                                        },
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                        Padding(
-                          padding: EdgeInsetsDirectional.only(bottom: 20.h),
-                          child: StreamBuilder<bool>(
-                            stream: _bloc?.isTaxiController,
-                            builder: (context, snap) {
-                              final value = snap.data ?? false;
-                              return GestureDetector(
-                                onTap: () => _bloc?.isTaxiController.sink.add(!value),
-                                child: Row(
-                                  children: [
-                                    Expanded(child: Text('Opero como taxi (opcional)', style: bodyText(context: context, fontWeight: FontWeight.w500))),
-                                    Transform.scale(
-                                      scale: 1.2,
-                                      child: Checkbox(value: value, onChanged: (v) => _bloc?.isTaxiController.sink.add(v ?? false)),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                      ],
-                      Padding(
-                        padding: EdgeInsetsDirectional.only(bottom: 20.h),
-                        child: StreamBuilder<bool>(
-                          stream: _bloc?.handyCapAccessibilityController,
-                          builder: (context, snap) {
-                            bool value = snap.data ?? false;
-                            return GestureDetector(
-                              onTap: () {
-                                _bloc?.handyCapAccessibilityController.sink.add(!value);
-                              },
-                              child: Row(
-                                children: [
-                                  Expanded(child: Text(languages.handicapAccess, style: bodyText(context: context, fontWeight: FontWeight.w500))),
-                                  Transform.scale(
-                                    scale: 1.2,
-                                    child: Checkbox(
-                                      tristate: false,
-                                      value: snap.data ?? false,
-                                      visualDensity: VisualDensity.compact,
-                                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                      checkColor: getCurrentTheme(context).colorWhite,
-                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5.r)),
-                                      side: BorderSide(color: getCurrentTheme(context).colorBorder, width: 1.sp),
-                                      onChanged: (value) {
-                                        _bloc?.handyCapAccessibilityController.sink.add(value ?? false);
-                                      },
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                    ],
-                  );
-                },
-              );
-            },
-          ),
+          _transportDriverOptions(),
         ],
       ),
+    );
+  }
+
+  Widget _transportDriverOptions() {
+    return StreamBuilder<ServiceList>(
+      stream: _bloc?.serviceTypeSelection,
+      builder: (context, snapService) {
+        final service = snapService.data;
+        if (service == null) {
+          return const SizedBox.shrink();
+        }
+        final isCar = service.serviceId == ServiceType.taxi;
+        final showTaxi = XistiVehicleCatalog.showTaxiOptionForVariant(service.deliveryVariant);
+        final showDeliveryToggle = service.supportsPassengerTransportToggle == true;
+
+        return Column(
+          children: [
+            if (showDeliveryToggle) _alsoTransportPassengersToggle(),
+            if (isCar) ...[
+              Padding(
+                padding: EdgeInsetsDirectional.only(bottom: 20.h, top: 4.h),
+                child: StreamBuilder<bool>(
+                  stream: _bloc?.childSafetyController,
+                  builder: (context, snap) {
+                    final value = snap.data ?? false;
+                    return GestureDetector(
+                      onTap: () => _bloc?.childSafetyController.sink.add(!value),
+                      child: Row(
+                        children: [
+                          Expanded(child: Text(languages.childSeatSafety, style: bodyText(context: context, fontWeight: FontWeight.w500))),
+                          Transform.scale(
+                            scale: 1.2,
+                            child: Checkbox(
+                              value: value,
+                              visualDensity: VisualDensity.compact,
+                              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                              checkColor: getCurrentTheme(context).colorWhite,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5.r)),
+                              side: BorderSide(color: getCurrentTheme(context).colorBorder, width: 1.sp),
+                              onChanged: (v) => _bloc?.childSafetyController.sink.add(v ?? false),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
+              Padding(
+                padding: EdgeInsetsDirectional.only(bottom: 20.h),
+                child: StreamBuilder<bool>(
+                  stream: _bloc?.handyCapAccessibilityController,
+                  builder: (context, snap) {
+                    final value = snap.data ?? false;
+                    return GestureDetector(
+                      onTap: () => _bloc?.handyCapAccessibilityController.sink.add(!value),
+                      child: Row(
+                        children: [
+                          Expanded(child: Text(languages.handicapAccess, style: bodyText(context: context, fontWeight: FontWeight.w500))),
+                          Transform.scale(
+                            scale: 1.2,
+                            child: Checkbox(
+                              value: value,
+                              visualDensity: VisualDensity.compact,
+                              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                              checkColor: getCurrentTheme(context).colorWhite,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5.r)),
+                              side: BorderSide(color: getCurrentTheme(context).colorBorder, width: 1.sp),
+                              onChanged: (v) => _bloc?.handyCapAccessibilityController.sink.add(v ?? false),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+            if (showTaxi)
+              Padding(
+                padding: EdgeInsetsDirectional.only(bottom: 20.h),
+                child: StreamBuilder<bool>(
+                  stream: _bloc?.isTaxiController,
+                  builder: (context, snap) {
+                    final value = snap.data ?? false;
+                    return GestureDetector(
+                      onTap: () => _bloc?.isTaxiController.sink.add(!value),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              'Opero como taxi (opcional)',
+                              style: bodyText(context: context, fontWeight: FontWeight.w500),
+                            ),
+                          ),
+                          Transform.scale(
+                            scale: 1.2,
+                            child: Checkbox(
+                              value: value,
+                              onChanged: (v) => _bloc?.isTaxiController.sink.add(v ?? false),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
+          ],
+        );
+      },
     );
   }
 

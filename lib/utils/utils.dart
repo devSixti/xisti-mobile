@@ -195,6 +195,7 @@ Future<void> manageLoginResponse(BuildContext context, LoginPojo response) async
 
     if (response.isRegister == 1) {
       if (isPhoneLogin && needsOtp) {
+        await putDataInSettingBox(hiveUserVerified, 0);
         await markPhoneOtpPending();
         await syncOtpDeliveryChannelFromResend();
         if (!context.mounted) return;
@@ -218,6 +219,7 @@ Future<void> manageLoginResponse(BuildContext context, LoginPojo response) async
       if (isSocialLoginType(loginType) && !hasPhone) {
         openScreenWithClearPrevious(context, const SignupScreen());
       } else {
+        await putDataInSettingBox(hiveUserVerified, 0);
         await markPhoneOtpPending();
         await syncOtpDeliveryChannelFromResend();
         if (!context.mounted) return;

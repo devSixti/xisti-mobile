@@ -78,7 +78,7 @@ class DriverVehicleDetailsBloc extends Bloc {
         if (!context.mounted) return;
         String message = getApiMsg(response.message);
         if (isApiStatus(context, response.status, message, true)) {
-          serviceList = XistiVehicleCatalog.mergeDriverServiceApi(response.serviceList);
+          serviceList = XistiVehicleCatalog.mergeDriverTransportRegistrationApi(response.serviceList);
           if (serviceList.isNotEmpty) {
             serviceTypeSelection.sink.add(serviceList.first);
           }
@@ -168,14 +168,15 @@ class DriverVehicleDetailsBloc extends Bloc {
             vehiclePlatNo: vehiclePlateNumberTEC.text,
             vehicleTypeId: vehicleTypeSelection.valueOrNull == null ? 0 : vehicleTypeSelection.valueOrNull?.vehicleTypeId ?? 0,
             serviceTypeId: serviceTypeSelection.valueOrNull == null ? 0 : serviceTypeSelection.valueOrNull?.serviceId ?? 0,
-            childSeat: _passengerExtrasEnabled()
+            childSeat: _carTransportExtrasEnabled()
                 ? ((childSafetyController.valueOrNull ?? false) ? 1 : 0)
                 : 0,
-            handyCapAccess: _passengerExtrasEnabled()
+            handyCapAccess: _carTransportExtrasEnabled()
                 ? ((handyCapAccessibilityController.valueOrNull ?? false) ? 1 : 0)
                 : 0,
-            isTaxi: _passengerExtrasEnabled() && serviceTypeSelection.valueOrNull?.serviceId == ServiceType.taxi
-                ? ((isTaxiController.valueOrNull ?? false) ? 1 : 0)
+            isTaxi: XistiVehicleCatalog.showTaxiOptionForVariant(serviceTypeSelection.valueOrNull?.deliveryVariant) &&
+                    (isTaxiController.valueOrNull ?? false)
+                ? 1
                 : 0,
             acceptDelivery: serviceTypeSelection.valueOrNull?.isDeliveryOnlyService == true ? 1 : 1,
             deliveryVariant: _deliveryVariantForApi(serviceTypeSelection.valueOrNull),
@@ -221,6 +222,17 @@ class DriverVehicleDetailsBloc extends Bloc {
     final service = serviceTypeSelection.valueOrNull;
     return (service?.supportsPassengerTransportToggle ?? false) &&
         (alsoTransportPassengersController.valueOrNull ?? false);
+  }
+
+  bool _carTransportExtrasEnabled() {
+    final service = serviceTypeSelection.valueOrNull;
+    if (service == null) {
+      return false;
+    }
+    if (service.serviceId == ServiceType.taxi) {
+      return true;
+    }
+    return _passengerExtrasEnabled();
   }
 
   String? _deliveryVariantForApi(ServiceList? service) {

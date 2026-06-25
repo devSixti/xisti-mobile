@@ -192,6 +192,24 @@ abstract final class XistiVehicleCatalog {
         _DriverCatalogRow(ServiceType.courier, 'Bicicleta', bicicleta, true, false),
       ];
 
+  static const transportRegistrationVariants = [
+    carroEco,
+    carroComodo,
+    carroEconomico,
+    motoAlto,
+    motoBajo,
+  ];
+
+  /// Driver manage-vehicle screen: only viajes matrix (no envío genérico).
+  static List<ServiceList> mergeDriverTransportRegistrationApi(List<ServiceList> apiRows) {
+    final all = mergeDriverServiceApi(apiRows);
+    return all
+        .where((s) => transportRegistrationVariants.contains(s.deliveryVariant.trim()))
+        .toList();
+  }
+
+  static bool showTaxiOptionForVariant(String? variant) => taxiEligibleVariant(variant);
+
   /// Ensures every catalog vehicle appears for drivers with transparent local icons.
   static List<ServiceList> mergeDriverServiceApi(List<ServiceList> apiRows) {
     final byVariant = <String, ServiceList>{};
