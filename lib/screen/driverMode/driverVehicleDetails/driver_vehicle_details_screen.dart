@@ -132,7 +132,7 @@ class _DriverVehicleDetailsScreenState extends State<DriverVehicleDetailsScreen>
           onTap: onTap,
           child: Container(
             margin: EdgeInsetsDirectional.only(end: 8.w),
-            padding: EdgeInsetsDirectional.symmetric(vertical: 14.h),
+            padding: EdgeInsetsDirectional.symmetric(vertical: 20.h, horizontal: 8.w),
             decoration: BoxDecoration(
               color: Colors.transparent,
               borderRadius: BorderRadius.circular(18.r),
@@ -144,7 +144,7 @@ class _DriverVehicleDetailsScreenState extends State<DriverVehicleDetailsScreen>
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                XistiVehicleImage(imagePath: XistiVehicleCatalog.iconAsset(iconVariant), size: 56.w),
+                XistiVehicleImage(imagePath: XistiVehicleCatalog.iconAsset(iconVariant), size: 96.w),
                 SizedBox(height: 8.h),
                 Text(label, style: bodyText(context: context, fontWeight: active ? FontWeight.w700 : FontWeight.w500)),
               ],

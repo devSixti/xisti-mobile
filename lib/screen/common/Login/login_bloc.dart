@@ -57,7 +57,7 @@ class LoginBloc extends Bloc {
         );
         subject.sink.add(ApiResponse.completed(response));
         if (!context.mounted) return;
-        await manageLoginResponse(context, response);
+        await manageLoginResponse(context, response, authAttemptLoginType: loginType);
       } catch (e) {
         subject.sink.add(ApiResponse.error(e.toString()));
       }
@@ -110,7 +110,7 @@ class LoginBloc extends Bloc {
         subject.sink.add(ApiResponse.completed(response));
 
         if (!context.mounted) return;
-        await manageLoginResponse(context, response);
+        await manageLoginResponse(context, response, authAttemptLoginType: loginType);
       } catch (e) {
         subject.sink.add(ApiResponse.error(e.toString()));
       }

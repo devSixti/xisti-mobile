@@ -183,26 +183,40 @@ void clearPendingSignupData() {
   putDataInUserInfoBox(hivePendingSignupReferral, '');
 }
 
-Future<void> manageLoginResponse(BuildContext context, LoginPojo response) async {
+Future<void> manageLoginResponse(
+  BuildContext context,
+  LoginPojo response, {
+  String? authAttemptLoginType,
+}) async {
   final message = getApiMsg(response.message, response.messageCode);
     if (isApiStatus(context, response.status ?? 0, message, false, messageCode: response.messageCode ?? 0)) {
     await setDataInHive(response);
     unawaited(getGoogleMapKeyForApiCall());
     final loginType = response.loginType ?? getStringFromUserInfoBox(hiveLoginType);
     final hasPhone = (response.contactNumber ?? '').trim().isNotEmpty;
-    final isPhoneLogin = loginType == LoginType.email;
     final phoneVerified = (response.userVerified ?? 0) == 1;
+    final isPhoneAuthAttempt = authAttemptLoginType == LoginType.email;
+    final isPhoneAccount = loginType == LoginType.email;
 
-    if (isPhoneLogin && !phoneVerified) {
+    Future<void> routeToPhoneOtp() async {
       await putDataInSettingBox(hiveUserVerified, 0);
       await markPhoneOtpPending();
       await syncOtpDeliveryChannelFromResend();
       if (!context.mounted) return;
       openScreenWithClearPrevious(context, const OtpVerifyScreen());
+    }
+
+    // Phone login must always pass OTP, even when the account was originally Google/social.
+    if ((isPhoneAuthAttempt || isPhoneAccount) && !phoneVerified) {
+      await routeToPhoneOtp();
       return;
     }
 
     if (response.isRegister == 1) {
+      if (!phoneVerified) {
+        await routeToPhoneOtp();
+        return;
+      }
       await markSessionAuthenticated();
       putDataInSettingBox(hiveAppMode, response.activeMode ?? AppMode.passenger);
       unawaited(SessionRestoreService.enableBiometricLoginIfAvailable());
