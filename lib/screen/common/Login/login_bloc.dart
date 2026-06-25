@@ -110,7 +110,7 @@ class LoginBloc extends Bloc {
         subject.sink.add(ApiResponse.completed(response));
 
         if (!context.mounted) return;
-        await manageLoginResponse(context, response, authAttemptLoginType: loginType);
+        await manageLoginResponse(context, response, authAttemptLoginType: LoginType.biometric);
       } catch (e) {
         subject.sink.add(ApiResponse.error(e.toString()));
       }
