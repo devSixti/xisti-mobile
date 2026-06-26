@@ -95,7 +95,7 @@ class _OtpBottomSheetState extends State<OtpBottomSheet> {
                   style: bodyText(context: context, fontWeight: FontWeight.w500),
                 ),
                 Padding(
-                  padding: EdgeInsetsDirectional.only(top: 30.h, bottom: 20.h),
+                  padding: EdgeInsetsDirectional.only(top: 30.h, bottom: 12.h),
                   child: Row(
                     children: [
                       Expanded(
@@ -158,6 +158,36 @@ class _OtpBottomSheetState extends State<OtpBottomSheet> {
                       ),
                     ],
                   ),
+                ),
+                StreamBuilder<bool>(
+                  stream: widget.bloc.resendOTPController,
+                  builder: (context, snapResendOTP) {
+                    final cooldownActive = snapResendOTP.data ?? false;
+                    final secondsLeft = _secondsRemaining();
+                    return StreamBuilder<ApiResponse<BaseModel>>(
+                      stream: widget.bloc.subjectResend,
+                      builder: (context, snapLoading) {
+                        final isLoading = snapLoading.hasData && snapLoading.data?.status == Status.loading;
+                        return Padding(
+                          padding: EdgeInsetsDirectional.only(bottom: 20.h),
+                          child: CustomRoundedButton(
+                            context,
+                            languages.sendOtpViaWhatsapp,
+                            (cooldownActive && secondsLeft > 0) || isLoading
+                                ? null
+                                : () {
+                                    widget.bloc.resendOtp(context, channel: 'whatsapp');
+                                  },
+                            setBorder: true,
+                            maxLine: 2,
+                            setProgress: isLoading,
+                            minWidth: double.maxFinite,
+                            margin: EdgeInsetsDirectional.zero,
+                          ),
+                        );
+                      },
+                    );
+                  },
                 ),
               ],
             ),

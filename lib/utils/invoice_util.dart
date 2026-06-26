@@ -66,6 +66,7 @@ void appendDriverInvoiceDeductionLines({
   dynamic vatOnCommission,
   dynamic totalDeduction,
   dynamic netDriverPay,
+  dynamic commissionPercent,
 }) {
   final deduction = deductionFromApiFields(
         rideFare: rideFare,
@@ -78,12 +79,16 @@ void appendDriverInvoiceDeductionLines({
   if (deduction.tripValue <= 0) {
     return;
   }
+  final percentLabel = _resolveCommissionPercentLabel(
+    deduction,
+    commissionPercent,
+  );
   setKeyValuePair(
     keyValuesList: keyValuesList,
     setDivider: false,
     setBold: false,
     setValueWithCurrency: true,
-    key: '${languages.platformCommission} (${getAdminCommissionPercent().toStringAsFixed(0)}%)',
+    key: '${languages.platformCommission} (${percentLabel.toStringAsFixed(0)}%)',
     value: "${deduction.commissionAmount}",
   );
   setKeyValuePair(
@@ -110,4 +115,18 @@ void appendDriverInvoiceDeductionLines({
     key: languages.netDriverEarnings,
     value: "${deduction.netForDriver}",
   );
+}
+
+double _resolveCommissionPercentLabel(
+  DriverInvoiceDeduction deduction,
+  dynamic commissionPercent,
+) {
+  final fromApi = double.tryParse(commissionPercent?.toString() ?? '');
+  if (fromApi != null && fromApi > 0) {
+    return fromApi;
+  }
+  if (deduction.tripValue > 0 && deduction.commissionAmount > 0) {
+    return deduction.commissionAmount / deduction.tripValue * 100;
+  }
+  return getAdminCommissionPercent();
 }

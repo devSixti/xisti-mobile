@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import '../hive/hive_helper.dart';
+import '../main.dart';
 
 class DestinationPaymentOption {
   final String code;
@@ -18,28 +19,54 @@ class DestinationPaymentUtil {
   static const String daviplata = 'daviplata';
   static const String nequi = 'nequi';
 
-  static List<DestinationPaymentOption> optionsForLocale(bool isSpanish) {
-    final fromApi = _optionsFromHive(isSpanish);
+  static List<DestinationPaymentOption> optionsForLocale([bool _ = true]) {
+    final fromApi = _optionsFromHive();
     if (fromApi.isNotEmpty) {
       return fromApi;
     }
-    if (isSpanish) {
-      return const [
-        DestinationPaymentOption(code: cash, label: 'Efectivo'),
-        DestinationPaymentOption(code: bancolombia, label: 'Bancolombia'),
-        DestinationPaymentOption(code: daviplata, label: 'Daviplata'),
-        DestinationPaymentOption(code: nequi, label: 'Nequi'),
-      ];
-    }
-    return const [
-      DestinationPaymentOption(code: cash, label: 'Cash'),
-      DestinationPaymentOption(code: bancolombia, label: 'Bancolombia'),
-      DestinationPaymentOption(code: daviplata, label: 'Daviplata'),
-      DestinationPaymentOption(code: nequi, label: 'Nequi'),
+    return [
+      DestinationPaymentOption(code: cash, label: languages.cash),
+      DestinationPaymentOption(code: bancolombia, label: languages.paymentBancolombia),
+      DestinationPaymentOption(code: daviplata, label: languages.paymentDaviplata),
+      DestinationPaymentOption(code: nequi, label: languages.paymentNequi),
     ];
   }
 
-  static List<DestinationPaymentOption> _optionsFromHive(bool isSpanish) {
+  static String _apiLabelKey() {
+    final lang = getLanguageFromUserPrefBox().toLowerCase();
+    if (lang.startsWith('es')) return 'label_es';
+    if (lang.startsWith('fr')) return 'label_fr';
+    if (lang.startsWith('it')) return 'label_it';
+    if (lang.startsWith('pt')) return 'label_pt';
+    return 'label_en';
+  }
+
+  static String _localizedKnownCode(String code) {
+    switch (code) {
+      case cash:
+        return languages.cash;
+      case bancolombia:
+        return languages.paymentBancolombia;
+      case daviplata:
+        return languages.paymentDaviplata;
+      case nequi:
+        return languages.paymentNequi;
+      default:
+        return code;
+    }
+  }
+
+  static String _labelFromRow(Map row, String code) {
+    for (final key in [_apiLabelKey(), 'label', 'label_en', 'label_es']) {
+      final value = row[key]?.toString().trim() ?? '';
+      if (value.isNotEmpty) {
+        return value;
+      }
+    }
+    return _localizedKnownCode(code);
+  }
+
+  static List<DestinationPaymentOption> _optionsFromHive() {
     final raw = getStringFromSettingBox(hiveDestinationPaymentMethods, defaultValue: '');
     if (raw.trim().isEmpty) {
       return [];
@@ -58,8 +85,7 @@ class DestinationPaymentUtil {
         if (code.isEmpty) {
           continue;
         }
-        final label = (row['label'] ?? row[isSpanish ? 'label_es' : 'label_en'] ?? code).toString();
-        out.add(DestinationPaymentOption(code: code, label: label));
+        out.add(DestinationPaymentOption(code: code, label: _labelFromRow(row, code)));
       }
       return out;
     } catch (_) {
@@ -68,10 +94,10 @@ class DestinationPaymentUtil {
   }
 
   static String labelForCode(String? code, {bool isSpanish = true}) {
-    final match = optionsForLocale(isSpanish).where((o) => o.code == code);
+    final match = optionsForLocale().where((o) => o.code == code);
     if (match.isNotEmpty) {
       return match.first.label;
     }
-    return code ?? '';
+    return _localizedKnownCode(code ?? '');
   }
 }

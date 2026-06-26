@@ -252,11 +252,11 @@ class AppLocalizationsIt extends AppLocalizations {
       'Un nuovo OTP è stato inviato al tuo numero di telefono registrato';
 
   @override
-  String get resendOtpWhatsappSuccessMsg => 'We sent a new code via WhatsApp';
+  String get resendOtpWhatsappSuccessMsg => 'OTP reinviato tramite WhatsApp.';
 
   @override
   String get otpSentViaWhatsappHint =>
-      'If your carrier blocks SMS, the code may arrive via WhatsApp.';
+      'Possiamo inviare il codice anche tramite WhatsApp.';
 
   @override
   String get yourName => 'Il tuo Nome';
@@ -290,26 +290,27 @@ class AppLocalizationsIt extends AppLocalizations {
   String get termsCondition => 'Termini e Condizioni';
 
   @override
-  String get privacyPolicy => 'Privacy and Personal Data Processing Policy';
+  String get privacyPolicy =>
+      'Informativa sulla privacy e sul trattamento dei dati personali';
 
   @override
   String get platformConnectionNotice =>
-      'I understand that XISTI is a technology platform connecting users with independent drivers, and does not provide transportation services or operate vehicles.';
+      'Comprendo che si tratta di una piattaforma tecnologica che collega utenti e conducenti indipendenti, senza fornire servizi di trasporto né gestire veicoli.';
 
   @override
   String get driverIndependentNotice =>
-      'I declare that I act as an independent driver and that using the XISTI platform does not create any employment, subordination, commercial representation, or exclusivity relationship with XISTI.';
+      'Dichiaro di agire come conducente indipendente e che l\'uso della piattaforma non crea alcun rapporto di lavoro, subordinazione, rappresentanza commerciale o esclusività.';
 
   @override
   String get deliveryLegalNotice =>
-      'Deliveries are package handoffs managed between users through the platform. XISTI only facilitates the connection and does not provide passenger or freight transport services.';
+      'Le consegne sono passaggi di pacchi gestiti tra utenti tramite la piattaforma. L\'app facilita solo il collegamento e non fornisce servizi di trasporto passeggeri o merci.';
 
   @override
-  String get agreeAndContinue => 'Agree and continue';
+  String get agreeAndContinue => 'Accetta e continua';
 
   @override
   String get marketingOptIn =>
-      'I authorize receiving communications, news and promotions from XISTI.';
+      'Autorizzo a ricevere comunicazioni, novità e promozioni.';
 
   @override
   String get account => 'Account';
@@ -941,7 +942,7 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get walletMinTopupNotice =>
-      'Minimum top-up COP 13,000. XISTI commission is 8% — fair margin for drivers.';
+      'Ricarica minima 13.000 COP. Commissione XISTI 8% — margine equo per i conducenti.';
 
   @override
   String get pleaseEnterAmount => 'Inserisci o seleziona l\'importo.';
@@ -1495,4 +1496,431 @@ class AppLocalizationsIt extends AppLocalizations {
   @override
   String get invalidVehiclePlate =>
       'Inserisci una targa valida (5-8 caratteri alfanumerici)';
+
+  @override
+  String get vehicleCarroEconomico => 'Auto economica';
+
+  @override
+  String get vehicleCarroElectrico => 'Auto elettrica';
+
+  @override
+  String get vehicleCarroComodo => 'Auto confort';
+
+  @override
+  String get vehicleMotoBajo => 'Moto a bassa cilindrata';
+
+  @override
+  String get vehicleMotoAlto => 'Moto ad alta cilindrata';
+
+  @override
+  String get vehicleMoto => 'Moto';
+
+  @override
+  String get vehicleCarro => 'Auto';
+
+  @override
+  String get vehicleBicicleta => 'Bicicletta';
+
+  @override
+  String get vehicleTrip => 'Viaggio';
+
+  @override
+  String get whereToBuy => 'Dove acquistare';
+
+  @override
+  String get whereToDeliver => 'Dove consegnare';
+
+  @override
+  String get selectWhereToBuy => 'Seleziona dove acquistare';
+
+  @override
+  String get selectWhereToDeliver => 'Seleziona dove consegnare';
+
+  @override
+  String get whatToBuyHint => 'Cosa devono comprare?';
+
+  @override
+  String get priceCapHint => 'Limite di prezzo (COP)';
+
+  @override
+  String get indicateWhatToBuy => 'Indica cosa vuoi che acquistino';
+
+  @override
+  String get indicatePriceCap => 'Indica il limite di prezzo';
+
+  @override
+  String get vehicleForErrand => 'Veicolo per l\'encargo';
+
+  @override
+  String get transportMediumForDelivery => 'Mezzo di trasporto per la consegna';
+
+  @override
+  String get transportMediumForErrand => 'Mezzo di trasporto per l\'encargo';
+
+  @override
+  String get rideCachedReconnecting =>
+      'Viaggio in cache — riconnessione quando c\'è segnale.';
+
+  @override
+  String get uploadVehiclePhotosThreeAngles =>
+      'Carica le foto frontale, laterale e posteriore del veicolo.';
+
+  @override
+  String get noCountryFound => 'Nessun paese trovato';
+
+  @override
+  String get backToShop => 'Torna al negozio';
+
+  @override
+  String get emergencyContactName => 'Nome del contatto di emergenza';
+
+  @override
+  String get sendOtpViaWhatsapp => 'Invia tramite WhatsApp';
+
+  @override
+  String regionConfirmTitle(Object city) {
+    return 'Sei a $city?';
+  }
+
+  @override
+  String regionConfirmCountryMessage(Object country, Object currency) {
+    return 'Abbiamo rilevato $country. Aggiorneremo la valuta ($currency) e le tariffe minime.';
+  }
+
+  @override
+  String regionConfirmCityMessage(Object city, Object country) {
+    return 'Aggiorneremo le zone della mappa per $city, $country.';
+  }
+
+  @override
+  String get tecnomecanicaExpiryOptional =>
+      'Revisione tecnica — scadenza (opzionale)';
+
+  @override
+  String get photoFront => 'Foto frontale';
+
+  @override
+  String get photoSide => 'Foto laterale';
+
+  @override
+  String get photoRear => 'Foto posteriore';
+
+  @override
+  String get operateAsTaxiOptional => 'Opero come taxi (opzionale)';
+
+  @override
+  String get alsoTransportPassengers => 'Vuoi anche trasportare passeggeri?';
+
+  @override
+  String get passengerTransportToggleOn =>
+      'Potrai ricevere richieste di passeggeri.';
+
+  @override
+  String get passengerTransportToggleOff =>
+      'Riceverai solo richieste di consegna.';
+
+  @override
+  String get googleSignInUnavailable =>
+      'Google Sign-In non è disponibile su questo dispositivo.';
+
+  @override
+  String get invalidNationalId => 'Documento non valido (6-10 cifre)';
+
+  @override
+  String get descriptionOrComments => 'Descrizione o commenti';
+
+  @override
+  String get phoneAtPickup => 'Telefono al ritiro';
+
+  @override
+  String get storeOrPurchasePlaceHint =>
+      'Negozio o luogo d\'acquisto (es. Éxito Calle 80)';
+
+  @override
+  String get errandDescription => 'Descrizione del trasporto';
+
+  @override
+  String get proposedValueRequired => 'Valore proposto (obbligatorio)';
+
+  @override
+  String get selectSharedRideDate => 'Seleziona data del viaggio';
+
+  @override
+  String get contributionPerPersonCop => 'Contributo a persona (COP)';
+
+  @override
+  String get scheduledRequest => 'Richiesta programmata';
+
+  @override
+  String get availableSharedRides => 'Corse condivise disponibili';
+
+  @override
+  String get noSharedRidesAvailable =>
+      'Non ci sono corse condivise su questo percorso. Prova un\'altra data o pubblica la tua.';
+
+  @override
+  String get contributionToAgree => 'Contributo da concordare';
+
+  @override
+  String get seatsAvailableSuffix => 'posto/i';
+
+  @override
+  String get joinRide => 'Unisciti al viaggio';
+
+  @override
+  String get createSharedRide => 'Crea corsa condivisa';
+
+  @override
+  String get availableSeats => 'Posti disponibili';
+
+  @override
+  String get publishRide => 'Pubblica viaggio';
+
+  @override
+  String get whereToPickupPackage => 'Dove ritirare il pacco';
+
+  @override
+  String get whereToDeliverYourAddress => 'Dove consegnare (il tuo indirizzo)';
+
+  @override
+  String get searchSharedRides => 'Cerca corse condivise';
+
+  @override
+  String get sendHaulingRequest => 'Invia richiesta di trasporto';
+
+  @override
+  String get goOnlineToPublishSharedRides =>
+      'Vai online per pubblicare corse condivise';
+
+  @override
+  String get sharedRide => 'Corsa condivisa';
+
+  @override
+  String get serviceModeTrips => 'Viaggi';
+
+  @override
+  String get serviceModeDelivery => 'Consegna';
+
+  @override
+  String get serviceModeShare => 'Condividi';
+
+  @override
+  String get serviceModeErrand => 'Commissione';
+
+  @override
+  String get serviceModeHauling => 'Traslochi';
+
+  @override
+  String get serviceModeShareSubtitle => 'Paese a paese o paese a città';
+
+  @override
+  String get serviceModeErrandSubtitle => 'Acquisti in negozio per te';
+
+  @override
+  String get serviceModeHaulingSubtitle => 'Traslochi e carichi pesanti';
+
+  @override
+  String get sharedRideTownToCity => 'Paese a città';
+
+  @override
+  String get sharedRideTownToTown => 'Paese a paese';
+
+  @override
+  String get errandPickup => 'Ritiri';
+
+  @override
+  String get errandPurchases => 'Acquisti';
+
+  @override
+  String get haulTruck => 'Camion';
+
+  @override
+  String get haulCage => 'Camion gabbia';
+
+  @override
+  String get haulMotocarguero => 'Motocarro';
+
+  @override
+  String get chipErrand => 'Commissione';
+
+  @override
+  String get chipShare => 'Condividi';
+
+  @override
+  String get chipHauling => 'Traslochi';
+
+  @override
+  String get chipDelivery => 'Consegna';
+
+  @override
+  String get chipMotoraton => 'Motoratón';
+
+  @override
+  String get chipRide => 'Corsa';
+
+  @override
+  String get deliveryNotPassengerTransport =>
+      'Consegna pacchi — non è trasporto passeggeri';
+
+  @override
+  String get genericErrorTryAgain => 'Si è verificato un errore. Riprova.';
+
+  @override
+  String get selectContributionAmount => 'Indica il contributo';
+
+  @override
+  String get selectSeatsAvailable => 'Indica i posti disponibili';
+
+  @override
+  String get selectPickupLocationErrand => 'Seleziona il punto di ritiro';
+
+  @override
+  String get selectDropLocationErrand => 'Seleziona il punto di consegna';
+
+  @override
+  String get taxiYellowTag => 'Giallo';
+
+  @override
+  String get passengerModeBannerUser =>
+      'Modalità utente — richiedi viaggi e consegne';
+
+  @override
+  String get passengerModeBannerDriver =>
+      'Modalità conducente — guadagna con il tuo veicolo';
+
+  @override
+  String get searchCardSubtitleTransport => 'Dove vuoi andare?';
+
+  @override
+  String get searchCardSubtitleDelivery => 'Invia un pacco';
+
+  @override
+  String get searchCardSubtitleErrand => 'Richiedi un acquisto in negozio';
+
+  @override
+  String get packageWeightHint => 'Peso (kg)';
+
+  @override
+  String get enterPackageWeight => 'Inserisci il peso in kg';
+
+  @override
+  String get packageHeightHint => 'Altezza (cm)';
+
+  @override
+  String get packageWidthHint => 'Larghezza (cm)';
+
+  @override
+  String get packageLengthHint => 'Lunghezza (cm)';
+
+  @override
+  String get packageDetailsTitle => 'Dettagli del pacco';
+
+  @override
+  String get packageSizeLabel => 'Dimensioni del pacco';
+
+  @override
+  String get packageLabel => 'Pacco';
+
+  @override
+  String get driverOfflineActionSaved =>
+      'Nessun segnale: azione salvata. Verrà inviata alla riconnessione.';
+
+  @override
+  String get serviceModeTransportCardSubtitle => 'Il tuo percorso, a modo tuo';
+
+  @override
+  String get serviceModeDeliveryCardSubtitle => 'Consegne urbane';
+
+  @override
+  String repeatActivityTitle(Object serviceLabel) {
+    return 'Ripeti $serviceLabel';
+  }
+
+  @override
+  String get paymentBancolombia => 'Bancolombia';
+
+  @override
+  String get paymentNequi => 'Nequi';
+
+  @override
+  String get paymentDaviplata => 'Daviplata';
+
+  @override
+  String get taxiLabel => 'Taxi';
+
+  @override
+  String get homeHeroSubtitleTransport => 'Viaggio urbano · Facile e sicuro';
+
+  @override
+  String get homeHeroSubtitleDelivery => 'Pacchi e consegne a Medellín';
+
+  @override
+  String get homeHeroSubtitleErrand => 'Compriamo e consegniamo per te';
+
+  @override
+  String get homeHeroSubtitleExpreso => 'Viaggi intercomunali';
+
+  @override
+  String get modeBannerTransport =>
+      'Viaggi · Negozia la tariffa a step di 500 COP';
+
+  @override
+  String get modeBannerDelivery =>
+      'Consegna urbana · Pagamento a destinazione disponibile';
+
+  @override
+  String get modeBannerErrand => 'Commissioni · Compriamo e consegniamo';
+
+  @override
+  String get modeBannerExpreso => 'Condividi · Percorsi intercomunali';
+
+  @override
+  String get offlineShowingLastKnownLocation =>
+      'Nessun segnale — mostra l\'ultima posizione nota.';
+
+  @override
+  String get deliveryOnlyServiceHint =>
+      'Riceverai richieste di consegna per il mezzo selezionato sopra.';
+
+  @override
+  String get passengerTransportToggleHint =>
+      'Le consegne dipendono dal veicolo registrato. Attiva solo se trasporti anche passeggeri.';
+
+  @override
+  String get demoProductSubtitle =>
+      'Facile e sicuro — mobilità urbana con negoziazione tariffa e wallet prepagato.';
+
+  @override
+  String get demoProductBody =>
+      'Richiedi corse, proponi la tariffa e connettiti con conducenti verificati a Medellín.';
+
+  @override
+  String get demoProductSupport => 'Supporto XISTI';
+
+  @override
+  String get securityWarningTitle => 'Avviso di sicurezza';
+
+  @override
+  String get securityWarningOfficial =>
+      'XISTI è gestito ufficialmente dal team xistiapp.com.';
+
+  @override
+  String get securityWarningBody =>
+      'Se qualcuno tenta di venderti una copia di questa app o chiede pagamenti fuori dai canali ufficiali, segnalalo a soporte@xistiapp.com. Scarica XISTI solo da Google Play, App Store o link pubblicati su xistiapp.com.';
+
+  @override
+  String get understood => 'Capito';
+
+  @override
+  String get sessionExpired => 'La sessione è scaduta. Accedi di nuovo.';
+
+  @override
+  String get userNotFound => 'Utente non trovato';
+
+  @override
+  String get emailAlreadyRegistered => 'Questa email è già registrata';
+
+  @override
+  String get phoneAlreadyRegistered =>
+      'Questo numero di telefono è già registrato';
 }

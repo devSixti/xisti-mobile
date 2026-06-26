@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../main.dart';
 import '../../../utils/service_mode_util.dart';
 import '../../../utils/utils.dart';
 import '../../../utils/xisti_ui_tokens.dart';
@@ -8,14 +9,14 @@ import '../../../utils/xisti_ui_tokens.dart';
 String xistiModeBannerCopy(String? mode) {
   switch (mode) {
     case ServiceModeKind.delivery:
-      return 'Envío urbano · Pago en destino disponible';
+      return languages.modeBannerDelivery;
     case ServiceModeKind.encomiendas:
-      return 'Encomiendas · Compramos y entregamos';
+      return languages.modeBannerErrand;
     case ServiceModeKind.expreso:
-      return 'Expreso · Rutas intermunicipales';
+      return languages.modeBannerExpreso;
     case ServiceModeKind.transport:
     default:
-      return 'Viajes · Negocia tu tarifa en COP 500';
+      return languages.modeBannerTransport;
   }
 }
 

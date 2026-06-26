@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../main.dart';
 import '../../../utils/service_mode_util.dart';
 import '../../../utils/utils.dart';
 import '../../../utils/xisti_ui_tokens.dart';
@@ -9,14 +10,14 @@ import 'passenger_home_dl.dart';
 String xistiHomeHeroSubtitleForMode(String? mode) {
   switch (mode) {
     case ServiceModeKind.delivery:
-      return 'Paquetes y envíos en Medellín';
+      return languages.homeHeroSubtitleDelivery;
     case ServiceModeKind.encomiendas:
-      return 'Compramos y te lo llevamos';
+      return languages.homeHeroSubtitleErrand;
     case ServiceModeKind.expreso:
-      return 'Viajes intermunicipales';
+      return languages.homeHeroSubtitleExpreso;
     case ServiceModeKind.transport:
     default:
-      return 'Viaje urbano · Fácil y Seguro';
+      return languages.homeHeroSubtitleTransport;
   }
 }
 
@@ -54,8 +55,8 @@ class PassengerHomeSearchCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = getCurrentTheme(context);
     final accent = XistiUiTokens.accentForMode(serviceMode);
-    final pickupHint = serviceMode == ServiceModeKind.encomiendas ? 'Dónde comprar' : languages.pickUpLocation;
-    final dropHint = serviceMode == ServiceModeKind.encomiendas ? 'Dónde entregar' : languages.dropLocation;
+    final pickupHint = serviceMode == ServiceModeKind.encomiendas ? languages.whereToBuy : languages.pickUpLocation;
+    final dropHint = serviceMode == ServiceModeKind.encomiendas ? languages.whereToDeliver : languages.dropLocation;
     final showRecents = (dropoff?.name ?? '').isEmpty && recentTrips.isNotEmpty;
     final cardPadV = compactModern ? 8.h : 10.h;
     final cardPadH = compactModern ? 12.w : 14.w;

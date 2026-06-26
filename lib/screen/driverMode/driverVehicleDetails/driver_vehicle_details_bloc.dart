@@ -136,7 +136,7 @@ class DriverVehicleDetailsBloc extends Bloc {
     if (!_hasVehiclePhoto(vehicleImageFrontFile, vehicleImageFrontUrl) ||
         !_hasVehiclePhoto(vehicleImageSideFile, vehicleImageSideUrl) ||
         !_hasVehiclePhoto(vehicleImageRearFile, vehicleImageRearUrl)) {
-      openSimpleSnackbar(context, 'Sube las fotos frontal, lateral y trasera del vehículo.');
+      openSimpleSnackbar(context, languages.uploadVehiclePhotosThreeAngles);
       return;
     }
     if (await isNetworkConnected(
@@ -215,7 +215,7 @@ class DriverVehicleDetailsBloc extends Bloc {
           if (response.status != 3) openSimpleSnackbar(context, message);
         }
       } catch (e) {
-        subjectUploadVehicleDetails.sink.add(ApiResponse.error('Ocurrió un error. Inténtalo de nuevo.'));
+        subjectUploadVehicleDetails.sink.add(ApiResponse.error(languages.genericErrorTryAgain));
       }
     }
   }

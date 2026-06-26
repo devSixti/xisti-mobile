@@ -551,13 +551,13 @@ abstract class AppLocalizations {
   /// No description provided for @resendOtpWhatsappSuccessMsg.
   ///
   /// In en, this message translates to:
-  /// **'We sent a new code via WhatsApp'**
+  /// **'OTP resent via WhatsApp.'**
   String get resendOtpWhatsappSuccessMsg;
 
   /// No description provided for @otpSentViaWhatsappHint.
   ///
   /// In en, this message translates to:
-  /// **'If your carrier blocks SMS, the code may arrive via WhatsApp.'**
+  /// **'We can also send your code via WhatsApp.'**
   String get otpSentViaWhatsappHint;
 
   /// No description provided for @yourName.
@@ -629,19 +629,19 @@ abstract class AppLocalizations {
   /// No description provided for @platformConnectionNotice.
   ///
   /// In en, this message translates to:
-  /// **'I understand that XISTI is a technology platform connecting users with independent drivers, and does not provide transportation services or operate vehicles.'**
+  /// **'I understand that this is a technology platform connecting users with independent drivers, and does not provide transportation services or operate vehicles.'**
   String get platformConnectionNotice;
 
   /// No description provided for @driverIndependentNotice.
   ///
   /// In en, this message translates to:
-  /// **'I declare that I act as an independent driver and that using the XISTI platform does not create any employment, subordination, commercial representation, or exclusivity relationship with XISTI.'**
+  /// **'I declare that I act as an independent driver and that using the platform does not create any employment, subordination, commercial representation, or exclusivity relationship.'**
   String get driverIndependentNotice;
 
   /// No description provided for @deliveryLegalNotice.
   ///
   /// In en, this message translates to:
-  /// **'Deliveries are package handoffs managed between users through the platform. XISTI only facilitates the connection and does not provide passenger or freight transport services.'**
+  /// **'Deliveries are package handoffs managed between users through the platform. The app only facilitates the connection and does not provide passenger or freight transport services.'**
   String get deliveryLegalNotice;
 
   /// No description provided for @agreeAndContinue.
@@ -653,7 +653,7 @@ abstract class AppLocalizations {
   /// No description provided for @marketingOptIn.
   ///
   /// In en, this message translates to:
-  /// **'I authorize receiving communications, news and promotions from XISTI.'**
+  /// **'I authorize receiving communications, news and promotions.'**
   String get marketingOptIn;
 
   /// No description provided for @account.
@@ -2905,6 +2905,798 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Enter a valid plate (5 to 8 alphanumeric characters)'**
   String get invalidVehiclePlate;
+
+  /// No description provided for @vehicleCarroEconomico.
+  ///
+  /// In en, this message translates to:
+  /// **'Economy car'**
+  String get vehicleCarroEconomico;
+
+  /// No description provided for @vehicleCarroElectrico.
+  ///
+  /// In en, this message translates to:
+  /// **'Electric car'**
+  String get vehicleCarroElectrico;
+
+  /// No description provided for @vehicleCarroComodo.
+  ///
+  /// In en, this message translates to:
+  /// **'Comfort car'**
+  String get vehicleCarroComodo;
+
+  /// No description provided for @vehicleMotoBajo.
+  ///
+  /// In en, this message translates to:
+  /// **'Low-displacement motorcycle'**
+  String get vehicleMotoBajo;
+
+  /// No description provided for @vehicleMotoAlto.
+  ///
+  /// In en, this message translates to:
+  /// **'High-displacement motorcycle'**
+  String get vehicleMotoAlto;
+
+  /// No description provided for @vehicleMoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Motorcycle'**
+  String get vehicleMoto;
+
+  /// No description provided for @vehicleCarro.
+  ///
+  /// In en, this message translates to:
+  /// **'Car'**
+  String get vehicleCarro;
+
+  /// No description provided for @vehicleBicicleta.
+  ///
+  /// In en, this message translates to:
+  /// **'Bicycle'**
+  String get vehicleBicicleta;
+
+  /// No description provided for @vehicleTrip.
+  ///
+  /// In en, this message translates to:
+  /// **'Trip'**
+  String get vehicleTrip;
+
+  /// No description provided for @whereToBuy.
+  ///
+  /// In en, this message translates to:
+  /// **'Where to buy'**
+  String get whereToBuy;
+
+  /// No description provided for @whereToDeliver.
+  ///
+  /// In en, this message translates to:
+  /// **'Where to deliver'**
+  String get whereToDeliver;
+
+  /// No description provided for @selectWhereToBuy.
+  ///
+  /// In en, this message translates to:
+  /// **'Select where to buy'**
+  String get selectWhereToBuy;
+
+  /// No description provided for @selectWhereToDeliver.
+  ///
+  /// In en, this message translates to:
+  /// **'Select where to deliver'**
+  String get selectWhereToDeliver;
+
+  /// No description provided for @whatToBuyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'What should they buy?'**
+  String get whatToBuyHint;
+
+  /// No description provided for @priceCapHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Price cap (COP)'**
+  String get priceCapHint;
+
+  /// No description provided for @indicateWhatToBuy.
+  ///
+  /// In en, this message translates to:
+  /// **'Indicate what you want them to buy'**
+  String get indicateWhatToBuy;
+
+  /// No description provided for @indicatePriceCap.
+  ///
+  /// In en, this message translates to:
+  /// **'Indicate the price cap'**
+  String get indicatePriceCap;
+
+  /// No description provided for @vehicleForErrand.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle for the errand'**
+  String get vehicleForErrand;
+
+  /// No description provided for @transportMediumForDelivery.
+  ///
+  /// In en, this message translates to:
+  /// **'Transport for delivery'**
+  String get transportMediumForDelivery;
+
+  /// No description provided for @transportMediumForErrand.
+  ///
+  /// In en, this message translates to:
+  /// **'Transport for the errand'**
+  String get transportMediumForErrand;
+
+  /// No description provided for @rideCachedReconnecting.
+  ///
+  /// In en, this message translates to:
+  /// **'Trip cached — reconnecting when signal is available.'**
+  String get rideCachedReconnecting;
+
+  /// No description provided for @uploadVehiclePhotosThreeAngles.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload front, side and rear photos of the vehicle.'**
+  String get uploadVehiclePhotosThreeAngles;
+
+  /// No description provided for @noCountryFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No country found'**
+  String get noCountryFound;
+
+  /// No description provided for @backToShop.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to store'**
+  String get backToShop;
+
+  /// No description provided for @emergencyContactName.
+  ///
+  /// In en, this message translates to:
+  /// **'Emergency contact name'**
+  String get emergencyContactName;
+
+  /// No description provided for @sendOtpViaWhatsapp.
+  ///
+  /// In en, this message translates to:
+  /// **'Send via WhatsApp'**
+  String get sendOtpViaWhatsapp;
+
+  /// No description provided for @regionConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you in {city}?'**
+  String regionConfirmTitle(Object city);
+
+  /// No description provided for @regionConfirmCountryMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'We detected {country}. We will update currency ({currency}) and minimum fares.'**
+  String regionConfirmCountryMessage(Object country, Object currency);
+
+  /// No description provided for @regionConfirmCityMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'We will update map zones for {city}, {country}.'**
+  String regionConfirmCityMessage(Object city, Object country);
+
+  /// No description provided for @tecnomecanicaExpiryOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Technical inspection — expiry (optional)'**
+  String get tecnomecanicaExpiryOptional;
+
+  /// No description provided for @photoFront.
+  ///
+  /// In en, this message translates to:
+  /// **'Front photo'**
+  String get photoFront;
+
+  /// No description provided for @photoSide.
+  ///
+  /// In en, this message translates to:
+  /// **'Side photo'**
+  String get photoSide;
+
+  /// No description provided for @photoRear.
+  ///
+  /// In en, this message translates to:
+  /// **'Rear photo'**
+  String get photoRear;
+
+  /// No description provided for @operateAsTaxiOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'I operate as taxi (optional)'**
+  String get operateAsTaxiOptional;
+
+  /// No description provided for @alsoTransportPassengers.
+  ///
+  /// In en, this message translates to:
+  /// **'Do you also want to transport passengers?'**
+  String get alsoTransportPassengers;
+
+  /// No description provided for @passengerTransportToggleOn.
+  ///
+  /// In en, this message translates to:
+  /// **'You can receive passenger ride requests.'**
+  String get passengerTransportToggleOn;
+
+  /// No description provided for @passengerTransportToggleOff.
+  ///
+  /// In en, this message translates to:
+  /// **'You will only receive delivery requests.'**
+  String get passengerTransportToggleOff;
+
+  /// No description provided for @googleSignInUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Google Sign-In is not available on this device.'**
+  String get googleSignInUnavailable;
+
+  /// No description provided for @invalidNationalId.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid ID (6 to 10 digits)'**
+  String get invalidNationalId;
+
+  /// No description provided for @descriptionOrComments.
+  ///
+  /// In en, this message translates to:
+  /// **'Description or comments'**
+  String get descriptionOrComments;
+
+  /// No description provided for @phoneAtPickup.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone at pickup'**
+  String get phoneAtPickup;
+
+  /// No description provided for @storeOrPurchasePlaceHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Store or purchase location (e.g. Éxito Calle 80)'**
+  String get storeOrPurchasePlaceHint;
+
+  /// No description provided for @errandDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Errand description'**
+  String get errandDescription;
+
+  /// No description provided for @proposedValueRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Proposed value (required)'**
+  String get proposedValueRequired;
+
+  /// No description provided for @selectSharedRideDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Select trip date'**
+  String get selectSharedRideDate;
+
+  /// No description provided for @contributionPerPersonCop.
+  ///
+  /// In en, this message translates to:
+  /// **'Contribution per person (COP)'**
+  String get contributionPerPersonCop;
+
+  /// No description provided for @scheduledRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'Scheduled request'**
+  String get scheduledRequest;
+
+  /// No description provided for @availableSharedRides.
+  ///
+  /// In en, this message translates to:
+  /// **'Available shared rides'**
+  String get availableSharedRides;
+
+  /// No description provided for @noSharedRidesAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'There are no shared rides on this route yet. Try another date or publish your own.'**
+  String get noSharedRidesAvailable;
+
+  /// No description provided for @contributionToAgree.
+  ///
+  /// In en, this message translates to:
+  /// **'Contribution to agree'**
+  String get contributionToAgree;
+
+  /// No description provided for @seatsAvailableSuffix.
+  ///
+  /// In en, this message translates to:
+  /// **'seat(s)'**
+  String get seatsAvailableSuffix;
+
+  /// No description provided for @joinRide.
+  ///
+  /// In en, this message translates to:
+  /// **'Join ride'**
+  String get joinRide;
+
+  /// No description provided for @createSharedRide.
+  ///
+  /// In en, this message translates to:
+  /// **'Create shared ride'**
+  String get createSharedRide;
+
+  /// No description provided for @availableSeats.
+  ///
+  /// In en, this message translates to:
+  /// **'Available seats'**
+  String get availableSeats;
+
+  /// No description provided for @publishRide.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish ride'**
+  String get publishRide;
+
+  /// No description provided for @whereToPickupPackage.
+  ///
+  /// In en, this message translates to:
+  /// **'Where to pick up the package'**
+  String get whereToPickupPackage;
+
+  /// No description provided for @whereToDeliverYourAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Where to deliver (your address)'**
+  String get whereToDeliverYourAddress;
+
+  /// No description provided for @searchSharedRides.
+  ///
+  /// In en, this message translates to:
+  /// **'Search shared rides'**
+  String get searchSharedRides;
+
+  /// No description provided for @sendHaulingRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'Send hauling request'**
+  String get sendHaulingRequest;
+
+  /// No description provided for @goOnlineToPublishSharedRides.
+  ///
+  /// In en, this message translates to:
+  /// **'Go online to publish shared rides'**
+  String get goOnlineToPublishSharedRides;
+
+  /// No description provided for @sharedRide.
+  ///
+  /// In en, this message translates to:
+  /// **'Shared ride'**
+  String get sharedRide;
+
+  /// No description provided for @serviceModeTrips.
+  ///
+  /// In en, this message translates to:
+  /// **'Trips'**
+  String get serviceModeTrips;
+
+  /// No description provided for @serviceModeDelivery.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery'**
+  String get serviceModeDelivery;
+
+  /// No description provided for @serviceModeShare.
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get serviceModeShare;
+
+  /// No description provided for @serviceModeErrand.
+  ///
+  /// In en, this message translates to:
+  /// **'Errand'**
+  String get serviceModeErrand;
+
+  /// No description provided for @serviceModeHauling.
+  ///
+  /// In en, this message translates to:
+  /// **'Hauling'**
+  String get serviceModeHauling;
+
+  /// No description provided for @serviceModeShareSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Town to town or town to city shared rides'**
+  String get serviceModeShareSubtitle;
+
+  /// No description provided for @serviceModeErrandSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'In-store purchases for you'**
+  String get serviceModeErrandSubtitle;
+
+  /// No description provided for @serviceModeHaulingSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Moves, hauling and heavy loads'**
+  String get serviceModeHaulingSubtitle;
+
+  /// No description provided for @sharedRideTownToCity.
+  ///
+  /// In en, this message translates to:
+  /// **'Town to city'**
+  String get sharedRideTownToCity;
+
+  /// No description provided for @sharedRideTownToTown.
+  ///
+  /// In en, this message translates to:
+  /// **'Town to town'**
+  String get sharedRideTownToTown;
+
+  /// No description provided for @errandPickup.
+  ///
+  /// In en, this message translates to:
+  /// **'Pickups'**
+  String get errandPickup;
+
+  /// No description provided for @errandPurchases.
+  ///
+  /// In en, this message translates to:
+  /// **'Purchases'**
+  String get errandPurchases;
+
+  /// No description provided for @haulTruck.
+  ///
+  /// In en, this message translates to:
+  /// **'Truck'**
+  String get haulTruck;
+
+  /// No description provided for @haulCage.
+  ///
+  /// In en, this message translates to:
+  /// **'Cage truck'**
+  String get haulCage;
+
+  /// No description provided for @haulMotocarguero.
+  ///
+  /// In en, this message translates to:
+  /// **'Cargo motorcycle'**
+  String get haulMotocarguero;
+
+  /// No description provided for @chipErrand.
+  ///
+  /// In en, this message translates to:
+  /// **'Errand'**
+  String get chipErrand;
+
+  /// No description provided for @chipShare.
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get chipShare;
+
+  /// No description provided for @chipHauling.
+  ///
+  /// In en, this message translates to:
+  /// **'Hauling'**
+  String get chipHauling;
+
+  /// No description provided for @chipDelivery.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery'**
+  String get chipDelivery;
+
+  /// No description provided for @chipMotoraton.
+  ///
+  /// In en, this message translates to:
+  /// **'Motoratón'**
+  String get chipMotoraton;
+
+  /// No description provided for @chipRide.
+  ///
+  /// In en, this message translates to:
+  /// **'Ride'**
+  String get chipRide;
+
+  /// No description provided for @deliveryNotPassengerTransport.
+  ///
+  /// In en, this message translates to:
+  /// **'Package delivery — not passenger transport'**
+  String get deliveryNotPassengerTransport;
+
+  /// No description provided for @genericErrorTryAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong. Please try again.'**
+  String get genericErrorTryAgain;
+
+  /// No description provided for @selectContributionAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the contribution amount'**
+  String get selectContributionAmount;
+
+  /// No description provided for @selectSeatsAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter available seats'**
+  String get selectSeatsAvailable;
+
+  /// No description provided for @selectPickupLocationErrand.
+  ///
+  /// In en, this message translates to:
+  /// **'Select pickup location'**
+  String get selectPickupLocationErrand;
+
+  /// No description provided for @selectDropLocationErrand.
+  ///
+  /// In en, this message translates to:
+  /// **'Select delivery location'**
+  String get selectDropLocationErrand;
+
+  /// No description provided for @taxiYellowTag.
+  ///
+  /// In en, this message translates to:
+  /// **'Yellow'**
+  String get taxiYellowTag;
+
+  /// No description provided for @passengerModeBannerUser.
+  ///
+  /// In en, this message translates to:
+  /// **'User mode — request rides and deliveries'**
+  String get passengerModeBannerUser;
+
+  /// No description provided for @passengerModeBannerDriver.
+  ///
+  /// In en, this message translates to:
+  /// **'Driver mode — earn with your vehicle'**
+  String get passengerModeBannerDriver;
+
+  /// No description provided for @searchCardSubtitleTransport.
+  ///
+  /// In en, this message translates to:
+  /// **'Where do you want to go?'**
+  String get searchCardSubtitleTransport;
+
+  /// No description provided for @searchCardSubtitleDelivery.
+  ///
+  /// In en, this message translates to:
+  /// **'Send a package'**
+  String get searchCardSubtitleDelivery;
+
+  /// No description provided for @searchCardSubtitleErrand.
+  ///
+  /// In en, this message translates to:
+  /// **'Request an in-store purchase'**
+  String get searchCardSubtitleErrand;
+
+  /// No description provided for @packageWeightHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Weight (kg)'**
+  String get packageWeightHint;
+
+  /// No description provided for @enterPackageWeight.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter weight in kg'**
+  String get enterPackageWeight;
+
+  /// No description provided for @packageHeightHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Height (cm)'**
+  String get packageHeightHint;
+
+  /// No description provided for @packageWidthHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Width (cm)'**
+  String get packageWidthHint;
+
+  /// No description provided for @packageLengthHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Length (cm)'**
+  String get packageLengthHint;
+
+  /// No description provided for @packageDetailsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Package details'**
+  String get packageDetailsTitle;
+
+  /// No description provided for @packageSizeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Package size'**
+  String get packageSizeLabel;
+
+  /// No description provided for @packageLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Package'**
+  String get packageLabel;
+
+  /// No description provided for @driverOfflineActionSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'No signal: action saved. It will be sent when reconnected.'**
+  String get driverOfflineActionSaved;
+
+  /// No description provided for @serviceModeTransportCardSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your route, your way'**
+  String get serviceModeTransportCardSubtitle;
+
+  /// No description provided for @serviceModeDeliveryCardSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Urban deliveries'**
+  String get serviceModeDeliveryCardSubtitle;
+
+  /// No description provided for @repeatActivityTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeat {serviceLabel}'**
+  String repeatActivityTitle(Object serviceLabel);
+
+  /// No description provided for @paymentBancolombia.
+  ///
+  /// In en, this message translates to:
+  /// **'Bancolombia'**
+  String get paymentBancolombia;
+
+  /// No description provided for @paymentNequi.
+  ///
+  /// In en, this message translates to:
+  /// **'Nequi'**
+  String get paymentNequi;
+
+  /// No description provided for @paymentDaviplata.
+  ///
+  /// In en, this message translates to:
+  /// **'Daviplata'**
+  String get paymentDaviplata;
+
+  /// No description provided for @taxiLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Taxi'**
+  String get taxiLabel;
+
+  /// No description provided for @homeHeroSubtitleTransport.
+  ///
+  /// In en, this message translates to:
+  /// **'Urban ride · Easy and Safe'**
+  String get homeHeroSubtitleTransport;
+
+  /// No description provided for @homeHeroSubtitleDelivery.
+  ///
+  /// In en, this message translates to:
+  /// **'Packages and deliveries in Medellín'**
+  String get homeHeroSubtitleDelivery;
+
+  /// No description provided for @homeHeroSubtitleErrand.
+  ///
+  /// In en, this message translates to:
+  /// **'We buy and deliver for you'**
+  String get homeHeroSubtitleErrand;
+
+  /// No description provided for @homeHeroSubtitleExpreso.
+  ///
+  /// In en, this message translates to:
+  /// **'Intercity shared rides'**
+  String get homeHeroSubtitleExpreso;
+
+  /// No description provided for @modeBannerTransport.
+  ///
+  /// In en, this message translates to:
+  /// **'Trips · Negotiate your fare in 500 COP steps'**
+  String get modeBannerTransport;
+
+  /// No description provided for @modeBannerDelivery.
+  ///
+  /// In en, this message translates to:
+  /// **'Urban delivery · Pay at destination available'**
+  String get modeBannerDelivery;
+
+  /// No description provided for @modeBannerErrand.
+  ///
+  /// In en, this message translates to:
+  /// **'Errands · We buy and deliver'**
+  String get modeBannerErrand;
+
+  /// No description provided for @modeBannerExpreso.
+  ///
+  /// In en, this message translates to:
+  /// **'Share · Intercity routes'**
+  String get modeBannerExpreso;
+
+  /// No description provided for @offlineShowingLastKnownLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'No signal — showing last known location.'**
+  String get offlineShowingLastKnownLocation;
+
+  /// No description provided for @deliveryOnlyServiceHint.
+  ///
+  /// In en, this message translates to:
+  /// **'You will receive delivery requests for the medium selected above.'**
+  String get deliveryOnlyServiceHint;
+
+  /// No description provided for @passengerTransportToggleHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Deliveries arrive based on your registered vehicle. Enable only if you also transport passengers.'**
+  String get passengerTransportToggleHint;
+
+  /// No description provided for @demoProductSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Easy and Safe — urban mobility with fare negotiation and prepaid wallet.'**
+  String get demoProductSubtitle;
+
+  /// No description provided for @demoProductBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Request rides, propose your fare, and connect with verified drivers in Medellín.'**
+  String get demoProductBody;
+
+  /// No description provided for @demoProductSupport.
+  ///
+  /// In en, this message translates to:
+  /// **'XISTI Support'**
+  String get demoProductSupport;
+
+  /// No description provided for @securityWarningTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Security notice'**
+  String get securityWarningTitle;
+
+  /// No description provided for @securityWarningOfficial.
+  ///
+  /// In en, this message translates to:
+  /// **'XISTI is officially operated by the xistiapp.com team.'**
+  String get securityWarningOfficial;
+
+  /// No description provided for @securityWarningBody.
+  ///
+  /// In en, this message translates to:
+  /// **'If someone tries to sell you a copy of this app or requests payments outside official channels, report it to soporte@xistiapp.com. Download XISTI only from Google Play, App Store, or links published on xistiapp.com.'**
+  String get securityWarningBody;
+
+  /// No description provided for @understood.
+  ///
+  /// In en, this message translates to:
+  /// **'Understood'**
+  String get understood;
+
+  /// No description provided for @sessionExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Your session expired. Please sign in again.'**
+  String get sessionExpired;
+
+  /// No description provided for @userNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'User not found'**
+  String get userNotFound;
+
+  /// No description provided for @emailAlreadyRegistered.
+  ///
+  /// In en, this message translates to:
+  /// **'This email is already registered'**
+  String get emailAlreadyRegistered;
+
+  /// No description provided for @phoneAlreadyRegistered.
+  ///
+  /// In en, this message translates to:
+  /// **'This phone number is already registered'**
+  String get phoneAlreadyRegistered;
 }
 
 class _AppLocalizationsDelegate

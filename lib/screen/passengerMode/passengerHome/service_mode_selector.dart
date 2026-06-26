@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../main.dart';
 import '../../../utils/service_mode_util.dart';
 import '../../../utils/utils.dart';
 import '../../../utils/xisti_ui_tokens.dart';
@@ -24,8 +25,8 @@ class ServiceModeSelector extends StatelessWidget {
     final visible = groups.isNotEmpty
         ? groups
         : [
-            ServiceModeGroup(mode: ServiceModeKind.transport, label: 'Viajes', displayOrder: 1, services: []),
-            ServiceModeGroup(mode: ServiceModeKind.delivery, label: 'Envío', displayOrder: 2, services: []),
+            ServiceModeGroup(mode: ServiceModeKind.transport, label: languages.serviceModeTrips, displayOrder: 1, services: []),
+            ServiceModeGroup(mode: ServiceModeKind.delivery, label: languages.serviceModeDelivery, displayOrder: 2, services: []),
           ];
 
     final cards = <Widget>[
@@ -118,14 +119,14 @@ class ServiceModeSelector extends StatelessWidget {
   String _subtitleFor(String mode) {
     switch (mode) {
       case ServiceModeKind.delivery:
-        return 'Entregas urbanas';
+        return languages.serviceModeDeliveryCardSubtitle;
       case ServiceModeKind.expreso:
-        return 'Intermunicipal';
+        return languages.serviceModeShareSubtitle;
       case ServiceModeKind.encomiendas:
-        return 'Compras por ti';
+        return languages.serviceModeErrandSubtitle;
       case ServiceModeKind.transport:
       default:
-        return 'Tu ruta, a tu manera';
+        return languages.serviceModeTransportCardSubtitle;
     }
   }
 

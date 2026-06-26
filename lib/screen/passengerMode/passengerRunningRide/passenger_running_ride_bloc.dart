@@ -85,7 +85,7 @@ class PassengerRunningRideBloc extends Bloc {
     if (!await offlineService.hasNetwork) {
       if (offlineService.cachedRideId() == rideId && subjectRideDetail.valueOrNull?.status == Status.completed) {
         if (context.mounted) {
-          openSimpleSnackbar(context, 'Viaje en caché — reconectando cuando haya señal.');
+          openSimpleSnackbar(context, languages.rideCachedReconnecting);
         }
         return;
       }

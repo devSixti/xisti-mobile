@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../commonView/custom_rounded_button.dart';
 import '../commonView/scaffold_with_safe_area.dart';
+import '../main.dart';
 import '../utils/utils.dart';
 
 class WarningBottomSheet extends StatefulWidget {
@@ -35,7 +36,7 @@ class _WarningBottomSheetState extends State<WarningBottomSheet> {
                         child: Padding(
                           padding: EdgeInsetsDirectional.only(top: 25.h, bottom: 20.h),
                           child: Text(
-                            'Aviso de seguridad',
+                            languages.securityWarningTitle,
                             textAlign: TextAlign.start,
                             style: bodyText(
                               context: context,
@@ -55,18 +56,18 @@ class _WarningBottomSheetState extends State<WarningBottomSheet> {
                   Image.asset(setImagesBasedOnTheme(context, 'warning.png'), height: 210.h, fit: BoxFit.fitHeight),
                   SizedBox(height: 20.h),
                   Text(
-                    'XISTI es operado oficialmente por el equipo de xistiapp.com.',
+                    languages.securityWarningOfficial,
                     textAlign: TextAlign.start,
                     style: bodyText(context: context, fontWeight: FontWeight.w600, fontSize: textSize18px),
                   ),
                   SizedBox(height: 15.h),
                   Text(
-                    'Si alguien intenta venderte una copia de esta app o solicita pagos fuera de los canales oficiales, repórtalo a soporte@xistiapp.com. Descarga XISTI solo desde Google Play, App Store o enlaces publicados en xistiapp.com.',
+                    languages.securityWarningBody,
                     textAlign: TextAlign.start,
                     style: bodyText(context: context, fontSize: textSize14px),
                   ),
                   SizedBox(height: 30.h),
-                  CustomRoundedButton(context, 'Entendido', () => Navigator.pop(context), margin: EdgeInsetsDirectional.only(bottom: getBottomMargin())),
+                  CustomRoundedButton(context, languages.understood, () => Navigator.pop(context), margin: EdgeInsetsDirectional.only(bottom: getBottomMargin())),
                 ],
               ),
             ),

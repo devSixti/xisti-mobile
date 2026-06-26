@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../main.dart';
 import '../utils/utils.dart';
 
 /// Prominent label so drivers can tell envíos apart from passenger transport.
@@ -37,7 +38,7 @@ class DeliveryRequestBadge extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Envío',
+                    languages.serviceModeDelivery,
                     style: bodyText(
                       context: context,
                       fontSize: textSize16px,
@@ -47,7 +48,7 @@ class DeliveryRequestBadge extends StatelessWidget {
                   ),
                   SizedBox(height: 2.h),
                   Text(
-                    'Entrega de paquete — no es transporte de pasajeros',
+                    languages.deliveryNotPassengerTransport,
                     style: bodyText(
                       context: context,
                       fontSize: textSize12px,
@@ -75,7 +76,7 @@ class DeliveryRequestBadge extends StatelessWidget {
           Icon(Icons.local_shipping_outlined, color: accent, size: 14.sp),
           SizedBox(width: 4.w),
           Text(
-            'Envío',
+            languages.serviceModeDelivery,
             style: bodyText(
               context: context,
               fontSize: textSize12px,

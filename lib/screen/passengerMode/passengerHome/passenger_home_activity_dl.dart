@@ -1,4 +1,6 @@
 /// Snapshot for the home activity hub card (active ride or recent destination).
+import '../../../main.dart';
+
 class PassengerActivitySnapshot {
   final bool isActive;
   final int? rideId;
@@ -46,7 +48,7 @@ class PassengerActivitySnapshot {
   }) =>
       PassengerActivitySnapshot(
         isActive: false,
-        title: 'Repetir $serviceLabel',
+        title: languages.repeatActivityTitle(serviceLabel),
         subtitle: destinationName,
         destinationName: destinationName,
         destinationLat: destinationLat,

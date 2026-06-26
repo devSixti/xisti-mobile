@@ -1,4 +1,5 @@
 import '../constant/constant.dart';
+import '../main.dart';
 import '../screen/passengerMode/passengerHome/passenger_home_dl.dart';
 import 'app_mobile_settings.dart';
 
@@ -135,7 +136,7 @@ class ServiceModeKind {
     final result = List<ServiceModeGroup>.from(groups);
     final existing = result.map((g) => g.mode).toSet();
 
-    void addIfMissing(String mode, String labelEs, int order) {
+    void addIfMissing(String mode, String label, int order) {
       if (existing.contains(mode)) return;
       if (mode == expreso && !isExpresoMobileEnabled()) return;
       if (mode == encomiendas && !isEncomiendasMobileEnabled()) return;
@@ -144,7 +145,7 @@ class ServiceModeKind {
       result.add(
         ServiceModeGroup(
           mode: mode,
-          label: labelEs,
+          label: label,
           displayOrder: order,
           services: services.length == 1 ? services : [services.first],
         ),
@@ -152,8 +153,8 @@ class ServiceModeKind {
       existing.add(mode);
     }
 
-    addIfMissing(expreso, 'Expreso', 3);
-    addIfMissing(encomiendas, 'Encomiendas', 4);
+    addIfMissing(expreso, languages.serviceModeShare, 3);
+    addIfMissing(encomiendas, languages.serviceModeErrand, 4);
     result.sort((a, b) => a.displayOrder.compareTo(b.displayOrder));
     return result;
   }
@@ -190,14 +191,14 @@ class ServiceModeKind {
   static String _defaultLabel(String mode) {
     switch (mode) {
       case delivery:
-        return 'Envío';
+        return languages.serviceModeDelivery;
       case expreso:
-        return 'Expreso';
+        return languages.serviceModeShare;
       case encomiendas:
-        return 'Encomiendas';
+        return languages.serviceModeErrand;
       case transport:
       default:
-        return 'Viajes';
+        return languages.serviceModeTrips;
     }
   }
 

@@ -44,7 +44,7 @@ class CourierDetailView extends StatelessWidget {
       children: [
         RideDetailItem(iconData: CustomIcons.manageInformation, titleText: "${languages.itemDesc} :", mainText: itemDesc),
         if (dimensions.isNotEmpty)
-          RideDetailItem(iconData: CustomIcons.manageInformation, titleText: "Package size :", mainText: dimensions),
+          RideDetailItem(iconData: CustomIcons.manageInformation, titleText: "${languages.packageSizeLabel} :", mainText: dimensions),
         RideDetailItem(iconData: CustomIcons.name, titleText: "${languages.recipientName} :", mainText: recipientName),
         RideDetailItem(iconData: CustomIcons.call, titleText: "${languages.recipientNumber} :", mainText: recipientNumber),
         if (estimatedPrice > 0)

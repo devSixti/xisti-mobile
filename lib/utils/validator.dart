@@ -109,7 +109,7 @@ String colombianNationalIdValidate(String value) {
   }
   final digits = value.replaceAll(RegExp(r'\D'), '');
   if (digits.length < 6 || digits.length > 10) {
-    return 'Documento inválido (6 a 10 dígitos)';
+    return languages.invalidNationalId;
   }
   return "";
 }

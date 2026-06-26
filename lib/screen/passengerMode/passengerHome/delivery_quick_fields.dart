@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../commonView/custom_text_field.dart';
+import '../../../main.dart';
 import '../../../utils/utils.dart';
 
 /// Peso y dimensiones del paquete en home (modo Envío), antes de ofertar tarifa.
@@ -84,13 +85,13 @@ class _DeliveryQuickFieldsState extends State<DeliveryQuickFields> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Detalles del paquete',
+            languages.packageDetailsTitle,
             style: bodyText(context: context, fontSize: textSize12px, fontWeight: FontWeight.w600),
           ),
           SizedBox(height: 8.h),
           TextFormFieldCustom(
             controller: _weight,
-            hint: 'Peso (kg)',
+            hint: languages.packageWeightHint,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}'))],
             setError: false,
@@ -106,7 +107,7 @@ class _DeliveryQuickFieldsState extends State<DeliveryQuickFields> {
               Expanded(
                 child: TextFormFieldCustom(
                   controller: _height,
-                  hint: 'Alto (cm)',
+                  hint: languages.packageHeightHint,
                   keyboardType: TextInputType.number,
                   inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                   setError: false,
@@ -117,7 +118,7 @@ class _DeliveryQuickFieldsState extends State<DeliveryQuickFields> {
               Expanded(
                 child: TextFormFieldCustom(
                   controller: _width,
-                  hint: 'Ancho (cm)',
+                  hint: languages.packageWidthHint,
                   keyboardType: TextInputType.number,
                   inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                   setError: false,
@@ -128,7 +129,7 @@ class _DeliveryQuickFieldsState extends State<DeliveryQuickFields> {
               Expanded(
                 child: TextFormFieldCustom(
                   controller: _length,
-                  hint: 'Largo (cm)',
+                  hint: languages.packageLengthHint,
                   keyboardType: TextInputType.number,
                   inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                   setError: false,

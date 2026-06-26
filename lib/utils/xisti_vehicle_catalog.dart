@@ -1,4 +1,5 @@
 import '../constant/constant.dart';
+import '../main.dart';
 import '../screen/driverMode/driverVehicleDetails/driver_vehicle_details_dl.dart';
 import '../screen/passengerMode/passengerHome/passenger_home_dl.dart';
 import 'service_mode_util.dart';
@@ -17,30 +18,51 @@ abstract final class XistiVehicleCatalog {
 
   static String iconAsset(String variant) => '$_iconBase/$variant.png';
 
+  static String _localizedLabel(String variant) {
+    switch (variant) {
+      case carroEconomico:
+        return languages.vehicleCarroEconomico;
+      case carroEco:
+        return languages.vehicleCarroElectrico;
+      case carroComodo:
+        return languages.vehicleCarroComodo;
+      case motoBajo:
+        return languages.vehicleMotoBajo;
+      case motoAlto:
+        return languages.vehicleMotoAlto;
+      case motoMedio:
+        return languages.vehicleMoto;
+      case bicicleta:
+        return languages.vehicleBicicleta;
+      default:
+        return variant;
+    }
+  }
+
   static List<ServiceTypeItem> transportOptions() => [
-        _item(ServiceType.taxi, 'Carro eco', carroEco, 1),
-        _item(ServiceType.taxi, 'Carro cómodo', carroComodo, 2),
-        _item(ServiceType.taxi, 'Carro económico', carroEconomico, 3),
-        _item(ServiceType.bike, 'Moto alto cilindraje', motoAlto, 4),
-        _item(ServiceType.bike, 'Moto bajo cilindraje', motoBajo, 5),
+        _item(ServiceType.taxi, _localizedLabel(carroEconomico), carroEconomico, 1),
+        _item(ServiceType.taxi, _localizedLabel(carroEco), carroEco, 2),
+        _item(ServiceType.taxi, _localizedLabel(carroComodo), carroComodo, 3),
+        _item(ServiceType.bike, _localizedLabel(motoBajo), motoBajo, 4),
+        _item(ServiceType.bike, _localizedLabel(motoAlto), motoAlto, 5),
       ];
 
   static List<DeliveryVehicleOption> deliveryOptions() => [
         DeliveryVehicleOption(
           vehicleServiceId: ServiceType.bike,
-          label: 'Moto',
+          label: languages.vehicleMoto,
           serviceIcon: iconAsset(motoMedio),
           deliveryVariant: motoMedio,
         ),
         DeliveryVehicleOption(
           vehicleServiceId: ServiceType.taxi,
-          label: 'Carro',
+          label: languages.vehicleCarro,
           serviceIcon: iconAsset(carroEconomico),
           deliveryVariant: carroEconomico,
         ),
         DeliveryVehicleOption(
           vehicleServiceId: ServiceType.courier,
-          label: 'Bicicleta',
+          label: languages.vehicleBicicleta,
           serviceIcon: iconAsset(bicicleta),
           deliveryVariant: bicicleta,
         ),
@@ -138,13 +160,13 @@ abstract final class XistiVehicleCatalog {
     }
     switch (serviceId) {
       case ServiceType.taxi:
-        return 'Carro';
+        return languages.vehicleCarro;
       case ServiceType.bike:
-        return 'Moto';
+        return languages.vehicleMoto;
       case ServiceType.courier:
-        return 'Bicicleta';
+        return languages.vehicleBicicleta;
       default:
-        return 'Viaje';
+        return languages.vehicleTrip;
     }
   }
 
@@ -182,22 +204,22 @@ abstract final class XistiVehicleCatalog {
   }
 
   static List<_DriverCatalogRow> _driverCatalogRows() => [
-        _DriverCatalogRow(ServiceType.taxi, 'Carro eco', carroEco, false, true),
-        _DriverCatalogRow(ServiceType.taxi, 'Carro cómodo', carroComodo, false, false),
-        _DriverCatalogRow(ServiceType.taxi, 'Carro económico', carroEconomico, false, true),
-        _DriverCatalogRow(ServiceType.bike, 'Moto alto cilindraje', motoAlto, false, false),
-        _DriverCatalogRow(ServiceType.bike, 'Moto bajo cilindraje', motoBajo, false, false),
-        _DriverCatalogRow(ServiceType.bike, 'Moto', motoMedio, true, false),
-        _DriverCatalogRow(ServiceType.taxi, 'Carro', carroEconomico, true, false),
-        _DriverCatalogRow(ServiceType.courier, 'Bicicleta', bicicleta, true, false),
+        _DriverCatalogRow(ServiceType.taxi, carroEconomico, false, true),
+        _DriverCatalogRow(ServiceType.taxi, carroEco, false, true),
+        _DriverCatalogRow(ServiceType.taxi, carroComodo, false, false),
+        _DriverCatalogRow(ServiceType.bike, motoBajo, false, false),
+        _DriverCatalogRow(ServiceType.bike, motoAlto, false, false),
+        _DriverCatalogRow(ServiceType.bike, motoMedio, true, false),
+        _DriverCatalogRow(ServiceType.taxi, carroEconomico, true, false),
+        _DriverCatalogRow(ServiceType.courier, bicicleta, true, false),
       ];
 
   static const transportRegistrationVariants = [
+    carroEconomico,
     carroEco,
     carroComodo,
-    carroEconomico,
-    motoAlto,
     motoBajo,
+    motoAlto,
   ];
 
   /// Driver manage-vehicle screen: only viajes matrix (no envío genérico).
@@ -231,7 +253,7 @@ abstract final class XistiVehicleCatalog {
           [];
       merged.add(ServiceList(
         serviceId: c.serviceId,
-        serviceName: existing?.serviceName.isNotEmpty == true ? existing!.serviceName : c.label,
+        serviceName: existing?.serviceName.isNotEmpty == true ? existing!.serviceName : _localizedLabel(c.variant),
         serviceIcon: iconAsset(c.variant),
         serviceDescription: existing?.serviceDescription ?? '',
         vehicleTypeList: vehicleTypes,
@@ -248,10 +270,9 @@ abstract final class XistiVehicleCatalog {
 
 class _DriverCatalogRow {
   final int serviceId;
-  final String label;
   final String variant;
   final bool deliveryOnly;
   final bool isTaxi;
 
-  const _DriverCatalogRow(this.serviceId, this.label, this.variant, this.deliveryOnly, this.isTaxi);
+  const _DriverCatalogRow(this.serviceId, this.variant, this.deliveryOnly, this.isTaxi);
 }

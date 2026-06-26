@@ -8,6 +8,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../appThemeManager/app_theme_colors.dart';
 import '../constant/dimensions.dart';
+import '../main.dart';
 import '../utils/style_util.dart';
 
 class TextFormFieldCustom extends StatefulWidget {
@@ -340,7 +341,7 @@ class InputDoneView extends StatelessWidget {
             onPressed: () {
               FocusScope.of(context).requestFocus(FocusNode());
             },
-            child: Text("Done", style: bodyText(context: context, textColor: Colors.blue, fontWeight: FontWeight.bold)),
+            child: Text(languages.done, style: bodyText(context: context, textColor: Colors.blue, fontWeight: FontWeight.bold)),
           ),
         ),
       ),

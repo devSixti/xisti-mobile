@@ -8,6 +8,7 @@ import 'package:shimmer/shimmer.dart';
 
 import '../../../commonView/common_view.dart';
 import '../../../commonView/custom_rounded_button.dart';
+import '../../../main.dart';
 import '../../../networking/api_response.dart';
 import '../../../utils/app_mobile_settings.dart';
 import '../../../utils/map_style_hot_reload.dart';
@@ -595,7 +596,7 @@ class _PassengerHomeState extends State<PassengerHome> {
   Widget fromAddress() => StreamBuilder<String>(
     stream: _bloc?.selectedServiceModeSubject,
     builder: (context, snapMode) {
-      final pickupHint = snapMode.data == ServiceModeKind.encomiendas ? 'Dónde comprar' : languages.pickUpLocation;
+      final pickupHint = snapMode.data == ServiceModeKind.encomiendas ? languages.whereToBuy : languages.pickUpLocation;
       return StreamBuilder<SearchedLocation?>(
         stream: _bloc?.fromAddressController,
         builder: (context, snap) {
@@ -650,7 +651,7 @@ class _PassengerHomeState extends State<PassengerHome> {
   Widget toAddress() => StreamBuilder<String>(
     stream: _bloc?.selectedServiceModeSubject,
     builder: (context, snapMode) {
-      final dropHint = snapMode.data == ServiceModeKind.encomiendas ? 'Dónde entregar' : languages.dropLocation;
+      final dropHint = snapMode.data == ServiceModeKind.encomiendas ? languages.whereToDeliver : languages.dropLocation;
       return StreamBuilder<SearchedLocation?>(
         stream: _bloc?.toAddressController,
         builder: (context, snap) {
@@ -875,7 +876,7 @@ class _PassengerHomeState extends State<PassengerHome> {
                 return Padding(
                   padding: EdgeInsetsDirectional.symmetric(horizontal: commonHorizontalPadding, vertical: 12.h),
                   child: Text(
-                    'No hay vehículos disponibles para este modo.',
+                    languages.noRecordFound,
                     style: bodyText(context: context, fontSize: textSize12px, textColor: getCurrentTheme(context).colorTextLight),
                     textAlign: TextAlign.center,
                   ),

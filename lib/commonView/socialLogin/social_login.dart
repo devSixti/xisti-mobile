@@ -166,7 +166,7 @@ class _SocialLoginState extends State<SocialLogin> {
       await _ensureGoogleSignInInitialized();
       final GoogleSignIn signIn = GoogleSignIn.instance;
       if (!signIn.supportsAuthenticate()) {
-        _reportSocialError('Google Sign-In no está disponible en este dispositivo.');
+        _reportSocialError(languages.googleSignInUnavailable);
         return;
       }
       final GoogleSignInAccount googleSignInAccount = await signIn.authenticate(scopeHint: ['email']);

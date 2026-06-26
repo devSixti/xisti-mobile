@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import '../../../../../blocs/bloc.dart';
 import '../../../../../commonView/customCountryCodePicker/country_code.dart';
 import '../../../../../hive/hive_helper.dart';
+import '../../../../../main.dart';
 import '../../../../../utils/destination_payment_util.dart';
 import '../../../../../utils/phone_util.dart';
 import '../../../../../utils/utils.dart';
@@ -214,7 +215,7 @@ class OfferFareAndBookBloc extends Bloc {
     if ((isCourier || isEncomienda) &&
         deliveryOptions.isNotEmpty &&
         (selectedDeliveryVehicleServiceIdSubject.valueOrNull ?? 0) <= 0) {
-      openSimpleSnackbar(context, 'Selecciona el vehículo.');
+      openSimpleSnackbar(context, languages.selectVehicle);
       return;
     }
     onSubmit(

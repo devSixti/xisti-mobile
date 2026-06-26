@@ -130,7 +130,7 @@ class DriverRideRequestDetailPanel extends StatelessWidget {
                     if (ride.recipientContactNumber.isNotEmpty)
                       _infoTile(context, icon: CustomIcons.call, label: languages.recipientNumber, value: ride.recipientContactNumber),
                     if (_packageSizeLine().isNotEmpty)
-                      _infoTile(context, icon: CustomIcons.manageInformation, label: 'Paquete', value: _packageSizeLine()),
+                      _infoTile(context, icon: CustomIcons.manageInformation, label: languages.packageLabel, value: _packageSizeLine()),
                     if (getDoubleFromDynamic(ride.estimatePrice) > 0)
                       _infoTile(
                         context,

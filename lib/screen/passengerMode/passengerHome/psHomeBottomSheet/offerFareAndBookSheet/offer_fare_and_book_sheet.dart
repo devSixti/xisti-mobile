@@ -11,6 +11,7 @@ import '../../../../../commonView/dropdown_button2.dart';
 import '../../../../../commonView/scaffold_with_safe_area.dart';
 import '../../../../../commonView/spinner_date_time_picker.dart';
 import '../../../../../hive/hive_helper.dart';
+import '../../../../../main.dart';
 import '../../../../../utils/destination_payment_util.dart';
 import '../../../../../commonView/xisti_bottom_sheet_shell.dart';
 import '../../../../../commonView/xisti_horizontal_payment_selector.dart';
@@ -205,7 +206,7 @@ class _OfferFareAndBookSheetState extends State<OfferFareAndBookSheet> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            widget.isEncomienda ? 'Vehículo para la encomienda' : 'Medio de transporte para el envío',
+            widget.isEncomienda ? languages.vehicleForErrand : languages.transportMediumForDelivery,
             style: bodyText(context: context, fontWeight: FontWeight.w600),
           ),
           SizedBox(height: 10.h),
@@ -323,9 +324,9 @@ class _OfferFareAndBookSheetState extends State<OfferFareAndBookSheet> {
         controller: _bloc?.estimatedPriceController,
         keyboardType: const TextInputType.numberWithOptions(decimal: false, signed: false),
         inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-        hint: 'Tope de precio (COP)',
+        hint: languages.priceCapHint,
         setError: true,
-        validator: (value) => validateEmptyField(value, 'Indica el tope de precio'),
+        validator: (value) => validateEmptyField(value, languages.indicatePriceCap),
         commonPrefixIcon: CustomIcons.paymentMethod,
       ),
     );
@@ -615,7 +616,6 @@ class _OfferFareAndBookSheetState extends State<OfferFareAndBookSheet> {
   }
 
   Widget packageDimensions() {
-    final isSpanish = getLanguageFromUserPrefBox().startsWith('es');
     return Column(
       children: [
         Padding(
@@ -623,9 +623,9 @@ class _OfferFareAndBookSheetState extends State<OfferFareAndBookSheet> {
           child: TextFormFieldCustom(
             controller: _bloc?.packageWeightController,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            hint: isSpanish ? 'Peso (kg)' : 'Weight (kg)',
+            hint: languages.packageWeightHint,
             setError: true,
-            validator: (v) => validateEmptyField(v, isSpanish ? 'Ingresa el peso en kg' : 'Enter weight in kg'),
+            validator: (v) => validateEmptyField(v, languages.enterPackageWeight),
           ),
         ),
         Padding(
@@ -636,9 +636,9 @@ class _OfferFareAndBookSheetState extends State<OfferFareAndBookSheet> {
                 child: TextFormFieldCustom(
                   controller: _bloc?.packageHeightController,
                   keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                  hint: isSpanish ? 'Alto (cm)' : 'Height (cm)',
+                  hint: languages.packageHeightHint,
                   setError: true,
-                  validator: (v) => validateEmptyField(v, isSpanish ? 'Alto (cm)' : 'Height (cm)'),
+                  validator: (v) => validateEmptyField(v, languages.packageHeightHint),
                 ),
               ),
               SizedBox(width: 10.w),
@@ -646,9 +646,9 @@ class _OfferFareAndBookSheetState extends State<OfferFareAndBookSheet> {
                 child: TextFormFieldCustom(
                   controller: _bloc?.packageWidthController,
                   keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                  hint: isSpanish ? 'Ancho (cm)' : 'Width (cm)',
+                  hint: languages.packageWidthHint,
                   setError: true,
-                  validator: (v) => validateEmptyField(v, isSpanish ? 'Ancho (cm)' : 'Width (cm)'),
+                  validator: (v) => validateEmptyField(v, languages.packageWidthHint),
                 ),
               ),
               SizedBox(width: 10.w),
@@ -656,9 +656,9 @@ class _OfferFareAndBookSheetState extends State<OfferFareAndBookSheet> {
                 child: TextFormFieldCustom(
                   controller: _bloc?.packageLengthController,
                   keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                  hint: isSpanish ? 'Largo (cm)' : 'Length (cm)',
+                  hint: languages.packageLengthHint,
                   setError: true,
-                  validator: (v) => validateEmptyField(v, isSpanish ? 'Largo (cm)' : 'Length (cm)'),
+                  validator: (v) => validateEmptyField(v, languages.packageLengthHint),
                 ),
               ),
             ],

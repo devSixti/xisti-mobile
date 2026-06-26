@@ -1,48 +1,44 @@
 import 'app_mobile_settings.dart';
 import '../hive/hive_helper.dart';
+import '../main.dart';
 
-/// Spanish API messages aligned with XISTI Admin `resources/lang/es/user_messages.php`.
-String? spanishApiMessageForCode(int code) {
+/// Maps API message codes to localized strings from ARB.
+String? localizedApiMessageForCode(int code) {
   switch (code) {
     case 1:
-      return 'Éxito';
+      return languages.success;
     case 2:
-      return 'Verificación de correo o número de teléfono pendiente';
+      return languages.verificationPending;
     case 3:
-      return 'Tu cuenta está bloqueada y no tienes acceso a la aplicación';
-    case 4:
-      return 'Tu sesión expiró. Por favor inicia sesión de nuevo';
+      return languages.driverBlock;
     case 401:
-      return 'No pudimos verificar la aplicación. Actualiza XISTI desde la tienda o reinstala la app.';
-    case 5:
-      return 'Usuario no encontrado';
-    case 9:
-      return 'Por favor inténtalo de nuevo';
-    case 11:
-      return 'El correo electrónico ya está registrado';
-    case 12:
-      return 'El número de teléfono ya está registrado';
-    case 371:
-      return 'La placa debe tener 3 letras y 3 números (ej. ABC123). En moto: ABC12D o ABC123';
+      return languages.newUpdateMsg;
     case 385:
-      return 'El teléfono debe tener exactamente 10 dígitos numéricos';
+      return languages.invalidMobileNumberCo;
     case 387:
-      return 'El número de documento debe tener entre 6 y 10 dígitos';
+      return languages.invalidNationalId;
+    case 371:
+      return languages.invalidVehiclePlate;
     case 388:
       final step = getFareNegotiationStepFromSettings().toInt();
-      return 'La tarifa debe avanzar de a $step en $step (moneda local)';
+      return languages.offerFareMin('$step');
     case 389:
-      return 'Ingresa el peso del paquete en kilogramos.';
+      return languages.enterParcelNote;
     case 390:
-      return 'Ingresa las dimensiones del paquete (alto, ancho y largo en cm).';
+      return languages.enterParcelNote;
     case 391:
-      return 'Ingresa el nombre del destinatario.';
+      return languages.enterRecipientName;
     case 392:
-      return 'Ingresa la descripción del paquete.';
+      return languages.enterParcelNote;
+    case 9:
+      return languages.genericErrorTryAgain;
     default:
       return null;
   }
 }
+
+@Deprecated('Use localizedApiMessageForCode')
+String? spanishApiMessageForCode(int code) => localizedApiMessageForCode(code);
 
 bool _prefersSpanishApiMessages() {
   try {
@@ -65,12 +61,12 @@ bool _looksLikeUntranslatedEnglish(String text) {
   return RegExp(r'\b(the|field|required|must|when|package|please)\b').hasMatch(lower);
 }
 
-/// Maps common Laravel validation strings (English) to Spanish for Colombia users.
-String? _spanishFromKnownEnglishApiMessage(String? message) {
+/// Maps common Laravel validation strings (English) to localized messages.
+String? _localizedFromKnownEnglishApiMessage(String? message) {
   if (message == null || message.trim().isEmpty) return null;
   final m = message.toLowerCase();
   if (m.contains('package weight') || m.contains('package_weight_kg') || m.contains('peso del paquete')) {
-    return spanishApiMessageForCode(389);
+    return localizedApiMessageForCode(389);
   }
   if (m.contains('package height') ||
       m.contains('package width') ||
@@ -79,40 +75,40 @@ String? _spanishFromKnownEnglishApiMessage(String? message) {
       m.contains('package_width') ||
       m.contains('package_length') ||
       m.contains('dimensiones del paquete')) {
-    return spanishApiMessageForCode(390);
+    return localizedApiMessageForCode(390);
   }
   if (m.contains('recipient name') || m.contains('recipient_name') || m.contains('nombre del destinatario')) {
-    return spanishApiMessageForCode(391);
+    return localizedApiMessageForCode(391);
   }
   if (m.contains('item description') || m.contains('item_description') || m.contains('descripción del paquete')) {
-    return spanishApiMessageForCode(392);
+    return localizedApiMessageForCode(392);
   }
   if (m.contains('phone number must be exactly 10') ||
       m.contains('recipient contact') ||
       m.contains('teléfono debe tener exactamente 10')) {
-    return spanishApiMessageForCode(385);
+    return localizedApiMessageForCode(385);
   }
   if (m.contains('document number must be between')) {
-    return spanishApiMessageForCode(387);
+    return localizedApiMessageForCode(387);
   }
   if (m.contains('fare must change in steps')) {
-    return spanishApiMessageForCode(388);
+    return localizedApiMessageForCode(388);
   }
   return null;
 }
 
-/// Prefer Spanish by message_code and known English patterns; fallback to API text or generic error.
+/// Prefer localized messages by message_code and known English patterns; fallback to API text or generic error.
 String resolveApiMessage({String? message, int? messageCode}) {
   final isSpanish = _prefersSpanishApiMessages();
 
   if (isSpanish) {
-    final fromEnglish = _spanishFromKnownEnglishApiMessage(message);
+    final fromEnglish = _localizedFromKnownEnglishApiMessage(message);
     if (fromEnglish != null && fromEnglish.isNotEmpty) {
       return fromEnglish;
     }
 
     if (messageCode != null && messageCode > 0 && messageCode != 9) {
-      final byCode = spanishApiMessageForCode(messageCode);
+      final byCode = localizedApiMessageForCode(messageCode);
       if (byCode != null && byCode.isNotEmpty) {
         return byCode;
       }
@@ -124,16 +120,16 @@ String resolveApiMessage({String? message, int? messageCode}) {
         return text;
       }
       if (_looksLikeUntranslatedEnglish(text)) {
-        return spanishApiMessageForCode(9) ?? 'Ocurrió un error. Inténtalo de nuevo.';
+        return localizedApiMessageForCode(9) ?? languages.genericErrorTryAgain;
       }
       return text;
     }
 
-    return spanishApiMessageForCode(messageCode ?? 9) ?? 'Ocurrió un error. Inténtalo de nuevo.';
+    return localizedApiMessageForCode(messageCode ?? 9) ?? languages.genericErrorTryAgain;
   }
 
   if (messageCode != null && messageCode > 0) {
-    final byCode = spanishApiMessageForCode(messageCode);
+    final byCode = localizedApiMessageForCode(messageCode);
     if (byCode != null && byCode.isNotEmpty) {
       return byCode;
     }
@@ -143,5 +139,5 @@ String resolveApiMessage({String? message, int? messageCode}) {
   if (text.isNotEmpty && text.toLowerCase() != 'null') {
     return text;
   }
-  return 'Something went wrong. Please try again.';
+  return languages.genericErrorTryAgain;
 }

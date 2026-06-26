@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../main.dart';
 import '../../utils/utils.dart';
 import 'country_code.dart';
 
@@ -169,7 +170,7 @@ class _SelectionDialogState extends State<SelectionDialog> {
       return widget.emptySearchBuilder!(context);
     }
 
-    return const Center(child: Text('No country found'));
+    return Center(child: Text(languages.noCountryFound));
   }
 
   @override

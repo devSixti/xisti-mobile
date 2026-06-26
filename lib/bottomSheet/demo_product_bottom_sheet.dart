@@ -4,6 +4,7 @@ import 'package:app_xisti/commonView/scaffold_with_safe_area.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../commonView/custom_rounded_button.dart';
+import '../main.dart';
 import '../utils/utils.dart';
 
 class ProductBottomSheet extends StatefulWidget {
@@ -52,21 +53,21 @@ class _ProductBottomSheetState extends State<ProductBottomSheet> {
                   Image.asset('assets/images/xisti/logo.png', height: 120.h, fit: BoxFit.contain),
                   SizedBox(height: 20.h),
                   Text(
-                    'Fácil y Seguro — movilidad urbana con negociación de tarifa y wallet prepago.',
+                    languages.demoProductSubtitle,
                     textAlign: TextAlign.start,
                     style: bodyText(context: context, fontSize: textSize18px, fontWeight: FontWeight.w600),
                   ),
                   SizedBox(height: 15.h),
                   Text(
-                    'Solicita viajes, propón tu tarifa y conéctate con conductores verificados en Medellín.',
+                    languages.demoProductBody,
                     textAlign: TextAlign.start,
                     style: bodyText(context: context, fontSize: textSize14px),
                   ),
                   SizedBox(height: 30.h),
-                  CustomRoundedButton(context, 'Continuar', () => Navigator.pop(context)),
+                  CustomRoundedButton(context, languages.continueTxt, () => Navigator.pop(context)),
                   CustomRoundedButton(
                     context,
-                    'Soporte XISTI',
+                    languages.demoProductSupport,
                     () {
                       openUrl('mailto:soporte@xistiapp.com', launchMode: LaunchMode.externalApplication);
                     },

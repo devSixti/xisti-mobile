@@ -11,6 +11,7 @@ import '../../../commonView/custom_text_field.dart';
 import '../../../commonView/no_record_found.dart';
 import '../../../commonView/xisti_vehicle_image.dart';
 import '../../../constant/constant.dart';
+import '../../../main.dart';
 import '../../../utils/utils.dart';
 import '../../../utils/xisti_vehicle_catalog.dart';
 import '../../../utils/validator.dart';
@@ -162,7 +163,7 @@ class _DriverVehicleDetailsScreenState extends State<DriverVehicleDetailsScreen>
         Row(
           children: [
             familyChip(
-              label: 'Moto',
+              label: languages.vehicleMoto,
               iconVariant: XistiVehicleCatalog.motoMedio,
               active: isMoto,
               onTap: () {
@@ -171,7 +172,7 @@ class _DriverVehicleDetailsScreenState extends State<DriverVehicleDetailsScreen>
               },
             ),
             familyChip(
-              label: 'Carro',
+              label: languages.vehicleCarro,
               iconVariant: XistiVehicleCatalog.carroEco,
               active: isCar,
               onTap: () {
@@ -255,7 +256,7 @@ class _DriverVehicleDetailsScreenState extends State<DriverVehicleDetailsScreen>
                   controller: _bloc?.technicalInspectionExpiryTEC,
                   readOnly: true,
                   onTap: () => _bloc?.selectTechnicalInspectionExpiry(),
-                  hint: 'Tecnomecánica – vencimiento (opcional)',
+                  hint: languages.tecnomecanicaExpiryOptional,
                   commonPrefixIcon: CustomIcons.modelYear,
                 ),
               );
@@ -437,7 +438,7 @@ class _DriverVehicleDetailsScreenState extends State<DriverVehicleDetailsScreen>
                       children: [
                         Expanded(
                           child: Text(
-                            '¿También desea transportar pasajeros?',
+                            languages.alsoTransportPassengers,
                             style: bodyText(context: context, fontWeight: FontWeight.w600),
                           ),
                         ),
@@ -451,8 +452,8 @@ class _DriverVehicleDetailsScreenState extends State<DriverVehicleDetailsScreen>
                   SizedBox(height: 6.h),
                   Text(
                     service?.isDeliveryOnlyService == true
-                        ? 'Recibirás solicitudes de envío para el medio que seleccionaste arriba.'
-                        : 'Los envíos llegan según el vehículo que registres. Active esto solo si también ofrece transporte de personas.',
+                        ? languages.deliveryOnlyServiceHint
+                        : languages.passengerTransportToggleHint,
                     style: bodyText(context: context, fontSize: textSize12px, textColor: getCurrentTheme(context).colorTextLight),
                   ),
                 ],

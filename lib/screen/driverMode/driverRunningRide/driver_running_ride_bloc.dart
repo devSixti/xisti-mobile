@@ -107,8 +107,8 @@ class DriverRunningRideBloc extends Bloc {
           openSimpleSnackbar(
             context,
             offlineService.isSnapshotStale
-                ? 'Sin señal — mostrando última ubicación conocida.'
-                : 'Viaje en caché — reconectando cuando haya señal.',
+                ? languages.offlineShowingLastKnownLocation
+                : languages.rideCachedReconnecting,
           );
         }
         return;
@@ -207,7 +207,7 @@ class DriverRunningRideBloc extends Bloc {
         tollCount: (apiRideStatus == DriverRideStatus.driverDrop && isTollCharge == 2) ? toll : 0,
       );
       if (context.mounted) {
-        openSimpleSnackbar(context, 'Sin señal: acción guardada. Se enviará al reconectar.');
+        openSimpleSnackbar(context, languages.driverOfflineActionSaved);
       }
       return;
     }

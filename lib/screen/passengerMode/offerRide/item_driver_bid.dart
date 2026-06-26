@@ -60,7 +60,7 @@ class ItemDriverBidView extends StatelessWidget {
                     color: getCurrentTheme(context).colorPrimary.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(8.r),
                   ),
-                  child: Text('Taxi', style: bodyText(context: context, fontSize: textSize12px, fontWeight: FontWeight.w700)),
+                  child: Text(languages.taxiLabel, style: bodyText(context: context, fontSize: textSize12px, fontWeight: FontWeight.w700)),
                 ),
             ],
           ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../constant/constant.dart';
+import '../main.dart';
 import '../utils/service_mode_util.dart';
 import '../utils/utils.dart';
 import '../utils/xisti_vehicle_catalog.dart';
@@ -41,7 +42,7 @@ class RideRequestTypeChip extends StatelessWidget {
         if (showTaxi)
           _chip(
             context,
-            label: 'Taxi',
+            label: languages.taxiYellowTag,
             icon: Icons.local_taxi_outlined,
             accent: const Color(0xFFF9A825),
           ),
@@ -51,10 +52,10 @@ class RideRequestTypeChip extends StatelessWidget {
 
   (String, IconData, Color)? _resolveLabel() {
     if (isEncomienda == 1 || serviceMode == ServiceModeKind.encomiendas) {
-      return ('Envío', Icons.local_shipping_outlined, const Color(0xFF00838F));
+      return (languages.chipErrand, Icons.local_shipping_outlined, const Color(0xFF00838F));
     }
     if (serviceMode == ServiceModeKind.expreso) {
-      return ('Expreso', Icons.bolt_outlined, const Color(0xFF6A1B9A));
+      return (languages.chipShare, Icons.bolt_outlined, const Color(0xFF6A1B9A));
     }
     if (ServiceModeKind.isDeliveryRideRequest(
       serviceId: serviceId,
@@ -79,7 +80,7 @@ class RideRequestTypeChip extends StatelessWidget {
       case ServiceType.bike:
         return (transportLabel, Icons.two_wheeler_outlined, const Color(0xFF2E7D32));
       case ServiceType.courier:
-        return ('Bicicleta', Icons.pedal_bike_outlined, const Color(0xFFE65100));
+        return (languages.vehicleBicicleta, Icons.pedal_bike_outlined, const Color(0xFFE65100));
       default:
         if (serviceMode == ServiceModeKind.transport) {
           return (transportLabel, CustomIcons.car, const Color(0xFF2E7D32));

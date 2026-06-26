@@ -273,7 +273,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return TextFormFieldCustom(
       controller: _bloc?.emergencyContactNameTEC,
       setError: true,
-      hint: 'Nombre del contacto de emergencia',
+      hint: languages.emergencyContactName,
       prefix: Padding(
         padding: EdgeInsetsDirectional.only(start: 15.w, end: 10.w),
         child: Icon(Icons.person_outline, color: getCurrentTheme(context).colorIconCommon, size: 24.sp),

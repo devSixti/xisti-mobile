@@ -93,7 +93,7 @@ class _OtpVerifyScreenState extends State<OtpVerifyScreen> {
                   StreamBuilder<String>(
                     stream: _bloc?.otpDeliveryChannelSubject,
                     builder: (context, channelSnap) {
-                      if (channelSnap.data != 'whatsapp') {
+                      if (channelSnap.data == 'whatsapp') {
                         return const SizedBox.shrink();
                       }
                       return Padding(

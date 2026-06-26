@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../main.dart';
 import '../../../utils/service_mode_util.dart';
 import '../../../utils/utils.dart';
 import '../../../utils/xisti_ui_tokens.dart';
@@ -25,8 +26,8 @@ class PassengerHomeServiceChipsBar extends StatelessWidget {
     final visible = groups.isNotEmpty
         ? groups
         : [
-            ServiceModeGroup(mode: ServiceModeKind.transport, label: 'Viajes', displayOrder: 1, services: []),
-            ServiceModeGroup(mode: ServiceModeKind.delivery, label: 'Envío', displayOrder: 2, services: []),
+            ServiceModeGroup(mode: ServiceModeKind.transport, label: languages.serviceModeTrips, displayOrder: 1, services: []),
+            ServiceModeGroup(mode: ServiceModeKind.delivery, label: languages.serviceModeDelivery, displayOrder: 2, services: []),
           ];
 
     return SizedBox(

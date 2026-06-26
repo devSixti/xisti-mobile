@@ -233,6 +233,7 @@ class ApiParam {
   static const paramLoginId = 'login_id';
   static const paramProfileImage = 'profile_image';
   static const paramOtp = 'otp';
+  static const paramChannel = 'channel';
   static const paramUniqueId = 'unique_id';
   static const paramWayPointStatus = "way_point_status";
   static const paramTollCharge = "toll_charge";

@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../commonView/custom_text_field.dart';
+import '../../../main.dart';
 import '../../../utils/utils.dart';
 
 /// Campos rápidos en home para modo Encomiendas (compra + tope antes de ofertar tarifa).
@@ -29,7 +30,7 @@ class EncomiendaQuickFields extends StatelessWidget {
         children: [
           TextFormFieldCustom(
             controller: purchaseDescriptionController,
-            hint: '¿Qué quieres que compren?',
+            hint: languages.whatToBuyHint,
             maxLine: 2,
             minLine: 1,
             setError: false,
@@ -41,7 +42,7 @@ class EncomiendaQuickFields extends StatelessWidget {
           SizedBox(height: 10.h),
           TextFormFieldCustom(
             controller: priceCapController,
-            hint: 'Tope de precio (COP)',
+            hint: languages.priceCapHint,
             keyboardType: TextInputType.number,
             inputFormatters: [FilteringTextInputFormatter.digitsOnly],
             setError: false,

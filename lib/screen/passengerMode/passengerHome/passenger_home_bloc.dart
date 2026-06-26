@@ -15,6 +15,7 @@ import '../../../bottomSheet/warning_bottom_sheet.dart';
 import '../../../commonView/common_view.dart';
 import '../../../commonView/custom_marker.dart';
 import '../../../hive/hive_helper.dart';
+import '../../../main.dart';
 import '../../../networking/base_dl.dart';
 import '../../../utils/app_mobile_settings.dart';
 import '../../../utils/destination_payment_util.dart';
@@ -641,22 +642,22 @@ class PassengerHomeBloc extends Bloc {
     }
     if (isEncomiendasMode) {
       if (purchaseDescriptionTEC.text.trim().isEmpty) {
-        openSimpleSnackbar(context, 'Indica qué quieres que compren');
+        openSimpleSnackbar(context, languages.indicateWhatToBuy);
         return;
       }
       if (priceCapTEC.text.trim().isEmpty) {
-        openSimpleSnackbar(context, 'Indica el tope de precio');
+        openSimpleSnackbar(context, languages.indicatePriceCap);
         return;
       }
       itemDescController.sink.add(purchaseDescriptionTEC.text.trim());
       itemEstimatedPriceController.sink.add(priceCapTEC.text.trim());
     }
     if ((fromAddressController.valueOrNull?.name ?? "").isEmpty) {
-      openSimpleSnackbar(context, isEncomiendasMode ? 'Selecciona dónde comprar' : languages.selectPickup);
+      openSimpleSnackbar(context, isEncomiendasMode ? languages.selectWhereToBuy : languages.selectPickup);
       return;
     }
     if ((toAddressController.valueOrNull?.name ?? "").isEmpty) {
-      openSimpleSnackbar(context, isEncomiendasMode ? 'Selecciona dónde entregar' : languages.selectDrop);
+      openSimpleSnackbar(context, isEncomiendasMode ? languages.selectWhereToDeliver : languages.selectDrop);
       return;
     }
     showModalBottomSheet(
@@ -952,7 +953,7 @@ class PassengerHomeBloc extends Bloc {
             rideStatus: response.rideStatus ?? 0,
             serviceId: firstDetail?.serviceId,
             title: statusLabel,
-            subtitle: lastAddress ?? 'Viaje en curso',
+            subtitle: lastAddress ?? languages.running,
           ),
         );
         return;
@@ -970,7 +971,7 @@ class PassengerHomeBloc extends Bloc {
             destinationName: dest,
             destinationLat: getDoubleFromDynamic(entry['destination_lat']),
             destinationLng: getDoubleFromDynamic(entry['destination_long']),
-            serviceLabel: entry['is_delivery'] == 1 ? 'envío' : 'viaje',
+            serviceLabel: entry['is_delivery'] == 1 ? languages.chipDelivery : languages.chipRide,
           ),
         );
         return;
@@ -982,16 +983,16 @@ class PassengerHomeBloc extends Bloc {
   String _activityStatusLabel(int rideStatus) {
     switch (rideStatus) {
       case 0:
-        return 'Buscando conductor';
+        return languages.findDrive;
       case 1:
       case 2:
-        return 'Viaje confirmado';
+        return languages.accepted;
       case 3:
-        return 'Conductor en camino';
+        return languages.yourDriverIsOnWay;
       case 5:
-        return 'Viaje en curso';
+        return languages.running;
       default:
-        return 'Actividad activa';
+        return languages.pending;
     }
   }
 

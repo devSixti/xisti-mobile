@@ -103,21 +103,23 @@ class OtpVerifyBloc extends Bloc {
     }
   }
 
-  Future<void> resendOtp(BuildContext bottomSheetContext) async {
+  Future<void> resendOtp(BuildContext bottomSheetContext, {String channel = 'sms'}) async {
     if (await isNetworkConnected(
       onRetryPressedCallApi: () {
-        resendOtp(bottomSheetContext);
+        resendOtp(bottomSheetContext, channel: channel);
       },
     )) {
       subjectResend.sink.add(ApiResponse.loading());
       try {
-        var response = BaseModel.fromJson(await _otpVerifyRepo.callResendOtpApi());
+        var response = BaseModel.fromJson(await _otpVerifyRepo.callResendOtpApi(channel: channel));
 
         String message = getApiMsg(response.message);
         if (!context.mounted) return;
         if (isApiStatus(context, response.status, message, true)) {
           subjectResend.sink.add(ApiResponse.completed(response));
-          if (response.otpDeliveryChannel == 'whatsapp') {
+          final deliveredViaWhatsapp =
+              channel == 'whatsapp' || response.otpDeliveryChannel == 'whatsapp';
+          if (deliveredViaWhatsapp) {
             putDataInSettingBox(hiveOtpDeliveryChannel, 'whatsapp');
             otpDeliveryChannelSubject.add('whatsapp');
             openSimpleSnackbar(context, languages.resendOtpWhatsappSuccessMsg);

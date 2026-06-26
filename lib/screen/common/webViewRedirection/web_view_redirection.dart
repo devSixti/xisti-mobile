@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
 import '../../../commonView/common_view.dart';
+import '../../../main.dart';
 import '../../../utils/utils.dart';
 
 class WebViewRedirectionScreen extends StatefulWidget {
@@ -87,7 +88,7 @@ class _WebViewRedirectionScreenState extends State<WebViewRedirectionScreen> {
           width: double.infinity,
           child: ElevatedButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Volver al comercio'),
+            child: Text(languages.backToShop),
           ),
         ),
       ),
