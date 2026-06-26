@@ -189,16 +189,23 @@ class ServiceModeKind {
   }
 
   static String _defaultLabel(String mode) {
+    String localized(String Function() getter, String fallback) {
+      try {
+        return getter();
+      } catch (_) {
+        return fallback;
+      }
+    }
     switch (mode) {
       case delivery:
-        return languages.serviceModeDelivery;
+        return localized(() => languages.serviceModeDelivery, 'Envío');
       case expreso:
-        return languages.serviceModeShare;
+        return localized(() => languages.serviceModeShare, 'Expreso');
       case encomiendas:
-        return languages.serviceModeErrand;
+        return localized(() => languages.serviceModeErrand, 'Encomiendas');
       case transport:
       default:
-        return languages.serviceModeTrips;
+        return localized(() => languages.serviceModeTrips, 'Viajes');
     }
   }
 
