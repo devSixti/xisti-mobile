@@ -18,7 +18,8 @@ env:
   FLUTTER_VERSION: "3.41.2"
   GRADLE_OPTS: "-Dorg.gradle.daemon=false -Dorg.gradle.caching=false -Dorg.gradle.parallel=false"
   API_DOMAIN: "https://admin.xistiapp.com"
-  DART_DEFINES: "--dart-define=API_DOMAIN=https://admin.xistiapp.com --dart-define=DEMO_APP=true"
+  DART_DEFINES_RELEASE: "--dart-define=API_DOMAIN=https://admin.xistiapp.com"
+  DART_DEFINES_QA: "--dart-define=API_DOMAIN=https://admin.xistiapp.com --dart-define=DEMO_APP=true"
 
 jobs:
   quality:
@@ -90,7 +91,7 @@ jobs:
           QA_APP_KEY: ${{ secrets.QA_APP_KEY }}
         run: |
           set -euo pipefail
-          DEFINES="${{ env.DART_DEFINES }}"
+          DEFINES="${{ env.DART_DEFINES_QA }}"
           if [ -n "${XISTI_APP_KEY:-}" ]; then
             DEFINES="${DEFINES} --dart-define=XISTI_APP_KEY=${XISTI_APP_KEY}"
           elif [ -n "${QA_APP_KEY:-}" ]; then
@@ -212,7 +213,7 @@ jobs:
           QA_APP_KEY: ${{ secrets.QA_APP_KEY }}
         run: |
           set -euo pipefail
-          DEFINES="${{ env.DART_DEFINES }}"
+          DEFINES="${{ env.DART_DEFINES_RELEASE }}"
           if [ -n "${XISTI_APP_KEY:-}" ]; then
             DEFINES="${DEFINES} --dart-define=XISTI_APP_KEY=${XISTI_APP_KEY}"
           elif [ -n "${QA_APP_KEY:-}" ]; then
@@ -312,7 +313,7 @@ jobs:
           QA_APP_KEY: ${{ secrets.QA_APP_KEY }}
         run: |
           set -euo pipefail
-          DEFINES="${{ env.DART_DEFINES }}"
+          DEFINES="${{ env.DART_DEFINES_RELEASE }}"
           if [ -n "${XISTI_APP_KEY:-}" ]; then
             DEFINES="${DEFINES} --dart-define=XISTI_APP_KEY=${XISTI_APP_KEY}"
           elif [ -n "${QA_APP_KEY:-}" ]; then

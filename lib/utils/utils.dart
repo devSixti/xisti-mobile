@@ -344,7 +344,7 @@ Future<void> setDataInHive(LoginPojo body) async {
   putDataInUserInfoBox(hiveCountryCode, dialCode);
   putDataInUserInfoBox(
     hiveContactNumber,
-    normalizeColombiaLocalMobile(body.contactNumber ?? '', dialCode: dialCode),
+    normalizeLocalMobile(body.contactNumber ?? '', dialCode: dialCode),
   );
   if ((body.selectCurrency ?? "").isNotEmpty) {
     putDataInUserInfoBox(hiveSelectedCurrency, body.selectCurrency ?? defaultCurrency);

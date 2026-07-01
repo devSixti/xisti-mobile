@@ -25,7 +25,7 @@ class SignUpBloc extends Bloc {
 
   SignUpBloc(this.context) {
     final dialCode = normalizeDialCode(getStringFromUserInfoBox(hiveCountryCode));
-    final localMobile = normalizeColombiaLocalMobile(
+    final localMobile = normalizeLocalMobile(
       getStringFromUserInfoBox(hiveContactNumber),
       dialCode: dialCode,
     );
@@ -142,7 +142,7 @@ class SignUpBloc extends Bloc {
 
   Future<void> sendPhoneOtpAndOpenVerify() async {
     final dialCode = normalizeDialCode(countryCodeController.valueOrNull?.dialCode);
-    final localMobile = normalizeColombiaLocalMobile(mobileController.text.trim(), dialCode: dialCode);
+    final localMobile = normalizeLocalMobile(mobileController.text.trim(), dialCode: dialCode);
 
     if (await isNetworkConnected(onRetryPressedCallApi: () => sendPhoneOtpAndOpenVerify())) {
       subject.sink.add(ApiResponse.loading());
@@ -174,8 +174,8 @@ class SignUpBloc extends Bloc {
       return true;
     }
     final dialCode = normalizeDialCode(countryCodeController.valueOrNull?.dialCode);
-    final localMobile = normalizeColombiaLocalMobile(mobileController.text.trim(), dialCode: dialCode);
-    final storedMobile = normalizeColombiaLocalMobile(
+    final localMobile = normalizeLocalMobile(mobileController.text.trim(), dialCode: dialCode);
+    final storedMobile = normalizeLocalMobile(
       getStringFromUserInfoBox(hiveContactNumber),
       dialCode: dialCode,
     );
@@ -200,7 +200,8 @@ class SignUpBloc extends Bloc {
 
   void buttonHide() {
     String fullName = registerFullNameValidate(fullNameController.text, languages.enterValidFullName);
-    String mobile = colombiaMobileNumberValidate(mobileController.text);
+    final dialCode = normalizeDialCode(countryCodeController.valueOrNull?.dialCode);
+    String mobile = mobileNumberValidateForDialCode(mobileController.text, dialCode: dialCode);
     String email = emailValidate(emailController.text);
 
     if (fullName.isEmpty && mobile.isEmpty && email.isEmpty &&

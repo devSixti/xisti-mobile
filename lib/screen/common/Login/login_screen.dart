@@ -113,7 +113,10 @@ class _LoginScreenState extends State<LoginScreen> {
                   textAlignVertical: TextAlignVertical.center,
                   validator: (value) {
                     _bloc?.buttonHide();
-                    return colombiaMobileNumberValidate(value);
+                    return colombiaMobileNumberValidate(
+                      value,
+                      dialCode: _bloc?.countryCodeController.valueOrNull?.dialCode,
+                    );
                   },
                 ),
               ),

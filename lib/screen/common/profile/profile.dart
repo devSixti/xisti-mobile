@@ -264,7 +264,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
       textAlignVertical: TextAlignVertical.center,
       validator: (value) {
         _bloc?.buttonHide();
-        return colombiaMobileNumberValidate(value);
+        return colombiaMobileNumberValidate(
+          value,
+          dialCode: _bloc?.contactCountryCodeController.valueOrNull?.dialCode,
+        );
       },
     );
   }

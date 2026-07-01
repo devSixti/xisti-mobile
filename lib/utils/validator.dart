@@ -43,15 +43,25 @@ String mobileNumberValidate(String value) {
   return "";
 }
 
-String colombiaMobileNumberValidate(String value) {
+String mobileNumberValidateForDialCode(String value, {String? dialCode}) {
   if (value.trim().isEmpty) {
     return languages.enterContactNumber;
   }
-  final digits = normalizeColombiaLocalMobile(value);
-  if (digits.length != 10) {
+  final digits = normalizeLocalMobile(value, dialCode: dialCode);
+  if (isColombiaDialCode(dialCode)) {
+    if (digits.length != 10) {
+      return languages.invalidMobileNumberCo;
+    }
+    return "";
+  }
+  if (digits.length < 6 || digits.length > 15) {
     return languages.invalidMobileNumberCo;
   }
   return "";
+}
+
+String colombiaMobileNumberValidate(String value, {String? dialCode}) {
+  return mobileNumberValidateForDialCode(value, dialCode: dialCode ?? '+57');
 }
 
 String _normalizePlate(String value) {

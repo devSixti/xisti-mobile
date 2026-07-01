@@ -77,7 +77,8 @@ class ProfileBloc extends Bloc {
   void buttonHide() {
     String fullName = fullNameValidate(fullNameTEC.text);
     String email = emailValidate(emailTEC.text);
-    String mobile = colombiaMobileNumberValidate(contactNoTEC.text);
+    final contactDial = normalizeDialCode(contactCountryCodeController.valueOrNull?.dialCode ?? defaultCountryCode.dialCode);
+    String mobile = mobileNumberValidateForDialCode(contactNoTEC.text, dialCode: contactDial);
 
     if (fullName.isEmpty && email.isEmpty && mobile.isEmpty) {
       submitValidController.add(true);
@@ -168,11 +169,11 @@ class ProfileBloc extends Bloc {
           await _repo.editProfileApi(
             fullNameTEC.text.trim(),
             contactDial,
-            normalizeColombiaLocalMobile(contactNoTEC.text.trim(), dialCode: contactDial),
+            normalizeLocalMobile(contactNoTEC.text.trim(), dialCode: contactDial),
             emailTEC.text.trim(),
             emergencyContactNoTEC.text.trim().isEmpty
                 ? ""
-                : normalizeColombiaLocalMobile(emergencyContactNoTEC.text.trim(), dialCode: emergencyDial),
+                : normalizeLocalMobile(emergencyContactNoTEC.text.trim(), dialCode: emergencyDial),
             emergencyContactNameTEC.text.trim(),
             emergencyDial,
             multipartFile,

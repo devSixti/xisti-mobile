@@ -7,6 +7,7 @@ import '../../../commonView/common_view.dart';
 import '../../../commonView/custom_rounded_button.dart';
 import '../../../hive/hive_helper.dart';
 import '../../../networking/api_response.dart';
+import '../../../utils/qa_review_util.dart';
 import '../../../utils/utils.dart';
 import '../../../utils/xisti_ui_tokens.dart';
 import '../Login/login_dl.dart';
@@ -28,9 +29,12 @@ class _OtpVerifyScreenState extends State<OtpVerifyScreen> {
   @override
   void didChangeDependencies() {
     _bloc ??= OtpVerifyBloc(context);
-    if (isDemoApp) {
-      _bloc?.otpController.add("123456");
-      _bloc?.pinInputController.text = "123456";
+    if (isQaReviewPhone()) {
+      _bloc?.otpController.add(kQaReviewFixedOtp);
+      _bloc?.pinInputController.text = kQaReviewFixedOtp;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _bloc?.verify();
+      });
     }
     super.didChangeDependencies();
   }

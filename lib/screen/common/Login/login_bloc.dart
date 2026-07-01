@@ -65,7 +65,8 @@ class LoginBloc extends Bloc {
   }
 
   void buttonHide() {
-    String mobile = colombiaMobileNumberValidate(mobileController.text);
+    final dialCode = normalizeDialCode(countryCodeController.valueOrNull?.dialCode);
+    String mobile = mobileNumberValidateForDialCode(mobileController.text, dialCode: dialCode);
 
     if (mobile.isEmpty) {
       submitValid.add(true);
@@ -78,7 +79,7 @@ class LoginBloc extends Bloc {
     FocusManager.instance.primaryFocus?.unfocus();
     if (formKey.currentState!.validate()) {
       final dialCode = normalizeDialCode(countryCodeController.valueOrNull?.dialCode);
-      final localMobile = normalizeColombiaLocalMobile(mobileController.text.trim(), dialCode: dialCode);
+      final localMobile = normalizeLocalMobile(mobileController.text.trim(), dialCode: dialCode);
       loginApiCall(loginType: LoginType.email, phoneNum: localMobile, countryCode: dialCode);
     }
   }

@@ -150,7 +150,10 @@ class _SignupScreenState extends State<SignupScreen> {
                                 return '';
                               }
                               _bloc?.buttonHide();
-                              return colombiaMobileNumberValidate(value);
+                              return colombiaMobileNumberValidate(
+                                value,
+                                dialCode: _bloc?.countryCodeController.valueOrNull?.dialCode,
+                              );
                             },
                             prefix: (_bloc?.isPhoneEditable ?? false)
                                 ? CustomCountryCodePicker(
