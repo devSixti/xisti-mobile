@@ -86,6 +86,7 @@ class LoginBloc extends Bloc {
 
   Future<void> login(String loginType, String email, String name, String id) async {
     FocusManager.instance.primaryFocus?.unfocus();
+    stashSocialSignupIdentity(loginType: loginType, name: name, email: email, loginId: id);
     loginApiCall(phoneNum: email, loginType: loginType, name: name, loginId: id);
   }
 

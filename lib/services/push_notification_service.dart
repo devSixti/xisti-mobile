@@ -24,6 +24,7 @@ import '../screen/driverMode/driverRunningRide/driver_running_ride.dart';
 import '../screen/passengerMode/offerRide/offer_ride_screen.dart';
 import '../screen/passengerMode/passengerRideDetail/passenger_ride_detail.dart';
 import '../screen/passengerMode/passengerRunningRide/passenger_running_ride.dart';
+import 'ride_session_manager.dart';
 import '../utils/alert_feedback_util.dart';
 import '../utils/notification_payload_util.dart';
 import '../utils/utils.dart';
@@ -297,6 +298,7 @@ class PushNotificationService {
         final int userType = int.parse((notificationData[NotificationConstant.userType] ?? 0).toString());
         final int rideType = int.parse((notificationData[NotificationConstant.rideType] ?? 0).toString());
         final int reportId = int.parse((notificationData[NotificationConstant.reportId] ?? 0).toString());
+        RideSessionManager.instance.applyPushNotification(notificationType: notificationType, rideId: rideId);
 
         /// ---------------- NORMAL NOTIFICATION ----------------
         switch (notificationType) {

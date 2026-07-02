@@ -192,6 +192,8 @@ class RideDetails {
     _serviceDateTime = json['service_date_time'];
     _totalAmount = json['total_amount'];
     _paymentType = json['payment_type'];
+    _destinationPaymentMethod = json['destination_payment_method'];
+    _destinationPaymentLabel = json['destination_payment_label'];
     _rideStatus = json['ride_status'];
     _referDiscount = json['refer_discount'];
     _otp = json['otp'];
@@ -254,6 +256,8 @@ class RideDetails {
   String? _serviceDateTime;
   dynamic _totalAmount;
   int? _paymentType;
+  String? _destinationPaymentMethod;
+  String? _destinationPaymentLabel;
   int? _rideStatus;
   dynamic _referDiscount;
   int? _otp;
@@ -316,6 +320,10 @@ class RideDetails {
   dynamic get totalAmount => _totalAmount ?? "";
 
   int get paymentType => _paymentType ?? 0;
+
+  String get destinationPaymentMethod => _destinationPaymentMethod ?? '';
+
+  String get destinationPaymentLabel => _destinationPaymentLabel ?? '';
 
   int get rideStatus => _rideStatus ?? 0;
 

@@ -331,6 +331,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get liveChat => 'Live Chat';
 
   @override
+  String get liveTrackingBadge => 'Live';
+
+  @override
+  String get estimatedArrival => 'Estimated arrival';
+
+  @override
   String get myPreference => 'My Preferences';
 
   @override
@@ -1164,7 +1170,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get selectExpiryDate => 'Select Expiry Date';
 
   @override
-  String get emptyDocument => 'The document is not required for this service';
+  String get emptyDocument =>
+      'No documents are pending upload. If you think this is an error, contact support.';
 
   @override
   String get document => 'Document';

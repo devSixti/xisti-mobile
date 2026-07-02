@@ -10,6 +10,7 @@ import '../../../hive/hive_helper.dart';
 import '../../../networking/base_dl.dart';
 import '../../../utils/phone_util.dart';
 import '../../../services/session_restore_service.dart';
+import '../../../utils/signup_submit_util.dart';
 import '../../../utils/utils.dart';
 import '../../../utils/validator.dart';
 import '../../passengerMode/passengerHome/passenger_home.dart';
@@ -22,8 +23,14 @@ class SignUpBloc extends Bloc {
   final BuildContext context;
 
   final SignUpRepo _signUpRepo = SignUpRepo();
+  late final VoidCallback _onFieldChanged;
 
   SignUpBloc(this.context) {
+    _onFieldChanged = () => buttonHide();
+    fullNameController.addListener(_onFieldChanged);
+    emailController.addListener(_onFieldChanged);
+    mobileController.addListener(_onFieldChanged);
+    referralCodeController.addListener(_onFieldChanged);
     final dialCode = normalizeDialCode(getStringFromUserInfoBox(hiveCountryCode));
     final localMobile = normalizeLocalMobile(
       getStringFromUserInfoBox(hiveContactNumber),
@@ -68,7 +75,12 @@ class SignUpBloc extends Bloc {
         flagUri: 'assets/flags/${(defaultCountryCode.code ?? 'CO').toLowerCase()}.png',
       ),
     );
+    buttonHide();
   }
+
+  bool get hideNameField => false;
+
+  bool get hideEmailField => false;
 
   final fullNameController = TextEditingController();
   final emailController = TextEditingController();
@@ -89,7 +101,7 @@ class SignUpBloc extends Bloc {
       context,
       FaceVerificationView(
         onVerified: (image, rotation) async {
-          File compressFile = await compressImage(image);
+          File compressFile = await prepareProfileImageFile(image);
           imgFileController.sink.add(compressFile);
           buttonHide();
         },
@@ -199,22 +211,27 @@ class SignUpBloc extends Bloc {
   }
 
   void buttonHide() {
-    String fullName = registerFullNameValidate(fullNameController.text, languages.enterValidFullName);
     final dialCode = normalizeDialCode(countryCodeController.valueOrNull?.dialCode);
-    String mobile = mobileNumberValidateForDialCode(mobileController.text, dialCode: dialCode);
-    String email = emailValidate(emailController.text);
-
-    if (fullName.isEmpty && mobile.isEmpty && email.isEmpty &&
-        (acceptTermsController.hasValue ? acceptTermsController.value : false) &&
-        (acceptPlatformController.hasValue ? acceptPlatformController.value : false)) {
-      submitValid.add(true);
-    } else {
-      submitValid.add(false);
-    }
+    final enabled = isSignupSubmitEnabled(
+      hideNameField: hideNameField,
+      hideEmailField: hideEmailField,
+      isPhoneEditable: isPhoneEditable,
+      nameError: registerFullNameValidate(fullNameController.text, languages.enterValidFullName),
+      mobileError: isPhoneEditable ? mobileNumberValidateForDialCode(mobileController.text, dialCode: dialCode) : '',
+      emailError: emailValidate(emailController.text),
+      hasProfileImage: imgFileController.valueOrNull != null,
+      acceptTerms: acceptTermsController.hasValue && acceptTermsController.value,
+      acceptPlatform: acceptPlatformController.hasValue && acceptPlatformController.value,
+    );
+    submitValid.add(enabled);
   }
 
   @override
   void dispose() {
+    fullNameController.removeListener(_onFieldChanged);
+    emailController.removeListener(_onFieldChanged);
+    mobileController.removeListener(_onFieldChanged);
+    referralCodeController.removeListener(_onFieldChanged);
     countryCodeController.close();
     submitValid.close();
     acceptTermsController.close();

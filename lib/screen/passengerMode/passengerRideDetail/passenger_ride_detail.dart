@@ -16,8 +16,10 @@ import '../../../commonView/ride_detail_item.dart';
 import '../../../commonView/statusView/passenger_ride_status_view.dart';
 import '../../../constant/chat_constant.dart';
 import '../../../networking/base_dl.dart';
+import '../../../utils/destination_payment_util.dart';
 import '../../../utils/file_downloader.dart';
 import '../../../utils/map_style_hot_reload.dart';
+import '../../../utils/display_localizer.dart';
 import '../../../utils/utils.dart';
 import '../../common/chatting/chatting_screen.dart';
 import '../../common/reportIssue/addReportIssue/add_report_issue_screen.dart';
@@ -147,7 +149,7 @@ class _PassengerRideDetailState extends State<PassengerRideDetail> {
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              if ((rideDetail?.rideStatus ?? 0) == passengerPending) cancelBtn(),
+                              if (canPassengerCancelRide(rideDetail?.rideStatus ?? 0)) cancelBtn(),
                               if ((rideDetail?.rideStatus ?? 0) >= passengerDrop) processBtn(),
                             ],
                           ),
@@ -175,7 +177,7 @@ class _PassengerRideDetailState extends State<PassengerRideDetail> {
         SizedBox(height: 5.h),
         if ((rideDetail?.cancelBy ?? "").isNotEmpty) ...[
           Text(
-            "${languages.cancelBy} ${rideDetail?.cancelBy ?? ""}",
+            "${languages.cancelBy} ${localizeCancelBy(rideDetail?.cancelBy)}",
             style: bodyText(context: context, fontWeight: FontWeight.w500),
           ),
         ],
@@ -407,7 +409,11 @@ class _PassengerRideDetailState extends State<PassengerRideDetail> {
         RideDetailItem(
           iconData: CustomIcons.paymentMethod,
           titleText: languages.paymentMethod,
-          mainText: getPaymentType(paymentType: rideDetail?.payment ?? 0),
+          mainText: DestinationPaymentUtil.ridePaymentMethodLabel(
+            paymentType: rideDetail?.payment ?? 0,
+            destinationPaymentMethod: rideDetail?.destinationPaymentMethod,
+            destinationPaymentLabel: rideDetail?.destinationPaymentLabel,
+          ),
         ),
         RideDetailItem(
           iconData: CustomIcons.paymentStatus,

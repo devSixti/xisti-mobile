@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../commonView/common_view.dart';
 import '../../../utils/rotating_splash_assets.dart';
 import '../../../utils/utils.dart';
+import '../../../utils/xisti_ui_tokens.dart';
 import 'splash_bloc.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -45,7 +46,7 @@ class _SplashScreenState extends State<SplashScreen> {
         systemOverlayStyle: AppThemeColors.dark().systemUiOverlayStyle,
       ),
       body: ColoredBox(
-        color: const Color(0xFF0B0B0B),
+        color: XistiBrand.black,
         child: Image.asset(
           _splashAsset,
           fit: BoxFit.cover,

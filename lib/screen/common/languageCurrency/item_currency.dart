@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../utils/currency_display_util.dart';
 import '../../../utils/utils.dart';
 import 'language_and_currency_dl.dart';
 
@@ -63,7 +64,7 @@ class ItemCurrencyState extends State<ItemCurrency> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      s.currencyName == "COP" ?  s.currencyName : "${s.currencyName} ${s.currencySymbol}",
+                      CurrencyDisplayUtil.chipLabel(s),
                       style: bodyText(context:context,
                         textColor: selectedChoice == s.currencyId ? getCurrentTheme(context).colorWhite : getCurrentTheme(context).colorTextCommon,
                         fontWeight: FontWeight.w500,

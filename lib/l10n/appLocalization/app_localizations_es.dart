@@ -337,6 +337,12 @@ class AppLocalizationsEs extends AppLocalizations {
   String get liveChat => 'Chat en vivo';
 
   @override
+  String get liveTrackingBadge => 'En vivo';
+
+  @override
+  String get estimatedArrival => 'Llegada estimada';
+
+  @override
   String get myPreference => 'Mis preferencias';
 
   @override
@@ -1172,7 +1178,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get emptyDocument =>
-      'Este documento no es necesario para este servicio';
+      'No hay documentos pendientes por subir. Si crees que es un error, contacta a soporte.';
 
   @override
   String get document => 'Documento';

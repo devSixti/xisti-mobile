@@ -10,8 +10,8 @@ import '../../../blocs/bloc.dart';
 import '../../../bottomSheet/sos_number_bottom_sheet.dart';
 import '../../../commonView/common_view.dart';
 import '../../../commonView/custom_rounded_button.dart';
+import '../../../commonView/live_ride_tracking_banner.dart';
 import '../../../commonView/load_image_with_placeholder.dart';
-import '../../../commonView/ride_status_msg.dart';
 import '../../../commonView/statusView/passenger_ride_status_view.dart';
 import '../../../constant/chat_constant.dart';
 import '../../../networking/base_dl.dart';
@@ -106,7 +106,14 @@ class _PassengerRunningRideState extends State<PassengerRunningRide> {
                             margin: EdgeInsetsDirectional.only(start: commonHorizontalPadding, end: commonHorizontalPadding, top: 50.h),
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
-                              children: [driverDetail(rideDetail), RideStatusMsg(rideStatus: rideDetail?.rideStatus ?? 0)],
+                              children: [
+                                driverDetail(rideDetail),
+                                LiveRideTrackingBanner(
+                                  rideStatus: rideDetail?.rideStatus ?? 0,
+                                  etaStream: _bloc?.subjectTime,
+                                  etaFallback: rideDetail?.estimatedTime,
+                                ),
+                              ],
                             ),
                           );
                         case Status.error:
@@ -161,7 +168,7 @@ class _PassengerRunningRideState extends State<PassengerRunningRide> {
                                         additionalNote: rideDetail?.additionalRemark ?? "",
                                         sideMargin: EdgeInsetsDirectional.only(top: 20.h),
                                       ),
-                                    if ((rideDetail?.rideStatus ?? 0) == passengerPending) cancelBtn(),
+                                    if (canPassengerCancelRide(rideDetail?.rideStatus ?? 0)) cancelBtn(),
                                     if ((rideDetail?.rideStatus ?? 0) >= passengerPayment) processBtn(),
                                   ],
                                 ),

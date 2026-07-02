@@ -3,12 +3,38 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'service_mode_util.dart';
 
-/// XISTI brand palette — shared across home, sheets, wallet, and tracking.
+/// XISTI official brand palette (Principal + Segundarios).
 abstract final class XistiBrand {
-  static const Color green = Color(0xFF39FF14);
-  static const Color purple = Color(0xFF9333EA);
-  static const Color dark = Color(0xFF0B0B0B);
-  static const Color darkSurface = Color(0xFF141414);
+  // Principal
+  static const Color green = Color(0xFF80FF00);
+  static const Color black = Color(0xFF000000);
+  static const Color white = Color(0xFFFFFFFF);
+
+  // Secundarios — verdes y grises
+  static const Color greenOlive = Color(0xFF478402);
+  static const Color greenPale = Color(0xFFD2FF97);
+  static const Color greenCream = Color(0xFFEBFFC5);
+  static const Color greyDark = Color(0xFF4D4D4D);
+  static const Color greenMid = Color(0xFF74D603);
+  static const Color dark = Color(0xFF1A1A1A);
+  static const Color greenLight = Color(0xFFB5FF5F);
+  static const Color offWhite = Color(0xFFF4F4F4);
+
+  // Secundarios — morados, azules y grises
+  static const Color greyLight = Color(0xFFE6E6E6);
+  static const Color lavenderGrey = Color(0xFFD7D3E2);
+  static const Color blueViolet = Color(0xFF4A00FF);
+  static const Color purple = Color(0xFF681FFF);
+  static const Color purpleMedium = Color(0xFF8251FC);
+  static const Color purpleDeep = Color(0xFF3800C1);
+  static const Color greyMedium = Color(0xFFCCCCCC);
+  static const Color purpleLight = Color(0xFF9C75FC);
+  static const Color lavender = Color(0xFFBCA7FC);
+  static const Color lavenderMuted = Color(0xFFAEA5C4);
+
+  /// Dark scaffold / cards (alias for [dark]).
+  static const Color darkSurface = dark;
+
   static const Color legalOrange = Color(0xFFE65100);
   static const Color legalOrangeBg = Color(0xFFFFF3E0);
 }

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="xisti_splash_bg">#0B0B0B</color>
-    <color name="xisti_primary">#39FF14</color>
-    <color name="colorPrimary">#39FF14</color>
-    <color name="xisti_secondary">#9333EA</color>
-	<color name="ic_launcher_background">#0B0B0B</color>
+    <color name="xisti_splash_bg">#000000</color>
+    <color name="xisti_primary">#80FF00</color>
+    <color name="colorPrimary">#80FF00</color>
+    <color name="xisti_secondary">#681FFF</color>
+    <color name="ic_launcher_background">#000000</color>
 </resources>

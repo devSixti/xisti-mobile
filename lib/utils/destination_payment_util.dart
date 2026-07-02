@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import '../hive/hive_helper.dart';
+import '../constant/constant.dart';
 import '../main.dart';
 
 class DestinationPaymentOption {
@@ -99,5 +100,28 @@ class DestinationPaymentUtil {
       return match.first.label;
     }
     return _localizedKnownCode(code ?? '');
+  }
+
+  static String ridePaymentMethodLabel({
+    required int paymentType,
+    String? destinationPaymentMethod,
+    String? destinationPaymentLabel,
+  }) {
+    final serverLabel = destinationPaymentLabel?.trim() ?? '';
+    if (serverLabel.isNotEmpty) {
+      return serverLabel;
+    }
+    final code = (destinationPaymentMethod ?? '').trim().toLowerCase();
+    if (code.isNotEmpty && code != cash) {
+      return labelForCode(code);
+    }
+    switch (paymentType) {
+      case PaymentType.online:
+        return languages.onlinePayment;
+      case PaymentType.wallet:
+        return languages.wallet;
+      default:
+        return languages.cash;
+    }
   }
 }

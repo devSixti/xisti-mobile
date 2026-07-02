@@ -15,6 +15,11 @@ const int passengerRating = 8;
 const int passengerCompleted = 9;
 const int passengerFailed = 10;
 
+/// Passenger may cancel while the trip has not started yet (before status 5).
+bool canPassengerCancelRide(int rideStatus) {
+  return rideStatus >= passengerPending && rideStatus < passengerRunning;
+}
+
 class PassengerRideStatusView extends StatelessWidget {
   final int rideStatus;
 

@@ -91,6 +91,8 @@
   "myWallet": "Mon portefeuille",
   "referHistory": "Consulter l'historique",
   "liveChat": "Chat en direct",
+  "liveTrackingBadge": "En direct",
+  "estimatedArrival": "Arrivée estimée",
   "myPreference": "Mes préférences",
   "emergencyContact": "Contact d'urgence",
   "inviteFriend": "Inviter un ami",

@@ -59,6 +59,8 @@ class PassengerRunningRidePojo {
     this.totalPay,
     this.payment,
     this.paymentStatus,
+    this.destinationPaymentMethod,
+    this.destinationPaymentLabel,
     this.sosContactList,
     this.rideFare,
     this.tollCharge,
@@ -133,6 +135,8 @@ class PassengerRunningRidePojo {
     totalPay = json['total_pay'];
     payment = json['payment'];
     paymentStatus = json['payment_status'];
+    destinationPaymentMethod = json['destination_payment_method'];
+    destinationPaymentLabel = json['destination_payment_label'];
     estimatePrice = json['estimate_price'];
     rideFare = json['ride_fare'];
     tollCharge = json['toll_charge'];
@@ -202,6 +206,8 @@ class PassengerRunningRidePojo {
   dynamic tollCharge;
   int? payment;
   int? paymentStatus;
+  String? destinationPaymentMethod;
+  String? destinationPaymentLabel;
   int? rideType;
   List<SosContactList>? sosContactList;
 

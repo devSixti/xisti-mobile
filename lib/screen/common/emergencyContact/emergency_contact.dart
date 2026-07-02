@@ -36,6 +36,7 @@ class _EmergencyContactState extends State<EmergencyContact> {
 
   Widget _buildEmergencyContact() {
     String emergencyNumber = getStringFromUserInfoBox(hiveEmergencyContact);
+    final emergencyName = getStringFromUserInfoBox(hiveEmergencyContactName).trim();
     return Column(
       mainAxisSize: MainAxisSize.max,
       mainAxisAlignment: MainAxisAlignment.center,
@@ -52,8 +53,17 @@ class _EmergencyContactState extends State<EmergencyContact> {
               children: [
                 Image.asset(setImagesBasedOnTheme(context, "emergency_contact.png"), width: double.infinity, height: 250.h, fit: BoxFit.fitHeight),
                 if (emergencyNumber.trim().isNotEmpty) ...[
+                  if (emergencyName.isNotEmpty)
+                    Padding(
+                      padding: EdgeInsetsDirectional.only(top: 20.h),
+                      child: Text(
+                        emergencyName,
+                        textAlign: TextAlign.center,
+                        style: bodyText(context: context, fontWeight: FontWeight.w700, fontSize: textSize20px),
+                      ),
+                    ),
                   Padding(
-                    padding: EdgeInsetsDirectional.only(top: 20.h),
+                    padding: EdgeInsetsDirectional.only(top: emergencyName.isNotEmpty ? 8.h : 20.h),
                     child: Text(
                       "${getStringFromUserInfoBox(hiveEmergencyCountryCode)} $emergencyNumber",
                       style: bodyText(context: context, fontWeight: FontWeight.w600, fontSize: textSize18px),

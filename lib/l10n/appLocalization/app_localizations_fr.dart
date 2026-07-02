@@ -336,6 +336,12 @@ class AppLocalizationsFr extends AppLocalizations {
   String get liveChat => 'Chat en direct';
 
   @override
+  String get liveTrackingBadge => 'En direct';
+
+  @override
+  String get estimatedArrival => 'Arrivée estimée';
+
+  @override
   String get myPreference => 'Mes préférences';
 
   @override

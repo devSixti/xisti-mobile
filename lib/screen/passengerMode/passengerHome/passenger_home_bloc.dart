@@ -9,9 +9,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 import '../../../blocs/bloc.dart';
-import '../../../bottomSheet/demo_product_bottom_sheet.dart';
 import '../../../bottomSheet/region_confirm_sheet.dart';
-import '../../../bottomSheet/warning_bottom_sheet.dart';
 import '../../../commonView/common_view.dart';
 import '../../../commonView/custom_marker.dart';
 import '../../../hive/hive_helper.dart';
@@ -47,9 +45,6 @@ class PassengerHomeBloc extends Bloc {
     firebaseAuth().then((value) {
       setFCMToken();
     });
-    if (isDemoApp && !(demoSheetContext?.mounted ?? false) && Platform.isAndroid) {
-      openDemoSheet();
-    }
   }
 
   GoogleMapController? googleMapController;
@@ -59,7 +54,6 @@ class PassengerHomeBloc extends Bloc {
   bool isFromLogin;
   CameraPosition? cameraPosition;
   bool isFromBottomSheet = false;
-  BuildContext? demoSheetContext;
   LatLng? currentLatLng;
 
   final subjectServiceData = BehaviorSubject<ApiResponse<ServiceTypeModel>>();
@@ -1039,11 +1033,39 @@ class PassengerHomeBloc extends Bloc {
 
   Future<void> flyToBarrio(XistiBarrioShortcut barrio) async {
     if (googleMapController == null) return;
+
+    toAddressController.sink.add(
+      SearchedLocation(
+        name: barrio.label,
+        lat: barrio.lat,
+        lng: barrio.lng,
+        latLng: barrio.latLng,
+      ),
+    );
+
     await googleMapController!.animateCamera(
       CameraUpdate.newCameraPosition(
         CameraPosition(target: barrio.latLng, zoom: 14),
       ),
     );
+
+    try {
+      final resolvedAddress = await getStringAddress(barrio.lat, barrio.lng);
+      if (!context.mounted) return;
+      if (resolvedAddress.trim().isNotEmpty) {
+        toAddressController.sink.add(
+          SearchedLocation(
+            name: resolvedAddress,
+            lat: barrio.lat,
+            lng: barrio.lng,
+            latLng: barrio.latLng,
+          ),
+        );
+      }
+    } catch (_) {}
+
+    setMarkers();
+    mapApiCall();
   }
 
   void changePolylineColorPerTheme() {
@@ -1150,42 +1172,6 @@ class PassengerHomeBloc extends Bloc {
         });
       }
     markersListController.sink.add(markerList);
-  }
-
-  void openDemoSheet() {
-    if (!getBoolFromSettingBox(hiveDemoSheetOpen)) {
-      Future.delayed(const Duration(seconds: 1), () {
-        if (!context.mounted) return;
-        showModalBottomSheet(
-          context: context,
-          enableDrag: false,
-          isDismissible: false,
-          barrierColor: Colors.transparent,
-          isScrollControlled: true,
-          builder: (context) {
-            demoSheetContext = context;
-            return WarningBottomSheet();
-          },
-        ).then((value) {
-          demoSheetContext = null;
-          if (!context.mounted) return;
-          showModalBottomSheet(
-            context: context,
-            enableDrag: false,
-            isDismissible: false,
-            isScrollControlled: true,
-            barrierColor: Colors.transparent,
-            builder: (context) {
-              demoSheetContext = context;
-              putDataInSettingBox(hiveDemoSheetOpen, true);
-              return ProductBottomSheet();
-            },
-          ).then((value) {
-            demoSheetContext = null;
-          });
-        });
-      });
-    }
   }
 
   @override

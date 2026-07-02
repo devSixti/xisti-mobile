@@ -787,7 +787,7 @@ class _OfferFareAndBookSheetState extends State<OfferFareAndBookSheet> {
             return val;
           },
           keyboardType: const TextInputType.numberWithOptions(decimal: true, signed: false),
-          inputFormatters: [getDecimalInputFormatter()],
+          inputFormatters: [getDecimalInputFormatter(decimalRange: getCurrencyFractionDigits())],
           style: bodyText(context: context, fontSize: 40.sp, fontWeight: FontWeight.w600),
           contentPadding: EdgeInsetsDirectional.zero,
           decoration: InputDecoration(

@@ -18,6 +18,7 @@ class DriverWaitingBloc extends Bloc {
   int serviceId;
   int timeOut;
   StreamSubscription<RemoteMessage>? firebaseOnMessageStream;
+  bool _hasNavigatedAway = false;
 
   DriverWaitingBloc(this.context, this.rideId, this.serviceId, this.timeOut) {
     startDriverWaitingTimer();
@@ -30,6 +31,15 @@ class DriverWaitingBloc extends Bloc {
   Timer? _screenTimer;
 
   final driverWaitingSubject = BehaviorSubject<ApiResponse<DriverWaitingPojo>>();
+
+  void _leaveWaitingScreen(Widget screen) {
+    if (_hasNavigatedAway || !context.mounted) {
+      return;
+    }
+    _hasNavigatedAway = true;
+    stopTimer();
+    openScreenWithClearPrevious(context, screen);
+  }
 
   Future<void> callGetRideStatusApi({required bool isLoading}) async {
     if (await isNetworkConnected(
@@ -46,32 +56,31 @@ class DriverWaitingBloc extends Bloc {
         if (!context.mounted) return;
         if (isApiStatus(context, response.status, message, true)) {
           if (response.rideStatus == 4) {
-            stopTimer();
-            openScreenWithClearPrevious(context, const DriverHome());
+            _leaveWaitingScreen(const DriverHome());
           } else {
             switch (response.bidStatus) {
               case 0:
                 break;
               case 1:
-                stopTimer();
                 if (response.rideType == 1) {
-                  openScreenWithClearPrevious(context, DriverRideHistory());
+                  _leaveWaitingScreen(DriverRideHistory());
                 } else {
-                  openScreenWithClearPrevious(context, DriverRunningRide(rideId: rideId, serviceId: serviceId));
+                  _leaveWaitingScreen(DriverRunningRide(rideId: rideId, serviceId: serviceId));
                 }
                 break;
               case 2:
-                stopTimer();
-                openScreenWithClearPrevious(context, const DriverHome());
-                openSimpleSnackbar(context, languages.reqRejectCustomer);
+                _leaveWaitingScreen(const DriverHome());
+                if (context.mounted) {
+                  openSimpleSnackbar(context, languages.reqRejectCustomer);
+                }
                 break;
             }
           }
         } else {
-          stopTimer();
-          openScreenWithClearPrevious(context, const DriverHome());
-          openSimpleSnackbar(context, message);
           driverWaitingSubject.add(ApiResponse.error(message));
+          if (context.mounted && isLoading) {
+            openSimpleSnackbar(context, message);
+          }
         }
       } catch (e) {
         driverWaitingSubject.add(ApiResponse.error(e.toString()));
@@ -85,8 +94,7 @@ class DriverWaitingBloc extends Bloc {
       callGetRideStatusApi(isLoading: false);
     });
     _screenTimer ??= Timer(Duration(seconds: timeOut), () {
-      stopTimer();
-      openScreenWithClearPrevious(context, const DriverHome());
+      _leaveWaitingScreen(const DriverHome());
     });
   }
 
@@ -111,15 +119,12 @@ class DriverWaitingBloc extends Bloc {
       if (notificationType == 1 && orderId == rideId) {
         pushNotificationService.dismissRideNotification(rideId);
         if (rideType == 1) {
-          if (!context.mounted) return;
-          openScreenWithClearPrevious(context, DriverRideHistory());
+          _leaveWaitingScreen(DriverRideHistory());
         } else {
-          if (!context.mounted) return;
-          openScreenWithClearPrevious(context, DriverRunningRide(rideId: rideId, serviceId: serviceId));
+          _leaveWaitingScreen(DriverRunningRide(rideId: rideId, serviceId: serviceId));
         }
-      } else if (notificationType == 14) {
-        if (!context.mounted) return;
-        openScreenWithClearPrevious(context, DriverHome());
+      } else if (notificationType == 14 && orderId == rideId) {
+        _leaveWaitingScreen(const DriverHome());
       }
     });
   }

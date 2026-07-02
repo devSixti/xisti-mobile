@@ -23,7 +23,9 @@ import '../../../hive/hive_helper.dart';
 import '../../../networking/base_dl.dart';
 import '../../../services/push_notification_service.dart';
 import '../../../utils/get_route_utils.dart';
+import '../../../utils/notification_payload_util.dart';
 import '../../../services/active_ride_offline_service.dart';
+import '../../../services/ride_session_manager.dart';
 import '../../../services/dispatch_trigger_service.dart';
 import '../../../services/ride_action_queue_service.dart';
 import '../../../utils/utils.dart';
@@ -65,6 +67,7 @@ class DriverRunningRideBloc extends Bloc {
   dynamic toll = 0;
   DateTime? _lastRouteRefreshAt;
   static const Duration _routeRefreshThrottle = Duration(seconds: 8);
+  int? _previousRideStatus;
 
   final subject = BehaviorSubject<ApiResponse<DriverRunningRidePojo>>();
   final subjectUpdateRideStatus = BehaviorSubject<ApiResponse<UpdateRideStatusPojo>>();
@@ -133,8 +136,7 @@ class DriverRunningRideBloc extends Bloc {
 
           /// Initializing variables for using every where in bloc
           _rideDetails = response.rideDetails ?? RideDetails();
-          rideStatus = _rideDetails.rideStatus;
-          changeStatus(rideStatus);
+          _applyRideStatusFromApi(_rideDetails.rideStatus ?? 0);
           serviceId = _rideDetails.serviceId;
           isRideOTP = _rideDetails.isOtp == 1;
           isTollCharge = _rideDetails.isTollCharge;
@@ -151,12 +153,19 @@ class DriverRunningRideBloc extends Bloc {
             {
               'ride_id': _rideDetails.rideId,
               'service_id': _rideDetails.serviceId,
+              'ride_status': rideStatus,
               'pickup_lat': pickupAddressItem?.addressLat,
               'pickup_long': pickupAddressItem?.addressLong,
               'destination_lat': dropAddressItem?.addressLat,
               'destination_long': dropAddressItem?.addressLong,
             },
             rideStatus: rideStatus,
+          );
+          RideSessionManager.instance.syncActiveRide(
+            rideId: _rideDetails.rideId ?? rideId,
+            rideStatus: rideStatus,
+            serviceId: _rideDetails.serviceId ?? serviceId,
+            isDriver: true,
           );
           if (rideStatus >= DriverRideStatus.driverRunning) {
             changeAddressTitle(languages.dropLocation);
@@ -263,8 +272,7 @@ class DriverRunningRideBloc extends Bloc {
             return;
           }
           rideStatus = response.rideStatus ?? 0;
-          changeStatus(rideStatus);
-          changeRideStatusWiseLayout();
+          _applyRideStatusFromApi(rideStatus, fromUserAction: true);
           if (rideDetailsApiCall) {
             callRideDetailsApi(isLoading: false);
           }
@@ -287,13 +295,72 @@ class DriverRunningRideBloc extends Bloc {
   }
 
   void setLayout() {
-    if (rideStatus == DriverRideStatus.driverCancel) {
-      _navigateToDriverHomeAfterRideEnded();
-      return;
-    }
-    changeRideStatusWiseLayout();
     setFirebaseReference();
     writeDataInFirebase();
+  }
+
+  void _applyRideStatusFromApi(int newStatus, {bool fromUserAction = false}) {
+    final previous = _previousRideStatus;
+    _previousRideStatus = newStatus;
+    rideStatus = newStatus;
+    changeStatus(rideStatus);
+
+    final becameCancelled = newStatus == DriverRideStatus.driverCancel && previous != DriverRideStatus.driverCancel;
+    final becameCompleted = newStatus == DriverRideStatus.driverCompleted && previous != DriverRideStatus.driverCompleted;
+    _updateRideStatusUi(
+      allowTerminalNavigation: fromUserAction || becameCancelled || becameCompleted,
+      previousStatus: previous,
+    );
+  }
+
+  void _updateRideStatusUi({required bool allowTerminalNavigation, int? previousStatus}) {
+    final previous = previousStatus;
+    switch (rideStatus) {
+      case DriverRideStatus.driverApproved:
+      case DriverRideStatus.driverSchedule:
+        changeActionButtonText(languages.startRide);
+        break;
+      case DriverRideStatus.driverCancel:
+        if (allowTerminalNavigation) {
+          _navigateToDriverHomeAfterRideEnded();
+        }
+        break;
+      case DriverRideStatus.driverRunning:
+        if (previous != DriverRideStatus.driverRunning) {
+          startRide();
+        }
+        break;
+      case DriverRideStatus.driverDrop:
+        if (previous != DriverRideStatus.driverDrop) {
+          completeRide();
+        }
+        changeActionButtonText(languages.collectPayment);
+        break;
+      case DriverRideStatus.driverPayment:
+        changeActionButtonText(languages.rateUser);
+        if (previous != DriverRideStatus.driverPayment) {
+          openReviewUserBottomSheet();
+        }
+        break;
+      case DriverRideStatus.driverRating:
+        changeActionButtonText(languages.completeRide);
+        if (previous != DriverRideStatus.driverRating) {
+          openRideCompletedBottomSheet();
+        }
+        break;
+      case DriverRideStatus.driverCompleted:
+        if (allowTerminalNavigation) {
+          pushNotificationService.dismissRideNotification(rideId);
+          openScreenWithClearPrevious(context, DriverHome());
+        }
+        break;
+      default:
+        break;
+    }
+  }
+
+  void changeRideStatusWiseLayout() {
+    _updateRideStatusUi(allowTerminalNavigation: true, previousStatus: _previousRideStatus);
   }
 
   void _navigateToDriverHomeAfterRideEnded() {
@@ -349,39 +416,6 @@ class DriverRunningRideBloc extends Bloc {
         break;
       default:
         callUpdateRideStatusApi(rideDetailsApiCall: callRideDetailsApi);
-        break;
-    }
-  }
-
-  void changeRideStatusWiseLayout() {
-    switch (rideStatus) {
-      case DriverRideStatus.driverApproved:
-      case DriverRideStatus.driverSchedule:
-        changeActionButtonText(languages.startRide);
-        break;
-      case DriverRideStatus.driverCancel:
-        _navigateToDriverHomeAfterRideEnded();
-        break;
-      case DriverRideStatus.driverRunning:
-        startRide();
-        break;
-      case DriverRideStatus.driverDrop:
-        completeRide();
-        changeActionButtonText(languages.collectPayment);
-        break;
-      case DriverRideStatus.driverPayment:
-        changeActionButtonText(languages.rateUser);
-        openReviewUserBottomSheet();
-        break;
-      case DriverRideStatus.driverRating:
-        changeActionButtonText(languages.completeRide);
-        openRideCompletedBottomSheet();
-        break;
-      case DriverRideStatus.driverCompleted:
-        pushNotificationService.dismissRideNotification(rideId);
-        openScreenWithClearPrevious(context, DriverHome());
-        break;
-      default:
         break;
     }
   }
@@ -571,7 +605,7 @@ class DriverRunningRideBloc extends Bloc {
       int orderId = int.parse((notificationData[NotificationConstant.rideId] ?? 0).toString());
       String notificationMessage = notificationData[NotificationConstant.message] ?? "";
       String notificationTitle = notificationData[NotificationConstant.title] ?? "";
-      if (notificationType == 2 && orderId == rideId) {
+      if (isTerminalRideNotification(notificationData, notificationType) && orderId == rideId) {
         pushNotificationService.dismissRideNotification(rideId);
         showRideCompleteCancelBottomSheet(notificationTitle, notificationMessage);
       } else if (orderId == rideId) {

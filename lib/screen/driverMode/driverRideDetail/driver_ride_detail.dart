@@ -16,8 +16,10 @@ import '../../../commonView/statusView/driver_ride_status_view.dart';
 import '../../../constant/chat_constant.dart';
 import '../../../networking/api_response.dart';
 import '../../../networking/base_dl.dart';
+import '../../../utils/destination_payment_util.dart';
 import '../../../utils/file_downloader.dart';
 import '../../../utils/map_style_hot_reload.dart';
+import '../../../utils/display_localizer.dart';
 import '../../../utils/utils.dart';
 import '../../common/chatting/chatting_screen.dart';
 import '../../common/reportIssue/addReportIssue/add_report_issue_screen.dart';
@@ -372,7 +374,11 @@ class _DriverRideDetailState extends State<DriverRideDetail> {
       RideDetailItem(
         iconData: CustomIcons.paymentMethod,
         titleText: languages.paymentMethod,
-        mainText: getPaymentType(paymentType: rideDetail?.paymentType ?? 0),
+        mainText: DestinationPaymentUtil.ridePaymentMethodLabel(
+          paymentType: rideDetail?.paymentType ?? 0,
+          destinationPaymentMethod: rideDetail?.destinationPaymentMethod,
+          destinationPaymentLabel: rideDetail?.destinationPaymentLabel,
+        ),
       ),
       RideDetailItem(
         iconData: CustomIcons.paymentStatus,
@@ -532,7 +538,7 @@ class _DriverRideDetailState extends State<DriverRideDetail> {
         SizedBox(height: 5.h),
         if ((rideDetail?.cancelBy ?? "").isNotEmpty) ...[
           Text(
-            "${languages.cancelBy} ${rideDetail?.cancelBy ?? ""}",
+            "${languages.cancelBy} ${localizeCancelBy(rideDetail?.cancelBy)}",
             style: bodyText(context: context, fontWeight: FontWeight.w500),
           ),
         ],

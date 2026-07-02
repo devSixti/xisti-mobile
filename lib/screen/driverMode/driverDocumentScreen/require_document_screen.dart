@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../commonView/common_view.dart';
-import '../../../commonView/no_record_found.dart';
+import '../../../commonView/custom_rounded_button.dart';
+import '../../../commonView/xisti_brand_placeholder.dart';
 import '../../../hive/hive_helper.dart';
 import '../../../networking/api_response.dart';
 import '../../../utils/utils.dart';
@@ -82,8 +83,31 @@ class _RequireDocumentScreenState extends State<RequireDocumentScreen> {
             var isError = snap.hasData && snap.data?.status == Status.error;
             return isLoading
                 ? RequireDocumentShimmer(enabled: isLoading)
-                : (!isError)
-                ? StreamBuilder<List<DocumentList>>(
+                : isError
+                ? Center(
+                    child: Padding(
+                      padding: EdgeInsetsDirectional.only(start: commonHorizontalPadding, end: commonHorizontalPadding),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          xistiDocumentEmptyIllustration(context),
+                          SizedBox(height: 20.h),
+                          Text(
+                            snap.data?.message ?? languages.genericErrorTryAgain,
+                            textAlign: TextAlign.center,
+                            style: bodyText(context: context, fontWeight: FontWeight.w600, fontSize: textSize18px),
+                          ),
+                          SizedBox(height: 20.h),
+                          CustomRoundedButton(
+                            context,
+                            languages.retry,
+                            () => _requireDocumentBloc?.callManageDocumentListApi(),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
+                : StreamBuilder<List<DocumentList>>(
                   stream: _requireDocumentBloc?.requiredDocumentList,
                   builder: (context, snapshot) {
                     List<DocumentList> documentList = snapshot.data ?? [];
@@ -110,10 +134,25 @@ class _RequireDocumentScreenState extends State<RequireDocumentScreen> {
                           },
                           itemCount: documentList.length,
                         )
-                        : NoRecordFound(message: languages.emptyDocument);
+                        : Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                xistiDocumentEmptyIllustration(context),
+                                SizedBox(height: 16.h),
+                                Padding(
+                                  padding: EdgeInsetsDirectional.only(start: commonHorizontalPadding, end: commonHorizontalPadding),
+                                  child: Text(
+                                    languages.emptyDocument,
+                                    textAlign: TextAlign.center,
+                                    style: bodyText(context: context, fontWeight: FontWeight.w600, fontSize: textSize18px),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
                   },
-                )
-                : NoRecordFound(message: languages.emptyDocument);
+                );
           },
         ),
       ),

@@ -253,7 +253,13 @@ String _handleError(dynamic error, {bool showServerErrorOnFailure = true}) {
         final context = navigatorKey.currentContext;
         // 401/403 are session/auth failures, not generic server outages.
         if (showServerErrorOnFailure && context != null && statusCode != 401 && statusCode != 403) {
-          showServerErrorDialog(context, isShowMapSessionMsg: statusCode == 429);
+          if (statusCode == 429 && isGoogleMapsDailyLimitResponse(dioError.response?.data)) {
+            showServerErrorDialog(context, isShowMapSessionMsg: true);
+          } else if (statusCode == 429) {
+            openSimpleSnackbar(context, extractApiErrorMessage(dioError.response?.data) ?? languages.apiErrorResponseMsg);
+          } else {
+            showServerErrorDialog(context);
+          }
         }
         // errorDescription = "${languages.apiErrorResponseMsg}: ${dioError.response?.statusCode}";
         break;
@@ -271,4 +277,32 @@ String _handleError(dynamic error, {bool showServerErrorOnFailure = true}) {
     errorDescription = languages.apiErrorUnexpectedErrorMsg;
   }
   return errorDescription;
+}
+
+bool isGoogleMapsDailyLimitResponse(dynamic data) {
+  if (data is Map) {
+    final messageCode = data['message_code'];
+    if (messageCode == 429) {
+      return true;
+    }
+    final message = (data['message'] ?? '').toString().toLowerCase();
+    return message.contains('google maps');
+  }
+  if (data is String) {
+    return data.toLowerCase().contains('google maps');
+  }
+  return false;
+}
+
+String? extractApiErrorMessage(dynamic data) {
+  if (data is Map) {
+    final message = data['message'];
+    if (message != null && message.toString().trim().isNotEmpty) {
+      return message.toString();
+    }
+  }
+  if (data is String && data.trim().isNotEmpty) {
+    return data;
+  }
+  return null;
 }

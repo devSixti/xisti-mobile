@@ -5,6 +5,7 @@ import '../constant/dimensions.dart';
 import '../main.dart';
 import '../utils/image_url_util.dart';
 import 'common_circular_progress_indicator.dart';
+import 'xisti_brand_placeholder.dart';
 
 class LoadImageWithPlaceHolder extends StatelessWidget {
   final double height;
@@ -38,6 +39,9 @@ class LoadImageWithPlaceHolder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (isNetworkImage && image.isEmpty && isXistiAvatarAsset(defaultAssetImage)) {
+      return xistiProfilePlaceholder(context, size: width, borderRadius: borderRadius);
+    }
     return SizedBox(
       width: width,
       height: height,
@@ -84,6 +88,9 @@ class LoadImageWithPlaceHolder extends StatelessWidget {
     }
     final fallback = defaultAssetImage;
     if (fallback != null && fallback.isNotEmpty) {
+      if (isXistiAvatarAsset(fallback) && navigatorKey.currentContext != null) {
+        return xistiProfilePlaceholder(navigatorKey.currentContext!, size: width, borderRadius: borderRadius);
+      }
       return Image.asset(fallback, width: width, height: height, fit: BoxFit.cover);
     }
     return Center(child: Container(color: getCurrentTheme(navigatorKey.currentContext!).colorShimmerBg));

@@ -107,3 +107,30 @@ NotificationDisplayConfig resolveNotificationDisplayConfig(int notificationType)
       );
   }
 }
+
+bool isDriverFareChangeNotification(Map<String, dynamic> data, int notificationType) {
+  if (notificationType == 9) {
+    return true;
+  }
+  if (notificationType != 1) {
+    return false;
+  }
+  final dispatchAction = (data[NotificationConstant.dispatchAction] ?? data['dispatch_action'] ?? '').toString();
+  if (dispatchAction == 'refresh_available_rides') {
+    return true;
+  }
+  final customerName = (data[NotificationConstant.customerName] ?? '').toString().trim();
+  final rideStatus = int.tryParse((data[NotificationConstant.rideStatus] ?? '0').toString()) ?? 0;
+  return customerName.isNotEmpty && ![4, 7, 9].contains(rideStatus);
+}
+
+bool isTerminalRideNotification(Map<String, dynamic> data, int notificationType) {
+  if (notificationType == 2) {
+    return true;
+  }
+  if (notificationType != 1) {
+    return false;
+  }
+  final rideStatus = int.tryParse((data[NotificationConstant.rideStatus] ?? '0').toString()) ?? 0;
+  return [4, 7, 9].contains(rideStatus);
+}

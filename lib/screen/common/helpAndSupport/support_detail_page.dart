@@ -1,9 +1,8 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
 import '../../../commonView/common_view.dart';
+import '../../../hive/hive_helper.dart';
 import '../../../utils/utils.dart';
 
 class SupportDetailPage extends StatefulWidget {
@@ -57,23 +56,37 @@ class _SupportDetailPageState extends State<SupportDetailPage>
   }
 
   void checkThemeMode() {
-    if (PlatformDispatcher.instance.platformBrightness == Brightness.light) {
-      setThemeMode(lightModeCSS);
-    } else if (PlatformDispatcher.instance.platformBrightness ==
-        Brightness.dark) {
-      setThemeMode(darkModeCSS);
-    }
+    _applyTheme(_isLightTheme());
     _webViewController?.reload();
   }
 
-  void setThemeMode(String theme) async {
+  bool _isLightTheme() {
+    if (mounted) {
+      return getCurrentTheme(context).themeMode == 1;
+    }
+    return getIntFromSettingBox(hiveAppTheme, defaultValue: 1) == 1;
+  }
+
+  void _applyTheme(bool isLight) {
+    setThemeMode(isLight ? lightModeCSS : darkModeCSS, isDark: !isLight);
+  }
+
+  void setThemeMode(String theme, {required bool isDark}) async {
     await _webViewController?.evaluateJavascript(
       source:
           """
             (function() {
+              var existing = document.getElementById('support-theme-style');
+              if (existing) existing.remove();
               var style = document.createElement('style');
+              style.id = 'support-theme-style';
               style.innerHTML = `$theme`;
               document.head.appendChild(style);
+              if ($isDark) {
+                document.querySelectorAll('[style]').forEach(function(el) {
+                  el.style.removeProperty('color');
+                });
+              }
             })();
           """,
     );
@@ -106,18 +119,28 @@ class _SupportDetailPageState extends State<SupportDetailPage>
           );
         },
         onLoadStop: (controller, url) async {
-          // Inject CSS for theme
-          getCurrentTheme(context).themeMode == 1
-              ? setThemeMode(lightModeCSS)
-              : setThemeMode(darkModeCSS);
+          _applyTheme(_isLightTheme());
         },
       ),
     );
   }
 
   String get darkModeCSS => """
-    body { background-color: #121212 !important; color: white !important; }
-    a { color: #bb86fc !important; }
+    html, body {
+      background-color: #121212 !important;
+      color: #FFFFFF !important;
+    }
+    body, body *:not(a):not(a *) {
+      color: #FFFFFF !important;
+    }
+    body p, body div, body span, body li, body ul, body ol,
+    body h1, body h2, body h3, body h4, body h5, body h6,
+    body td, body th, body strong, body em, body label, body blockquote {
+      color: #FFFFFF !important;
+    }
+    a, a * {
+      color: #BB86FC !important;
+    }
   """;
 
   String get lightModeCSS => """

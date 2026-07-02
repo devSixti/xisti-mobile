@@ -335,6 +335,12 @@ class AppLocalizationsPt extends AppLocalizations {
   String get liveChat => 'Chat ao Vivo';
 
   @override
+  String get liveTrackingBadge => 'Ao vivo';
+
+  @override
+  String get estimatedArrival => 'Chegada estimada';
+
+  @override
   String get myPreference => 'Minhas Preferências';
 
   @override

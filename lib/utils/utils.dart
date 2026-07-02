@@ -175,6 +175,25 @@ bool requiresPhoneOtpOnSignup() {
   return loginType != LoginType.email && loginType != LoginType.biometric;
 }
 
+void stashSocialSignupIdentity({
+  required String loginType,
+  String? name,
+  String? email,
+  String? loginId,
+}) {
+  putDataInUserInfoBox(hiveLoginType, loginType);
+  final trimmedName = (name ?? '').trim();
+  if (trimmedName.isNotEmpty && trimmedName != '-' && trimmedName.toUpperCase() != 'N/A') {
+    putDataInUserInfoBox(hiveUserName, trimmedName);
+    putDataInUserInfoBox(hivePendingSignupFullName, trimmedName);
+  }
+  final normalizedEmail = (email ?? '').trim();
+  if (normalizedEmail.isNotEmpty) {
+    putDataInUserInfoBox(hiveEmail, normalizedEmail);
+    putDataInUserInfoBox(hivePendingSignupEmail, normalizedEmail);
+  }
+}
+
 void clearPendingSignupData() {
   putDataInSettingBox(hivePendingSignupAfterOtp, false);
   putDataInSettingBox(hivePendingSignupProfilePath, '');
@@ -191,7 +210,6 @@ Future<void> manageLoginResponse(
   final message = getApiMsg(response.message, response.messageCode);
     if (isApiStatus(context, response.status ?? 0, message, false, messageCode: response.messageCode ?? 0)) {
     await setDataInHive(response);
-    unawaited(getGoogleMapKeyForApiCall());
     final loginType = response.loginType ?? getStringFromUserInfoBox(hiveLoginType);
     final hasPhone = (response.contactNumber ?? '').trim().isNotEmpty;
     final phoneVerified = (response.userVerified ?? 0) == 1;
@@ -221,7 +239,8 @@ Future<void> manageLoginResponse(
       putDataInSettingBox(hiveAppMode, response.activeMode ?? AppMode.passenger);
       unawaited(SessionRestoreService.enableBiometricLoginIfAvailable());
       changeSubscribeTopic();
-      getGoogleMapKeyForApiCall();
+      await getGoogleMapKeyForApiCall();
+      if (!context.mounted) return;
       if (response.activeMode == AppMode.driver) {
         openScreenWithClearPrevious(context, const DriverHome(isFromLogin: true));
       } else {
@@ -491,7 +510,23 @@ void showProfileImageRequiredSheet(BuildContext context) {
 
 double getDoubleFromDynamic(dynamic value) {
   if (value == null) return 0;
-  return double.tryParse(value.toString()) ?? 0;
+  if (value is num) return value.toDouble();
+  return parseSafeDouble(value.toString());
+}
+
+String _amountNumberLocale() => isColombiaCurrencySelected() ? 'es_CO' : 'en_US';
+
+int _effectiveAmountFractionDigits(int numberAfterPoint) {
+  if (isColombiaCurrencySelected()) return 0;
+  return numberAfterPoint;
+}
+
+String _formatAmountNumber(dynamic amount, {int numberAfterPoint = 2, bool grouped = true}) {
+  final digits = _effectiveAmountFractionDigits(numberAfterPoint);
+  final decimalPattern = digits > 0 ? ".${"#" * digits}" : "";
+  final pattern = grouped ? "#,##0$decimalPattern" : "0$decimalPattern";
+  final formatter = NumberFormat(pattern, _amountNumberLocale());
+  return formatter.format(getDoubleFromDynamic(amount)).trim();
 }
 
 String getAmountWithCurrency(dynamic amount, {int numberAfterPoint = 2}) {
@@ -501,15 +536,11 @@ String getAmountWithCurrency(dynamic amount, {int numberAfterPoint = 2}) {
   } else if (selectedCurrency == "COL\$") {
     selectedCurrency = "COP";
   }
-  final decimalPattern = numberAfterPoint > 0 ? ".${"#" * numberAfterPoint}" : "";
-  final formatter = NumberFormat("#,##0$decimalPattern", "en_US");
-  return "$selectedCurrency ${formatter.format(getDoubleFromDynamic(amount)).trim()}";
+  return "$selectedCurrency ${_formatAmountNumber(amount, numberAfterPoint: numberAfterPoint)}";
 }
 
 String getEditableAmount(dynamic amount, {int numberAfterPoint = 2}) {
-  final decimalPattern = numberAfterPoint > 0 ? ".${"#" * numberAfterPoint}" : "";
-  final formatter = NumberFormat("0$decimalPattern", "en_US");
-  return formatter.format(getDoubleFromDynamic(amount)).trim();
+  return _formatAmountNumber(amount, numberAfterPoint: numberAfterPoint);
 }
 
 /// Fare increment/decrement while searching for a driver (from API / Hive, COP default 500).
@@ -713,9 +744,20 @@ class _StrictDecimalInputFormatter extends TextInputFormatter {
 
   @override
   TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) {
-    String text = newValue.text.replaceAll(',', '.'); // Normalize comma to dot
+    String text = newValue.text;
 
     if (text.isEmpty) return newValue.copyWith(text: text);
+
+    if (decimalRange == 0) {
+      text = text.replaceAll(RegExp(r'[^\d]'), '');
+      if (!RegExp(r'^\d*$').hasMatch(text)) return oldValue;
+      return newValue.copyWith(
+        text: text,
+        selection: TextSelection.collapsed(offset: text.length),
+      );
+    }
+
+    text = text.replaceAll(',', '.'); // Normalize comma to dot
 
     // Allow only digits and a single `.`
     if (!RegExp(r'^\d*\.?\d*$').hasMatch(text)) return oldValue;
@@ -736,6 +778,20 @@ class _StrictDecimalInputFormatter extends TextInputFormatter {
 
 double parseSafeDouble(String input) {
   String sanitized = input.trim();
+  if (sanitized.isEmpty) return 0.0;
+
+  if (isColombiaCurrencySelected()) {
+    if (sanitized.contains(',')) {
+      final parts = sanitized.split(',');
+      final whole = parts.first.replaceAll('.', '');
+      final fraction = parts.length > 1 ? parts[1] : '';
+      sanitized = fraction.isEmpty ? whole : '$whole.$fraction';
+    } else {
+      sanitized = sanitized.replaceAll('.', '');
+    }
+  } else {
+    sanitized = sanitized.replaceAll(',', '.');
+  }
 
   if (sanitized == '.') return 0.0;
   if (sanitized.startsWith('.')) sanitized = '0$sanitized';

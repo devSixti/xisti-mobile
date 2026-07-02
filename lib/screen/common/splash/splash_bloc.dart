@@ -12,15 +12,15 @@ import '../../../bottomSheet/common_bottom_sheet.dart';
 import '../../../bottomSheet/location_disclosure_sheet.dart';
 import '../../../hive/hive_helper.dart';
 import '../../../services/market_config_repo.dart';
+import '../../../services/app_telemetry.dart';
+import '../../../services/ride_session_manager.dart';
+import '../../../services/ride_session_resume.dart';
 import '../../../utils/app_mobile_settings.dart';
 import '../../../utils/mobile_auth_bootstrap.dart';
 import '../../../services/session_restore_service.dart';
 import '../../../utils/utils.dart';
 import '../../driverMode/driverHome/driver_home.dart';
-import '../../driverMode/driverRunningRide/driver_running_ride.dart';
-import '../../passengerMode/offerRide/offer_ride_screen.dart';
 import '../../passengerMode/passengerHome/passenger_home.dart';
-import '../../passengerMode/passengerRunningRide/passenger_running_ride.dart';
 import '../languageCurrency/language_currency_screen.dart';
 import '../otpVerify/otp_verify_repo.dart';
 import '../otpVerify/otp_verify_screen.dart';
@@ -68,6 +68,7 @@ class SplashBloc extends Bloc {
         applySocialLoginSettingsFromApi(response.toJson());
         applyAppMobileSettingsFromJson(response.toJson());
         unawaited(syncMarketConfig());
+        unawaited(getGoogleMapKeyForApiCall());
         _subject.sink.add(ApiResponse.completed(response));
         openForceFullyUpdateDialog(response.appVersion ?? "0", response.isForcefullyUpdate ?? 0);
       } else {
@@ -85,6 +86,7 @@ class SplashBloc extends Bloc {
     if (!context.mounted) return;
     await applyBootstrapDefaultsWhenApiUnavailable();
     await ensureMobileAppAuthConfigured();
+    unawaited(getGoogleMapKeyForApiCall());
     openForceFullyUpdateDialog("0", 0);
   }
 
@@ -175,20 +177,10 @@ class SplashBloc extends Bloc {
         String message = getApiMsg(response.message);
         if (!context.mounted) return;
         if (isApiStatus(context, response.status, message, false, showMess: false)) {
-          List<RunningRides> runningRidesList = response.runningRides ?? [];
           putDataInSettingBox(hiveIsAutoSettle, response.isAutoSettle == 1);
-          if (runningRidesList.isEmpty) {
-            _timer = Timer(const Duration(milliseconds: 5000), () {
-              if (!context.mounted) return;
-              openScreenWithClearPrevious(context, const DriverHome(isFromLogin: false));
-            });
-          } else {
-            if (!context.mounted) return;
-            openScreenWithClearPrevious(
-              context,
-              DriverRunningRide(rideId: response.runningRides?.first.rideId ?? 0, serviceId: response.runningRides?.first.rideServiceCatId ?? ServiceType.taxi),
-            );
-          }
+          final screen = RideSessionResume.screenForDriverResponse(response) ?? RideSessionResume.driverHome();
+          if (!context.mounted) return;
+          _openResumeScreen(screen);
         } else {
           _handleRunningServiceFailure(response.status, messageCode: response.messageCode, isDriver: true);
         }
@@ -210,35 +202,15 @@ class SplashBloc extends Bloc {
         String message = getApiMsg(response.message);
         if (!context.mounted) return;
         if (isApiStatus(context, response.status, message, false, showMess: false)) {
+          final screen = RideSessionResume.screenForPassengerResponse(response) ?? RideSessionResume.passengerHome();
+          if (!context.mounted) return;
           if ((response.rideId ?? 0) == 0) {
-            if (!context.mounted) return;
-            _timer = Timer(const Duration(milliseconds: 5000), () {
-              openScreenWithClearPrevious(context, const PassengerHome());
-            });
-          } else {
-            if (!context.mounted) return;
-            Widget screen;
-            if (response.rideStatus == 0 && (response.rideDetails ?? []).isNotEmpty) {
-              RideDetails rideDetail = response.rideDetails!.first;
-              screen = OfferRideScreen(
-                rideId: rideDetail.rideId ?? 0,
-                serviceType: rideDetail.serviceId ?? 0,
-                addressList: rideDetail.addressList ?? [],
-                fareAmount: "${rideDetail.offeredPrice ?? 0}",
-                itemDesc: rideDetail.itemDescription ?? "",
-                recipientName: rideDetail.recipientName ?? "",
-                recipientNumber: rideDetail.recipientContactNumber ?? "",
-                minFareAmount: rideDetail.minBargainAmt ?? 0,
-                maxFareAmount: rideDetail.maxBargainAmt ?? 0,
-                estimatedPrice: "${rideDetail.offeredPrice ?? 0}",
-              );
-            } else {
-              screen = PassengerRunningRide(rideId: response.rideId ?? 0);
-            }
             _timer = Timer(const Duration(milliseconds: 5000), () {
               if (!context.mounted) return;
-              openScreenWithClearPrevious(context, screen);
+              _openResumeScreen(screen);
             });
+          } else {
+            _openResumeScreen(screen);
           }
         } else {
           _handleRunningServiceFailure(response.status, messageCode: response.messageCode, isDriver: false);
@@ -307,6 +279,7 @@ class SplashBloc extends Bloc {
     }
 
     if (isLoggedIn()) {
+      RideSessionManager.instance.restoreFromOfflineCache();
       if (getIntFromSettingBox(hiveAppMode) == AppMode.driver) {
         callDriverRunningServiceApi();
       } else {
@@ -315,6 +288,15 @@ class SplashBloc extends Bloc {
     } else {
       _openWelcomeAfterDelay();
     }
+  }
+
+  void _openResumeScreen(Widget screen) {
+    AppTelemetry.instance.logRideFunnel(
+      'session_resume_navigation',
+      rideId: RideSessionManager.instance.current.rideId,
+      rideStatus: RideSessionManager.instance.current.rideStatus,
+    );
+    openScreenWithClearPrevious(context, screen);
   }
 
   @override

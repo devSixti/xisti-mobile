@@ -10,6 +10,7 @@ import '../hive/hive_helper.dart';
 import '../networking/base_dl.dart';
 import '../networking/sos_trigger_log_repo.dart';
 import '../utils/phone_util.dart';
+import '../utils/display_localizer.dart';
 import '../utils/utils.dart';
 
 class SosTriggerContext {
@@ -113,7 +114,7 @@ class _SosNumberBottomSheetState extends State<SosNumberBottomSheet> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
-                                data.name,
+                                localizeSosContactName(data.name),
                                 style: bodyText(
                                   context: context,
                                   fontSize: textSize14px,
@@ -192,8 +193,8 @@ List<SosContactList> mergeUserEmergencyIntoSosList(List<SosContactList> sosConta
     return key != emergencyKey;
   }).toList();
 
-  final userName = getStringFromUserInfoBox(hiveUserName).trim();
-  final displayName = userName.isNotEmpty ? userName : languages.emergencyContact;
+  final contactName = getStringFromUserInfoBox(hiveEmergencyContactName).trim();
+  final displayName = contactName.isNotEmpty ? contactName : languages.emergencyContact;
 
   return [
     SosContactList(

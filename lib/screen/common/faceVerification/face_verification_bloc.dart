@@ -18,7 +18,7 @@ class FaceVerificationBloc extends Bloc {
   final bool rotateImage;
 
   FaceVerificationBloc(this.context, {required this.onVerified, required this.onCancel, this.rotateImage = false}) {
-    _initializeCamera();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _initializeCamera());
   }
 
   final _faceDetectionService = FaceDetectionService();
@@ -99,6 +99,18 @@ class FaceVerificationBloc extends Bloc {
     if (_isCameraInitializing) return;
     _isCameraInitializing = true;
     try {
+      final permission = await Permission.camera.request();
+      if (!permission.isGranted) {
+        if (permission.isPermanentlyDenied) {
+          _isWaitingForPermission = true;
+          faceVerificationStateSubject.sink.add(FaceVerificationState.failed(message: languages.cameraPermissionMessage));
+          _showPermissionBottomSheet();
+        } else {
+          faceVerificationStateSubject.sink.add(FaceVerificationState.failed(message: languages.cameraPermissionMessage));
+        }
+        return;
+      }
+
       final cameras = await availableCameras();
       if (cameras.isEmpty) {
         faceVerificationStateSubject.sink.add(FaceVerificationState.failed(message: languages.noCamerasFound));
@@ -107,6 +119,7 @@ class FaceVerificationBloc extends Bloc {
 
       final frontCamera = cameras.firstWhere((camera) => camera.lensDirection == CameraLensDirection.front, orElse: () => cameras.first);
 
+      await cameraController?.dispose();
       cameraController = CameraController(
         frontCamera,
         ResolutionPreset.high,
@@ -116,7 +129,10 @@ class FaceVerificationBloc extends Bloc {
 
       await cameraController?.initialize();
 
-      if (cameraController == null || !(cameraController?.value.isInitialized ?? false)) return;
+      if (cameraController == null || !(cameraController?.value.isInitialized ?? false)) {
+        faceVerificationStateSubject.sink.add(FaceVerificationState.failed(message: languages.failedToCaptureImagePleaseTryAgain));
+        return;
+      }
 
       await cameraController?.setExposureMode(ExposureMode.auto);
       await cameraController?.setFocusMode(FocusMode.auto);

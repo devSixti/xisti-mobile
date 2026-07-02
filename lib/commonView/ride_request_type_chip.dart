@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../appThemeManager/app_theme_colors.dart';
 import '../constant/constant.dart';
 import '../main.dart';
 import '../utils/service_mode_util.dart';
@@ -44,7 +45,7 @@ class RideRequestTypeChip extends StatelessWidget {
             context,
             label: languages.taxiYellowTag,
             icon: Icons.local_taxi_outlined,
-            accent: const Color(0xFFF9A825),
+            accent: AppThemeColors.brandGreen,
           ),
       ],
     );

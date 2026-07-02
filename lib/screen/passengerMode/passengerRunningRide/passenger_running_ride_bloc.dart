@@ -17,7 +17,9 @@ import '../../../hive/hive_helper.dart';
 import '../../../networking/base_dl.dart';
 import '../../../services/push_notification_service.dart';
 import '../../../utils/get_route_utils.dart';
+import '../../../services/ride_session_manager.dart';
 import '../../../services/active_ride_offline_service.dart';
+import '../../../utils/display_localizer.dart';
 import '../../../utils/utils.dart';
 import '../../common/wallet/walletHome/wallet_home_dl.dart';
 import '../../common/wallet/walletHome/wallet_home_repo.dart';
@@ -113,6 +115,7 @@ class PassengerRunningRideBloc extends Bloc {
             {
               'ride_id': response.rideId,
               'service_id': response.serviceId,
+              'ride_status': rideStatus,
               'pickup_lat': addressList.isNotEmpty ? addressList.first.addressLat : null,
               'pickup_long': addressList.isNotEmpty ? addressList.first.addressLong : null,
               'destination_lat': addressList.length > 1 ? addressList.last.addressLat : null,
@@ -120,13 +123,19 @@ class PassengerRunningRideBloc extends Bloc {
             },
             rideStatus: rideStatus,
           );
+          RideSessionManager.instance.syncActiveRide(
+            rideId: response.rideId ?? rideId,
+            rideStatus: rideStatus,
+            serviceId: response.serviceId ?? ServiceType.taxi,
+            isDriver: false,
+          );
           if (response.rideStatus == 9 && response.userRatingStatus == 1 && bottomSheetContext == null) {
             ActiveRideOfflineService.instance.clearRideSnapshot();
             bottomSheetContext = context;
             openCommonCompleteBottomSheet(languages.rideCompletedMsg);
           } else if (rideStatus == 4) {
             ActiveRideOfflineService.instance.clearRideSnapshot();
-            openCommonCancelBottomSheet(languages.rideCancelBy(response.cancelBy ?? ""), response.rideId ?? 0);
+            openCommonCancelBottomSheet(languages.rideCancelBy(localizeCancelBy(response.cancelBy)), response.rideId ?? 0);
           } else {
             mapApiCall();
           }
@@ -163,6 +172,7 @@ class PassengerRunningRideBloc extends Bloc {
 
         if (!context.mounted) return;
         if (isApiStatus(context, response.status, message, true)) {
+          RideSessionManager.instance.markIdle(funnelStep: 'passenger_cancelled_ride');
           ActiveRideOfflineService.instance.clearRideSnapshot();
           pushNotificationService.dismissRideNotification(rideId);
           addressList = [];
@@ -379,7 +389,7 @@ class PassengerRunningRideBloc extends Bloc {
           _refreshPassengerRouteIfNeeded();
         }
         driverPreviousLatLng = driverCurrentLatLong;
-        focusInMap(googleMapController!, driverCurrentLatLong!.latitude, driverCurrentLatLong!.longitude, true);
+        _fitMapToLiveTracking();
       }
     });
   }
@@ -404,7 +414,32 @@ class PassengerRunningRideBloc extends Bloc {
     final dropLatLng = convertStringLatLongToLatLongObject("${addressList.last.addressLat ?? "0"},${addressList.last.addressLong ?? "0"}");
     await GetRoutesUtils().getRoutes(driverCurrentLatLong!, dropLatLng, latLngs, (polyLines, duration, distance) async {
       polyLinesController.sink.add(polyLines);
+      subjectTime.sink.add("${formattedTime(timeInSecond: duration)} ${languages.away}");
+      _fitMapToLiveTracking();
     });
+  }
+
+  void _fitMapToLiveTracking() {
+    if (googleMapController == null) {
+      return;
+    }
+    final lats = <double>[];
+    final lngs = <double>[];
+    if (driverCurrentLatLong != null) {
+      lats.add(driverCurrentLatLong!.latitude);
+      lngs.add(driverCurrentLatLong!.longitude);
+    }
+    for (final address in addressList) {
+      lats.add(getDoubleFromDynamic(address.addressLat ?? '0'));
+      lngs.add(getDoubleFromDynamic(address.addressLong ?? '0'));
+    }
+    if (lats.length >= 2) {
+      setMapFitToTourUsingLatLng(latList: lats, longList: lngs, controller: googleMapController!, padding: 56.sp);
+      return;
+    }
+    if (driverCurrentLatLong != null) {
+      focusInMap(googleMapController!, driverCurrentLatLong!.latitude, driverCurrentLatLong!.longitude, true);
+    }
   }
 
   void updateDriverMarker() {

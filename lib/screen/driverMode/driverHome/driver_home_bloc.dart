@@ -21,6 +21,7 @@ import '../../../services/dispatch_trigger_service.dart';
 import '../../../services/push_notification_service.dart';
 import '../../../utils/service_mode_util.dart';
 import '../../../utils/alert_feedback_util.dart';
+import '../../../utils/notification_payload_util.dart';
 import '../../../utils/utils.dart';
 import 'driver_availability_modes.dart';
 import '../../common/splash/splash_dl.dart';
@@ -511,7 +512,7 @@ class DriverHomeBloc extends Bloc {
         DispatchTriggerService.recordManualRefresh('refresh_available_rides');
         callAvailableRideApi(isLoading: false);
         pushNotificationService.dismissRideNotification(orderId);
-      } else if (notificationType == 9 && !isWaitingOpen) {
+      } else if (isDriverFareChangeNotification(notificationData, notificationType) && !isWaitingOpen) {
         pushNotificationService.dismissRideNotification(orderId);
         DispatchTriggerService.recordManualRefresh('refresh_available_rides');
         callAvailableRideApi(isLoading: false);

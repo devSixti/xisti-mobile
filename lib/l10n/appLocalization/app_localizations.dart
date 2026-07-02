@@ -704,6 +704,18 @@ abstract class AppLocalizations {
   /// **'Live Chat'**
   String get liveChat;
 
+  /// No description provided for @liveTrackingBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Live'**
+  String get liveTrackingBadge;
+
+  /// No description provided for @estimatedArrival.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimated arrival'**
+  String get estimatedArrival;
+
   /// No description provided for @myPreference.
   ///
   /// In en, this message translates to:
