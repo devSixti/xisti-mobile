@@ -15,8 +15,26 @@ abstract final class XistiVehicleCatalog {
   static const String bicicleta = 'bicicleta';
 
   static const _iconBase = 'assets/images/vehicle_home';
+  static const _iconDeliveryBase = 'assets/images/vehicle_home_delivery';
 
-  static String iconAsset(String variant) => '$_iconBase/$variant.png';
+  /// Envíos / encomiendas: moto medio, carro económico y bicicleta (morado).
+  static const Set<String> deliveryThemedVariants = {
+    motoMedio,
+    carroEconomico,
+    bicicleta,
+  };
+
+  static bool isDeliveryThemedVariant(String? variant) =>
+      deliveryThemedVariants.contains(variant);
+
+  static String iconAsset(String variant, {bool delivery = false}) {
+    if (delivery && isDeliveryThemedVariant(variant)) {
+      return '$_iconDeliveryBase/$variant.png';
+    }
+    return '$_iconBase/$variant.png';
+  }
+
+  static String deliveryIconAsset(String variant) => iconAsset(variant, delivery: true);
 
   static String _localizedLabel(String variant) {
     switch (variant) {
@@ -51,19 +69,19 @@ abstract final class XistiVehicleCatalog {
         DeliveryVehicleOption(
           vehicleServiceId: ServiceType.bike,
           label: languages.vehicleMoto,
-          serviceIcon: iconAsset(motoMedio),
+          serviceIcon: deliveryIconAsset(motoMedio),
           deliveryVariant: motoMedio,
         ),
         DeliveryVehicleOption(
           vehicleServiceId: ServiceType.taxi,
           label: languages.vehicleCarro,
-          serviceIcon: iconAsset(carroEconomico),
+          serviceIcon: deliveryIconAsset(carroEconomico),
           deliveryVariant: carroEconomico,
         ),
         DeliveryVehicleOption(
           vehicleServiceId: ServiceType.courier,
           label: languages.vehicleBicicleta,
-          serviceIcon: iconAsset(bicicleta),
+          serviceIcon: deliveryIconAsset(bicicleta),
           deliveryVariant: bicicleta,
         ),
       ];
@@ -120,7 +138,7 @@ abstract final class XistiVehicleCatalog {
           .map((c) => ServiceTypeItem(
                 serviceId: c.serviceId,
                 serviceName: c.serviceName,
-                serviceIcon: c.serviceIcon,
+                serviceIcon: deliveryIconAsset(c.deliveryVariant ?? ''),
                 serviceMode: serviceMode,
                 displayOrder: c.displayOrder,
                 deliveryVariant: c.deliveryVariant,
@@ -132,7 +150,7 @@ abstract final class XistiVehicleCatalog {
       return ServiceTypeItem(
         serviceId: c.serviceId,
         serviceName: c.serviceName,
-        serviceIcon: c.serviceIcon ?? iconAsset(variant),
+        serviceIcon: deliveryIconAsset(variant),
         serviceMode: serviceMode,
         displayOrder: c.displayOrder,
         deliveryVariant: variant,
@@ -181,10 +199,15 @@ abstract final class XistiVehicleCatalog {
     int? serviceId,
     String? variant,
     String? fallbackUrl,
+    bool delivery = false,
   }) {
     final v = (variant ?? '').trim();
     if (v.isNotEmpty) {
-      for (final e in [...transportOptions(), ...deliveryServiceItems()]) {
+      final useDelivery = delivery || (v != carroEconomico && isDeliveryThemedVariant(v));
+      if (useDelivery && isDeliveryThemedVariant(v)) {
+        return deliveryIconAsset(v);
+      }
+      for (final e in transportOptions()) {
         if ((e.deliveryVariant ?? '') == v && (e.serviceIcon ?? '').startsWith('assets/')) {
           return e.serviceIcon!;
         }
@@ -194,9 +217,9 @@ abstract final class XistiVehicleCatalog {
       case ServiceType.taxi:
         return iconAsset(carroEco);
       case ServiceType.bike:
-        return iconAsset(motoMedio);
+        return delivery ? deliveryIconAsset(motoMedio) : iconAsset(motoBajo);
       case ServiceType.courier:
-        return iconAsset(bicicleta);
+        return deliveryIconAsset(bicicleta);
       default:
         break;
     }
@@ -254,7 +277,7 @@ abstract final class XistiVehicleCatalog {
       merged.add(ServiceList(
         serviceId: c.serviceId,
         serviceName: existing?.serviceName.isNotEmpty == true ? existing!.serviceName : _localizedLabel(c.variant),
-        serviceIcon: iconAsset(c.variant),
+        serviceIcon: iconAsset(c.variant, delivery: c.deliveryOnly),
         serviceDescription: existing?.serviceDescription ?? '',
         vehicleTypeList: vehicleTypes,
         supportsPassengerTransportToggle: existing?.supportsPassengerTransportToggle ?? c.deliveryOnly,
