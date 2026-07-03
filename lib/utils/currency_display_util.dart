@@ -26,17 +26,36 @@ class CurrencyDisplayUtil {
     }
   }
 
+  static String formatAmount(String storedSymbol, String formattedNumber) {
+    return '${currencyBadge(storedSymbol)} $formattedNumber';
+  }
+
+  /// Display badge: `$ COP`, `$ USD`, `€ EUR`, `R$ BRL`, `$ ARS`.
+  static String currencyBadge(String storedSymbol) {
+    final code = _resolveCurrencyCode(storedSymbol);
+    switch (code) {
+      case 'COP':
+        return r'$ COP';
+      case 'USD':
+        return r'$ USD';
+      case 'EUR':
+        return '€ EUR';
+      case 'BRL':
+        return r'R$ BRL';
+      case 'ARS':
+        return r'$ ARS';
+      default:
+        final prefix = amountPrefix(storedSymbol);
+        return prefix.isEmpty ? code : '$prefix $code';
+    }
+  }
+
   static String chipLabel(CurrencyListItem item) {
-    final name = item.currencyName.trim();
-    final code = (item.currencyCode.trim().isNotEmpty ? item.currencyCode : name).trim().toUpperCase();
-    final symbol = normalizeSymbol(item.currencySymbol, currencyCode: code);
-    if (code.isNotEmpty && symbol.isNotEmpty) {
-      return '$code · $symbol';
+    final code = (item.currencyCode.trim().isNotEmpty ? item.currencyCode : item.currencyName).trim().toUpperCase();
+    if (code.isNotEmpty) {
+      return currencyBadge(code);
     }
-    if (name.isNotEmpty && symbol.isNotEmpty) {
-      return '$name · $symbol';
-    }
-    return name.isNotEmpty ? name : code;
+    return item.currencyName.trim();
   }
 
   static String amountPrefix(String storedSymbol) {
@@ -45,26 +64,6 @@ class CurrencyDisplayUtil {
     final upper = storedSymbol.trim().toUpperCase();
     if (upper.contains('COP') || upper.contains('COL')) return '\$';
     return storedSymbol.trim().isEmpty ? '\$' : storedSymbol.trim();
-  }
-
-  /// ISO-style display label for amounts: "$ 13.000", "€ 25", "R$ 100".
-  static String formatAmount(String storedSymbol, String formattedNumber) {
-    final code = _resolveCurrencyCode(storedSymbol);
-    switch (code) {
-      case 'COP':
-        return '\$ $formattedNumber';
-      case 'USD':
-        return '\$ $formattedNumber USD';
-      case 'EUR':
-        return '€ $formattedNumber EUR';
-      case 'BRL':
-        return 'R\$ $formattedNumber BRL';
-      case 'ARS':
-        return '\$ $formattedNumber ARS';
-      default:
-        final prefix = amountPrefix(storedSymbol);
-        return prefix.isEmpty ? formattedNumber : '$prefix $formattedNumber';
-    }
   }
 
   static String _resolveCurrencyCode(String storedSymbol) {

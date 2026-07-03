@@ -25,18 +25,18 @@ class SharedRideKindSelector extends StatelessWidget {
       child: Row(
         children: [
           Expanded(
-            child: _chip(context, SharedRideKind.puebloPueblo, Icons.place_outlined),
+            child: _chip(context, SharedRideKind.puebloPueblo),
           ),
           SizedBox(width: 8.w),
           Expanded(
-            child: _chip(context, SharedRideKind.puebloCiudad, Icons.location_city_outlined),
+            child: _chip(context, SharedRideKind.puebloCiudad),
           ),
         ],
       ),
     );
   }
 
-  Widget _chip(BuildContext context, String kind, IconData icon) {
+  Widget _chip(BuildContext context, String kind) {
     final isSelected = selectedKind == kind;
     final theme = getCurrentTheme(context);
     return GestureDetector(
@@ -51,26 +51,18 @@ class SharedRideKindSelector extends StatelessWidget {
             width: isSelected ? 1.5 : 1,
           ),
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, size: 16.sp, color: isSelected ? theme.colorPrimary : theme.colorIconCommon),
-            SizedBox(width: 5.w),
-            Flexible(
-              child: Text(
-                SharedRideKind.label(kind),
-                maxLines: 1,
-                textAlign: TextAlign.center,
-                overflow: TextOverflow.ellipsis,
-                style: bodyText(
-                  context: context,
-                  fontSize: 11.5.sp,
-                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                  textColor: isSelected ? theme.colorPrimary : theme.colorTextCommon,
-                ),
-              ),
-            ),
-          ],
+        alignment: Alignment.center,
+        child: Text(
+          SharedRideKind.label(kind),
+          maxLines: 1,
+          textAlign: TextAlign.center,
+          overflow: TextOverflow.ellipsis,
+          style: bodyText(
+            context: context,
+            fontSize: 11.5.sp,
+            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+            textColor: isSelected ? theme.colorPrimary : theme.colorTextCommon,
+          ),
         ),
       ),
     );

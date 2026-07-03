@@ -45,7 +45,7 @@ class DeliveryDirectionSelector extends StatelessWidget {
       onTap: () => onChanged(value),
       borderRadius: BorderRadius.circular(12.r),
       child: Container(
-        padding: EdgeInsets.symmetric(vertical: 12.h),
+        padding: EdgeInsetsDirectional.symmetric(vertical: 7.h, horizontal: 6.w),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12.r),
           border: Border.all(

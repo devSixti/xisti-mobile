@@ -97,6 +97,9 @@ abstract final class XistiUiTokens {
         return XistiBrand.purple;
       case ServiceModeKind.expreso:
         return XistiBrand.green;
+      case ServiceModeKind.acarreos:
+      case ServiceModeKind.carga:
+        return XistiBrand.purple;
       case ServiceModeKind.transport:
       default:
         return XistiBrand.green;
@@ -109,6 +112,8 @@ abstract final class XistiUiTokens {
     switch (mode) {
       case ServiceModeKind.delivery:
       case ServiceModeKind.encomiendas:
+      case ServiceModeKind.acarreos:
+      case ServiceModeKind.carga:
         return XistiBrand.purple;
       default:
         return XistiBrand.green;

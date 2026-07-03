@@ -34,6 +34,7 @@ class SharedRideFields extends StatelessWidget {
         ? '${tripDate!.day.toString().padLeft(2, '0')}/${tripDate!.month.toString().padLeft(2, '0')}/${tripDate!.year}'
         : dateHint;
 
+    final theme = getCurrentTheme(context);
     return Padding(
       padding: EdgeInsetsDirectional.only(
         start: commonHorizontalPadding,
@@ -84,19 +85,10 @@ class SharedRideFields extends StatelessWidget {
               ],
             ),
           ],
-          SizedBox(height: 12.h),
-          Container(
-            width: double.infinity,
-            padding: EdgeInsetsDirectional.all(12.w),
-            decoration: BoxDecoration(
-              color: const Color(0xFFE3F2FD),
-              borderRadius: BorderRadius.circular(12.r),
-              border: Border.all(color: const Color(0xFF1565C0).withValues(alpha: 0.35)),
-            ),
-            child: Text(
-              languages.sharedRideContributionNotice,
-              style: bodyText(context: context, fontSize: textSize12px, textColor: const Color(0xFF1565C0)),
-            ),
+          SizedBox(height: 8.h),
+          Text(
+            languages.sharedRideContributionNotice,
+            style: bodyText(context: context, fontSize: textSize12px, textColor: theme.colorTextLight),
           ),
         ],
       ),

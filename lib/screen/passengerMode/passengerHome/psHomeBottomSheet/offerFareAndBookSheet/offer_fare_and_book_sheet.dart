@@ -14,6 +14,7 @@ import '../../../../../hive/hive_helper.dart';
 import '../../../../../main.dart';
 import '../../../../../utils/destination_payment_util.dart';
 import '../../../../../commonView/xisti_bottom_sheet_shell.dart';
+import '../../../../../commonView/fare_trip_summary.dart';
 import '../../../../../commonView/xisti_horizontal_payment_selector.dart';
 import '../../../../../utils/xisti_ui_tokens.dart';
 import '../../../../../utils/utils.dart';
@@ -399,19 +400,14 @@ class _OfferFareAndBookSheetState extends State<OfferFareAndBookSheet> {
     );
   }
 
-  Container fareInfo() {
-    return Container(
-      margin: EdgeInsetsDirectional.only(top: 10.h),
-      padding: EdgeInsetsDirectional.only(start: 10.w, end: 10.w, top: 10.w, bottom: 10.w),
-      decoration: BoxDecoration(
-        color: getCurrentTheme(context).colorSelectionPrimaryOpc,
-        borderRadius: BorderRadius.circular(15.r),
-        border: Border.all(color: getCurrentTheme(context).colorPrimary, width: 0.5.sp),
-      ),
-      child: Text(
-        "${languages.recommendedFare} ${getAmountWithCurrency(widget.recommendedFare)}, ${languages.minFare} ${getAmountWithCurrency(widget.minFare)}, ${languages.maxFare} ${getAmountWithCurrency(widget.maxFare)}, ${widget.km}, ${widget.minutes}",
-        style: bodyText(context: context, fontWeight: FontWeight.w500, fontSize: textSize14px),
-      ),
+  Widget fareInfo() {
+    return FareTripSummary(
+      recommendedFare: widget.recommendedFare,
+      minFare: widget.minFare,
+      maxFare: widget.maxFare,
+      distanceLabel: widget.km.replaceAll(RegExp(r'[^0-9.,]'), '').trim(),
+      durationLabel: widget.minutes.replaceAll(RegExp(r'[^0-9]'), '').trim(),
+      accent: XistiUiTokens.deliveryAccent,
     );
   }
 

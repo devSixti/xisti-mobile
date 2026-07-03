@@ -2,6 +2,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import '../googleApi/google_api_repo.dart';
 import '../googleApi/route_detail_dl.dart';
+import 'route_metrics_util.dart';
 import 'utils.dart';
 
 class GetRoutesUtils {
@@ -13,6 +14,11 @@ class GetRoutesUtils {
     List<LatLng> wayPoints,
     Function(Map<PolylineId, Polyline> polyLines, int duration, int distance) callBack,
   ) async {
+    if (!isPlausibleRouteCoordinate(origin.latitude, origin.longitude)
+        || !isPlausibleRouteCoordinate(destination.latitude, destination.longitude)) {
+      callBack({}, 0, 0);
+      return;
+    }
     try {
       var response = RouteDetailPojo.fromJson(
         await GoogleApiRepo().routeDataApiCall(origin.latitude, origin.longitude, destination.latitude, destination.longitude, wayPoints),
@@ -41,7 +47,7 @@ class GetRoutesUtils {
         );
         polyLines[id] = polyline;
 
-        duration = int.parse((route.duration ?? "0").replaceAll(RegExp("[a-zA-Z]"), ""));
+        duration = parseRouteDurationSeconds(route.duration);
         distance = route.distanceMeters ?? 0;
         callBack(polyLines, duration, distance);
       } else {

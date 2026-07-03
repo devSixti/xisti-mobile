@@ -15,19 +15,23 @@ class SharedRideKind {
   static String label(String kind) {
     switch (normalize(kind)) {
       case puebloCiudad:
-        return languages.sharedRideTownToCity;
+        return 'Ciudad → Municipio';
       case puebloPueblo:
       default:
-        return languages.sharedRideTownToTown;
+        return 'Municipio → Ciudad';
     }
   }
 
-  static String originHint(String kind) => languages.sharedRideOriginTownHint;
+  static String originHint(String kind) {
+    return normalize(kind) == puebloCiudad
+        ? 'Ciudad de origen (ej. Medellín)'
+        : 'Municipio de origen (ej. Santa Fe de Antioquia)';
+  }
 
   static String destinationHint(String kind) {
     return normalize(kind) == puebloCiudad
-        ? languages.sharedRideDestinationCityHint
-        : languages.sharedRideDestinationTownHint;
+        ? 'Municipio de destino'
+        : 'Ciudad de destino';
   }
 
   static String destinationRequiredMessage(String kind) {

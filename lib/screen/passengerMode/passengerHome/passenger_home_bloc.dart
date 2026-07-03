@@ -22,6 +22,7 @@ import '../../../utils/delivery_direction_kind.dart';
 import '../../../utils/get_route_utils.dart';
 import '../../../utils/shared_ride_kind.dart';
 import '../../../services/passenger_location_history_service.dart';
+import '../../../utils/route_metrics_util.dart';
 import '../../../utils/service_mode_util.dart';
 import '../../../utils/xisti_vehicle_catalog.dart';
 import '../../../utils/utils.dart';
@@ -1141,7 +1142,7 @@ class PassengerHomeBloc extends Bloc {
           polyLinesController.sink.add(polyLines);
           changePolylineColorPerTheme();
           timeController.sink.add((duration / 60).round());
-          distanceController.sink.add(getDoubleFromDynamic((distance / 1000).toStringAsFixed(2)));
+          distanceController.sink.add(routeDistanceKmFromMeters(distance));
           if (googleMapController != null) {
             setMapFitToTour(polyline: Set<Polyline>.of(polyLines.values), controller: googleMapController!, padding: 50.sp);
           }
