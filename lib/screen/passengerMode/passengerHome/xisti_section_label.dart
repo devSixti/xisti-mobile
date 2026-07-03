@@ -7,40 +7,41 @@ import '../../../utils/utils.dart';
 class XistiSectionLabel extends StatelessWidget {
   final String label;
   final Color accent;
+  final Widget? trailing;
 
   const XistiSectionLabel({
     super.key,
     required this.label,
     required this.accent,
+    this.trailing,
   });
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsetsDirectional.only(
-        start: commonHorizontalPadding,
-        end: commonHorizontalPadding,
-        bottom: 8.h,
-      ),
+      padding: EdgeInsetsDirectional.only(bottom: 8.h),
       child: Row(
         children: [
           Container(
             width: 3.w,
-            height: 12.h,
+            height: 14.h,
             decoration: BoxDecoration(
               color: accent,
               borderRadius: BorderRadius.circular(2.r),
             ),
           ),
           SizedBox(width: 8.w),
-          Text(
-            label,
-            style: bodyText(
-              context: context,
-              fontSize: textSize12px,
-              fontWeight: FontWeight.w700,
+          Expanded(
+            child: Text(
+              label,
+              style: bodyText(
+                context: context,
+                fontSize: textSize14px,
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ),
+          if (trailing != null) trailing!,
         ],
       ),
     );

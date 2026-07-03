@@ -8,6 +8,7 @@ import '../../../utils/service_mode_util.dart';
 import '../../../utils/utils.dart';
 import '../../../utils/xisti_ui_tokens.dart';
 import 'passenger_home_dl.dart';
+import 'xisti_section_label.dart';
 
 /// XISTI vehicle picker — spotlight carousel, no bordered tiles (distinct from ZIMO).
 class PassengerVehicleDeck extends StatefulWidget {
@@ -85,32 +86,15 @@ class _PassengerVehicleDeckState extends State<PassengerVehicleDeck> {
               end: commonHorizontalPadding,
               bottom: 4.h,
             ),
-            child: Row(
-              children: [
-                Container(
-                  width: 3.w,
-                  height: 14.h,
-                  decoration: BoxDecoration(
-                    color: accent,
-                    borderRadius: BorderRadius.circular(2.r),
-                  ),
-                ),
-                SizedBox(width: 8.w),
-                Text(
-                  textOnly ? 'Tipo de carga' : 'Elige tu medio',
-                  style: bodyText(
-                    context: context,
-                    fontWeight: FontWeight.w700,
-                    fontSize: textSize14px,
-                  ),
-                ),
-                const Spacer(),
-                if (active.matchesSelection(widget.selected))
-                  GestureDetector(
-                    onTap: () => _openInfo(context, active),
-                    child: Icon(CustomIcons.information, size: 18.sp, color: accent),
-                  ),
-              ],
+            child: XistiSectionLabel(
+              label: textOnly ? 'Tipo de carga' : 'Elige tu medio',
+              accent: accent,
+              trailing: active.matchesSelection(widget.selected)
+                  ? GestureDetector(
+                      onTap: () => _openInfo(context, active),
+                      child: Icon(CustomIcons.information, size: 18.sp, color: accent),
+                    )
+                  : null,
             ),
           ),
           SizedBox(
@@ -176,7 +160,7 @@ class _PassengerVehicleDeckState extends State<PassengerVehicleDeck> {
                                   context: context,
                                   textColor: isActive ? accent : theme.colorTextCommon,
                                   fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
-                                  fontSize: isActive ? textSize14px : textSize12px,
+                                  fontSize: textSize14px,
                                 ),
                               ),
                             )
@@ -193,7 +177,9 @@ class _PassengerVehicleDeckState extends State<PassengerVehicleDeck> {
               },
             ),
           ),
-          if (!textOnly)
+          if (textOnly)
+            const SizedBox.shrink()
+          else
             Padding(
               padding: EdgeInsetsDirectional.symmetric(horizontal: commonHorizontalPadding),
               child: AnimatedSwitcher(

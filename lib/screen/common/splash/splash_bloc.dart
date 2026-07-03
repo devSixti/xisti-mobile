@@ -222,13 +222,13 @@ class SplashBloc extends Bloc {
   }
 
   void _handleRunningServiceFailure(int? status, {int? messageCode, required bool isDriver}) {
-    if (needsPhoneOtpCompletion() || status == 2) {
-      unawaited(_resumePendingOtp());
-      return;
-    }
     if (status == 4 || status == 5) {
       unawaited(clearSessionCredentials());
       _openWelcomeAfterDelay();
+      return;
+    }
+    if (needsPhoneOtpCompletion() || status == 2) {
+      unawaited(_resumePendingOtp());
       return;
     }
     if (isLoggedIn()) {
@@ -260,8 +260,11 @@ class SplashBloc extends Bloc {
     SessionRestoreService.syncLoggedInFlagFromStoredCredentials();
 
     if (needsPhoneOtpCompletion()) {
-      await _resumePendingOtp();
-      return;
+      if (hasStoredCredentials()) {
+        await _resumePendingOtp();
+        return;
+      }
+      await clearSessionCredentials();
     }
 
     if (!isLoggedIn() && SessionRestoreService.canRestoreBiometricSession()) {

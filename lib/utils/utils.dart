@@ -132,7 +132,8 @@ Future<void> clearSessionCredentials() async {
   await putDataInSettingBox(hivePendingPhoneOtp, false);
   await putDataInSettingBox(hiveUserVerified, 0);
   await putDataInSettingBox(hiveAccessToken, '');
-  putDataInUserInfoBox(hiveUserId, 0);
+  await putDataInUserInfoBox(hiveUserId, 0);
+  clearPendingSignupData();
 }
 
 Future<void> syncOtpDeliveryChannelFromResend() async {
@@ -208,76 +209,68 @@ Future<void> manageLoginResponse(
   String? authAttemptLoginType,
 }) async {
   final message = getApiMsg(response.message, response.messageCode);
-    if (isApiStatus(context, response.status ?? 0, message, false, messageCode: response.messageCode ?? 0)) {
-    await setDataInHive(response);
-    final loginType = response.loginType ?? getStringFromUserInfoBox(hiveLoginType);
-    final hasPhone = (response.contactNumber ?? '').trim().isNotEmpty;
-    final phoneVerified = (response.userVerified ?? 0) == 1;
-    final isPhoneAuthAttempt = authAttemptLoginType == LoginType.email;
-    final isPhoneAccount = loginType == LoginType.email;
+  if (!isApiStatus(context, response.status ?? 0, message, false, messageCode: response.messageCode ?? 0)) {
+    return;
+  }
 
-    Future<void> routeToPhoneOtp() async {
-      await putDataInSettingBox(hiveUserVerified, 0);
-      await markPhoneOtpPending();
-      if (!context.mounted) return;
+  final preservedLoginType = getStringFromUserInfoBox(hiveLoginType);
+  final preservedName = getStringFromUserInfoBox(hivePendingSignupFullName).trim().isNotEmpty
+      ? getStringFromUserInfoBox(hivePendingSignupFullName)
+      : getStringFromUserInfoBox(hiveUserName);
+  final preservedEmail = getStringFromUserInfoBox(hivePendingSignupEmail).trim().isNotEmpty
+      ? getStringFromUserInfoBox(hivePendingSignupEmail)
+      : getStringFromUserInfoBox(hiveEmail);
+
+  await setDataInHive(response);
+
+  if (isSocialLoginType(preservedLoginType)) {
+    putDataInUserInfoBox(hiveLoginType, preservedLoginType);
+    if (preservedName.trim().isNotEmpty &&
+        preservedName != '-' &&
+        preservedName.toUpperCase() != 'N/A' &&
+        (response.userName ?? '').trim().isEmpty) {
+      putDataInUserInfoBox(hiveUserName, preservedName);
+      putDataInUserInfoBox(hivePendingSignupFullName, preservedName);
+    }
+    if (preservedEmail.trim().isNotEmpty && (response.email ?? '').trim().isEmpty) {
+      putDataInUserInfoBox(hiveEmail, preservedEmail);
+      putDataInUserInfoBox(hivePendingSignupEmail, preservedEmail);
+    }
+  }
+
+  final loginType = response.loginType ?? getStringFromUserInfoBox(hiveLoginType);
+  final hasPhone = (response.contactNumber ?? '').trim().isNotEmpty;
+  final phoneVerified = (response.userVerified ?? 0) == 1;
+
+  if (!phoneVerified) {
+    await markPhoneOtpPending();
+    if (!context.mounted) return;
+    if (isSocialLoginType(loginType) && !hasPhone) {
+      openScreenWithClearPrevious(context, const SignupScreen());
+    } else {
       openScreenWithClearPrevious(context, const OtpVerifyScreen());
     }
-
-    // Phone login must always pass OTP, even when the account was originally Google/social.
-    if ((isPhoneAuthAttempt || isPhoneAccount) && !phoneVerified) {
-      await routeToPhoneOtp();
-      return;
-    }
-
-    // Returning Google/Facebook/Apple users with a completed profile go straight in.
-    if (response.isRegister == 1 && phoneVerified && isSocialLoginType(loginType)) {
-      await markSessionAuthenticated();
-      putDataInSettingBox(hiveAppMode, response.activeMode ?? AppMode.passenger);
-      unawaited(SessionRestoreService.enableBiometricLoginIfAvailable());
-      changeSubscribeTopic();
-      await getGoogleMapKeyForApiCall();
-      if (!context.mounted) return;
-      if (response.activeMode == AppMode.driver) {
-        openScreenWithClearPrevious(context, const DriverHome(isFromLogin: true));
-      } else {
-        openScreenWithClearPrevious(context, const PassengerHome(isFromLogin: true));
-      }
-      return;
-    }
-
-    if (response.isRegister == 1) {
-      if (!phoneVerified) {
-        await routeToPhoneOtp();
-        return;
-      }
-      await markSessionAuthenticated();
-      putDataInSettingBox(hiveAppMode, response.activeMode ?? AppMode.passenger);
-      unawaited(SessionRestoreService.enableBiometricLoginIfAvailable());
-      changeSubscribeTopic();
-      await getGoogleMapKeyForApiCall();
-      if (!context.mounted) return;
-      if (response.activeMode == AppMode.driver) {
-        openScreenWithClearPrevious(context, const DriverHome(isFromLogin: true));
-      } else {
-        openScreenWithClearPrevious(context, const PassengerHome(isFromLogin: true));
-      }
-      return;
-    }
-
-    if (!isUserVerified()) {
-      if (isSocialLoginType(loginType) && !hasPhone) {
-        openScreenWithClearPrevious(context, const SignupScreen());
-      } else {
-        await putDataInSettingBox(hiveUserVerified, 0);
-        await markPhoneOtpPending();
-        if (!context.mounted) return;
-        openScreenWithClearPrevious(context, const OtpVerifyScreen());
-      }
-      return;
-    }
-
-    openScreenWithClearPrevious(context, const SignupScreen());
+    return;
   }
+
+  await markSessionAuthenticated();
+
+  if (response.isRegister == 1) {
+    clearPendingSignupData();
+    putDataInSettingBox(hiveAppMode, response.activeMode ?? AppMode.passenger);
+    unawaited(SessionRestoreService.enableBiometricLoginIfAvailable());
+    changeSubscribeTopic();
+    await getGoogleMapKeyForApiCall();
+    if (!context.mounted) return;
+    if (response.activeMode == AppMode.driver) {
+      openScreenWithClearPrevious(context, const DriverHome(isFromLogin: true));
+    } else {
+      openScreenWithClearPrevious(context, const PassengerHome(isFromLogin: true));
+    }
+    return;
+  }
+
+  openScreenWithClearPrevious(context, const SignupScreen());
 }
 
 bool isApiStatus(
@@ -304,9 +297,6 @@ bool isApiStatus(
       return true;
     case 2:
       showApiMessage(context, showMess, message, messageCode, hideMessOnCodeList);
-      if (hasStoredCredentials() && !isUserVerified()) {
-        unawaited(markPhoneOtpPending());
-      }
       return false;
     case 3:
       showSimpleDialogWithMessAndLogout(context: context, message: message);

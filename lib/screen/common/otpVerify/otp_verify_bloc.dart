@@ -47,7 +47,7 @@ class OtpVerifyBloc extends Bloc {
         final message = getApiMsg(response.message, response.messageCode);
         subjectVerify.sink.add(ApiResponse.completed(response));
         if (!context.mounted) return;
-        if (isApiStatus(context, response.status ?? 0, message, true, messageCode: response.messageCode ?? 0)) {
+        if (isApiStatus(context, response.status ?? 0, message, false, messageCode: response.messageCode ?? 0)) {
           await markSessionAuthenticated();
           final pendingSocialSignup = getBoolFromSettingBox(hivePendingSignupAfterOtp);
           final registrationComplete = (response.isRegister ?? 0) == 1;
@@ -58,6 +58,11 @@ class OtpVerifyBloc extends Bloc {
               clearPendingSignupData();
             }
             await manageLoginResponse(context, response);
+          }
+        } else if (response.status == 4 || response.status == 5) {
+          await clearSessionCredentials();
+          if (context.mounted) {
+            await navigateToWelcome(context);
           }
         } else {
           openSimpleSnackbar(context, message);
@@ -116,7 +121,7 @@ class OtpVerifyBloc extends Bloc {
 
         String message = getApiMsg(response.message);
         if (!context.mounted) return;
-        if (isApiStatus(context, response.status, message, true)) {
+        if (isApiStatus(context, response.status, message, false)) {
           subjectResend.sink.add(ApiResponse.completed(response));
           final deliveredViaWhatsapp =
               channel == 'whatsapp' || response.otpDeliveryChannel == 'whatsapp';
