@@ -291,9 +291,14 @@ abstract final class XistiVehicleCatalog {
   /// Driver manage-vehicle screen: only viajes matrix (no envío genérico).
   static List<ServiceList> mergeDriverTransportRegistrationApi(List<ServiceList> apiRows) {
     final all = mergeDriverServiceApi(apiRows);
-    return all
-        .where((s) => transportRegistrationVariants.contains(s.deliveryVariant.trim()))
-        .toList();
+    final seen = <String>{};
+    return all.where((s) {
+      final v = s.deliveryVariant.trim();
+      if (!transportRegistrationVariants.contains(v)) return false;
+      if (seen.contains(v)) return false;
+      seen.add(v);
+      return true;
+    }).toList();
   }
 
   static bool showTaxiOptionForVariant(String? variant) => taxiEligibleVariant(variant);

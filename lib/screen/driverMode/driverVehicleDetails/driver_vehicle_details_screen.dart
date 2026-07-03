@@ -167,13 +167,13 @@ class _DriverVehicleDetailsScreenState extends State<DriverVehicleDetailsScreen>
       return null;
     }
 
-    final chipData = <({String label, String icon, String variant, bool active})>[
-      (label: languages.vehicleMoto, icon: XistiVehicleCatalog.motoMedio, variant: XistiVehicleCatalog.motoMedio, active: false),
-      (label: languages.vehicleCarro, icon: XistiVehicleCatalog.carroEco, variant: XistiVehicleCatalog.carroEco, active: false),
-      (label: languages.vehicleBicicleta, icon: XistiVehicleCatalog.bicicleta, variant: XistiVehicleCatalog.bicicleta, active: false),
-      (label: languages.haulMotocarguero, icon: XistiVehicleCatalog.motocarguero, variant: XistiVehicleCatalog.motocarguero, active: false),
-      (label: languages.haulTruck, icon: XistiVehicleCatalog.camionAcarreo, variant: XistiVehicleCatalog.camionAcarreo, active: false),
-      (label: languages.haulCage, icon: XistiVehicleCatalog.jaulaAcarreo, variant: XistiVehicleCatalog.jaulaAcarreo, active: false),
+    final chipData = <({String label, String icon, String variant})>[
+      (label: languages.vehicleMoto, icon: XistiVehicleCatalog.motoMedio, variant: XistiVehicleCatalog.motoMedio),
+      (label: languages.vehicleCarro, icon: XistiVehicleCatalog.carroEco, variant: XistiVehicleCatalog.carroEco),
+      (label: languages.vehicleBicicleta, icon: XistiVehicleCatalog.bicicleta, variant: XistiVehicleCatalog.bicicleta),
+      (label: languages.haulMotocarguero, icon: XistiVehicleCatalog.motocarguero, variant: XistiVehicleCatalog.motocarguero),
+      (label: languages.haulTruck, icon: XistiVehicleCatalog.camionAcarreo, variant: XistiVehicleCatalog.camionAcarreo),
+      (label: languages.haulCage, icon: XistiVehicleCatalog.jaulaAcarreo, variant: XistiVehicleCatalog.jaulaAcarreo),
     ];
 
     bool _isActiveChip(String chipVariant) {
