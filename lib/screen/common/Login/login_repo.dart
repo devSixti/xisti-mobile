@@ -23,6 +23,7 @@ class LoginRepo {
         ApiParam.paramSelectCountryCode: countryCode,
         ApiParam.paramSelectCurrency: getStringFromSettingBox(hiveSelectedCurrency),
       },
+      showServerErrorOnFailure: false,
     );
     return response;
   }

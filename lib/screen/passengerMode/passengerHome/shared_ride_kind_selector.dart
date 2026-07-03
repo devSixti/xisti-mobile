@@ -19,11 +19,7 @@ class SharedRideKindSelector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsetsDirectional.only(
-        start: commonHorizontalPadding,
-        end: commonHorizontalPadding,
-        bottom: 6.h,
-      ),
+      padding: EdgeInsetsDirectional.zero,
       child: Row(
         children: [
           Expanded(
@@ -46,7 +42,7 @@ class SharedRideKindSelector extends StatelessWidget {
       onTap: () => onKindChanged(kind),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 220),
-        padding: EdgeInsetsDirectional.symmetric(vertical: 8.h, horizontal: 6.w),
+        padding: EdgeInsetsDirectional.symmetric(vertical: 10.h, horizontal: 8.w),
         decoration: BoxDecoration(
           color: isSelected ? accent.withValues(alpha: 0.12) : theme.colorScaffoldBg,
           borderRadius: BorderRadius.circular(12.r),

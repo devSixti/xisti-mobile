@@ -12,6 +12,7 @@ class OtpVerifyRepo {
         ApiParam.paramAccessToken: getStringFromSettingBox(hiveAccessToken),
         ApiParam.paramOtp: otp,
       },
+      showServerErrorOnFailure: false,
     );
     return response;
   }
@@ -25,6 +26,7 @@ class OtpVerifyRepo {
         ApiParam.paramChannel: channel,
         ApiParam.paramForceResend: forceResend ? 1 : 0,
       },
+      showServerErrorOnFailure: false,
     );
     return response;
   }

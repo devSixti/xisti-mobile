@@ -99,7 +99,7 @@ class OtpVerifyBloc extends Bloc {
         await setDataInHive(response);
         await markSessionAuthenticated();
         unawaited(SessionRestoreService.enableBiometricLoginIfAvailable());
-        await getGoogleMapKeyForApiCall();
+        unawaited(getGoogleMapKeyForApiCall());
         if (!context.mounted) return;
         openScreenWithClearPrevious(context, const PassengerHome());
       }

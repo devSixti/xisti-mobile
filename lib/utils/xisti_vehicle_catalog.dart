@@ -28,7 +28,9 @@ abstract final class XistiVehicleCatalog {
       deliveryThemedVariants.contains(variant);
 
   static String iconAsset(String variant, {bool delivery = false}) {
-    final assetVariant = _displayIconVariant(variant);
+    final assetVariant = delivery && isDeliveryThemedVariant(variant)
+        ? variant
+        : _displayIconVariant(variant);
     if (delivery && isDeliveryThemedVariant(assetVariant)) {
       return '$_iconDeliveryBase/$assetVariant.png';
     }

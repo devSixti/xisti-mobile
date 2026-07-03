@@ -27,7 +27,6 @@ import 'delivery_quick_fields.dart';
 import 'delivery_direction_selector.dart';
 import 'shared_ride_kind_selector.dart';
 import 'shared_ride_fields.dart';
-import 'shared_ride_vehicle_selector.dart';
 import 'acarreo_quick_fields.dart';
 import 'mode_service_hint.dart';
 import 'service_mode_context_strip.dart';
@@ -228,7 +227,7 @@ class _PassengerHomeState extends State<PassengerHome> {
       serviceModeContextStrip(),
       modeServiceHint(),
       sharedRideKindSelector(),
-      sharedRideVehicleSelector(),
+      sharedRideAddressFields(),
       deliveryDirectionSelector(),
       Padding(
         padding: EdgeInsetsDirectional.only(top: 4.h, bottom: 8.h),
@@ -279,22 +278,6 @@ class _PassengerHomeState extends State<PassengerHome> {
 
   bool _isAcarreosMode(String? mode) => ServiceModeKind.isAcarreosMode(mode);
 
-  Widget sharedRideVehicleSelector() => StreamBuilder<String>(
-    stream: _bloc?.selectedServiceModeSubject,
-    builder: (context, snap) {
-      if (!_isSharedRidesMode(snap.data)) return const SizedBox.shrink();
-      return StreamBuilder<String?>(
-        stream: _bloc?.selectedSharedRideVehicleSubject,
-        builder: (context, variantSnap) {
-          return SharedRideVehicleSelector(
-            selectedVariant: variantSnap.data,
-            onChanged: _bloc!.selectSharedRideVehicle,
-          );
-        },
-      );
-    },
-  );
-
   Widget sharedRideKindSelector() => StreamBuilder<String>(
     stream: _bloc?.selectedServiceModeSubject,
     builder: (context, snap) {
@@ -302,18 +285,25 @@ class _PassengerHomeState extends State<PassengerHome> {
       return StreamBuilder<String>(
         stream: _bloc?.selectedSharedRideKindSubject,
         builder: (context, kindSnap) {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              XistiSectionLabel(
-                label: 'Tipo de ruta',
-                accent: XistiUiTokens.accentForMode(snap.data),
-              ),
-              SharedRideKindSelector(
-                selectedKind: kindSnap.data ?? SharedRideKind.defaultKind,
-                onKindChanged: _bloc!.selectSharedRideKind,
-              ),
-            ],
+          return Padding(
+            padding: EdgeInsetsDirectional.only(
+              start: commonHorizontalPadding,
+              end: commonHorizontalPadding,
+              bottom: 6.h,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                XistiSectionLabel(
+                  label: 'Tipo de ruta',
+                  accent: XistiUiTokens.accentForMode(snap.data),
+                ),
+                SharedRideKindSelector(
+                  selectedKind: kindSnap.data ?? SharedRideKind.defaultKind,
+                  onKindChanged: _bloc!.selectSharedRideKind,
+                ),
+              ],
+            ),
           );
         },
       );
@@ -1036,6 +1026,9 @@ class _PassengerHomeState extends State<PassengerHome> {
                 return getServiceDataShimmer();
               }
               if (serviceTypeList.isEmpty) {
+                if (_isSharedRidesMode(modeSnap.data)) {
+                  return const SizedBox.shrink();
+                }
                 return Padding(
                   padding: EdgeInsetsDirectional.symmetric(horizontal: commonHorizontalPadding, vertical: 12.h),
                   child: Text(
@@ -1052,11 +1045,40 @@ class _PassengerHomeState extends State<PassengerHome> {
                 return StreamBuilder<ServiceTypeItem?>(
                   stream: _bloc?.subjectSelectedServiceData,
                   builder: (context, snapSelected) {
-                    return PassengerVehicleDeck(
-                      vehicles: serviceTypeList,
-                      selected: snapSelected.data,
-                      serviceMode: modeSnap.data,
-                      onSelect: (index) => _bloc?.vehicleSelect(index),
+                    return Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        PassengerVehicleDeck(
+                          vehicles: serviceTypeList,
+                          selected: snapSelected.data,
+                          serviceMode: modeSnap.data,
+                          sectionLabel: _isSharedRidesMode(modeSnap.data) ? 'Tipo de vehículo' : null,
+                          onSelect: (index) => _bloc?.vehicleSelect(index),
+                        ),
+                        if (_isSharedRidesMode(modeSnap.data))
+                          StreamBuilder<String?>(
+                            stream: _bloc?.selectedSharedRideVehicleSubject,
+                            builder: (context, variantSnap) {
+                              final accent = XistiUiTokens.accentForMode(modeSnap.data);
+                              return Align(
+                                alignment: AlignmentDirectional.centerEnd,
+                                child: Padding(
+                                  padding: EdgeInsetsDirectional.only(
+                                    end: commonHorizontalPadding,
+                                    bottom: 4.h,
+                                  ),
+                                  child: TextButton(
+                                    onPressed: variantSnap.data == null ? null : () => _bloc?.selectSharedRideVehicle(null),
+                                    child: Text(
+                                      'Cualquier tipo',
+                                      style: bodyText(context: context, fontSize: textSize12px, textColor: accent),
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                      ],
                     );
                   },
                 );

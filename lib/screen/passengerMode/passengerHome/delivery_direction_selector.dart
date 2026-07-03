@@ -46,7 +46,7 @@ class DeliveryDirectionSelector extends StatelessWidget {
       borderRadius: BorderRadius.circular(12.r),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 220),
-        padding: EdgeInsetsDirectional.symmetric(vertical: 8.h, horizontal: 6.w),
+        padding: EdgeInsetsDirectional.symmetric(vertical: 10.h, horizontal: 8.w),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12.r),
           border: Border.all(

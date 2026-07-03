@@ -6,7 +6,7 @@ import '../../../utils/utils.dart';
 import '../../../utils/xisti_service_mode_presentation.dart';
 import '../../../utils/xisti_ui_tokens.dart';
 
-class ServiceModeSelector extends StatelessWidget {
+class ServiceModeSelector extends StatefulWidget {
   final String selectedMode;
   final List<ServiceModeGroup> groups;
   final ValueChanged<String> onModeSelected;
@@ -21,29 +21,64 @@ class ServiceModeSelector extends StatelessWidget {
   });
 
   @override
+  State<ServiceModeSelector> createState() => _ServiceModeSelectorState();
+}
+
+class _ServiceModeSelectorState extends State<ServiceModeSelector> {
+  final ScrollController _slimRailController = ScrollController();
+  final List<GlobalKey> _pillKeys = [];
+
+  @override
+  void dispose() {
+    _slimRailController.dispose();
+    super.dispose();
+  }
+
+  @override
+  void didUpdateWidget(covariant ServiceModeSelector oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.selectedMode != widget.selectedMode) {
+      _scrollSelectedIntoView();
+    }
+  }
+
+  List<ServiceModeGroup> get _visibleGroups => widget.groups.isNotEmpty
+      ? widget.groups
+      : [
+          ServiceModeGroup(mode: ServiceModeKind.transport, label: languages.serviceModeTrips, displayOrder: 1, services: []),
+          ServiceModeGroup(mode: ServiceModeKind.delivery, label: languages.serviceModeDelivery, displayOrder: 2, services: []),
+        ];
+
+  void _scrollSelectedIntoView() {
+    if (!widget.useSlimRail) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final groups = _visibleGroups;
+      final index = groups.indexWhere((group) => group.mode == widget.selectedMode);
+      if (index < 0 || index >= _pillKeys.length) return;
+      final context = _pillKeys[index].currentContext;
+      if (context == null) return;
+      Scrollable.ensureVisible(
+        context,
+        alignment: 0.5,
+        duration: const Duration(milliseconds: 280),
+        curve: Curves.easeOutCubic,
+      );
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final visible = groups.isNotEmpty
-        ? groups
-        : [
-            ServiceModeGroup(mode: ServiceModeKind.transport, label: languages.serviceModeTrips, displayOrder: 1, services: []),
-            ServiceModeGroup(mode: ServiceModeKind.delivery, label: languages.serviceModeDelivery, displayOrder: 2, services: []),
-          ];
+    final visible = _visibleGroups;
 
-    final cards = <Widget>[
-      for (var i = 0; i < visible.length; i++)
-        _ModeCard(
-          context: context,
-          title: _titleFor(visible[i]),
-          subtitle: _subtitleFor(visible[i].mode),
-          icon: _iconFor(visible[i].mode),
-          mode: visible[i].mode,
-          selected: selectedMode == visible[i].mode,
-          onTap: () => onModeSelected(visible[i].mode),
-          compact: visible.length > 2,
-        ),
-    ];
+    if (widget.useSlimRail) {
+      while (_pillKeys.length < visible.length) {
+        _pillKeys.add(GlobalKey());
+      }
+      if (_pillKeys.length > visible.length) {
+        _pillKeys.removeRange(visible.length, _pillKeys.length);
+      }
+      WidgetsBinding.instance.addPostFrameCallback((_) => _scrollSelectedIntoView());
 
-    if (useSlimRail) {
       return Padding(
         padding: EdgeInsetsDirectional.only(
           start: commonHorizontalPadding,
@@ -59,18 +94,20 @@ class ServiceModeSelector extends StatelessWidget {
           child: Padding(
             padding: EdgeInsets.all(4.w),
             child: SingleChildScrollView(
+              controller: _slimRailController,
               scrollDirection: Axis.horizontal,
               child: Row(
                 children: [
                   for (var i = 0; i < visible.length; i++) ...[
                     if (i > 0) SizedBox(width: 6.w),
                     _SlimModePill(
+                      key: _pillKeys[i],
                       context: context,
                       title: _titleFor(visible[i]),
                       mode: visible[i].mode,
                       icon: _iconFor(visible[i].mode),
-                      selected: selectedMode == visible[i].mode,
-                      onTap: () => onModeSelected(visible[i].mode),
+                      selected: widget.selectedMode == visible[i].mode,
+                      onTap: () => widget.onModeSelected(visible[i].mode),
                     ),
                   ],
                 ],
@@ -80,6 +117,20 @@ class ServiceModeSelector extends StatelessWidget {
         ),
       );
     }
+
+    final cards = <Widget>[
+      for (var i = 0; i < visible.length; i++)
+        _ModeCard(
+          context: context,
+          title: _titleFor(visible[i]),
+          subtitle: _subtitleFor(visible[i].mode),
+          icon: _iconFor(visible[i].mode),
+          mode: visible[i].mode,
+          selected: widget.selectedMode == visible[i].mode,
+          onTap: () => widget.onModeSelected(visible[i].mode),
+          compact: visible.length > 2,
+        ),
+    ];
 
     if (visible.length <= 2) {
       return Padding(
@@ -134,6 +185,7 @@ class _SlimModePill extends StatelessWidget {
   final VoidCallback onTap;
 
   const _SlimModePill({
+    super.key,
     required this.context,
     required this.title,
     required this.mode,

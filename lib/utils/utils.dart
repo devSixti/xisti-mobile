@@ -329,7 +329,7 @@ Future<void> manageLoginResponse(
     putDataInSettingBox(hiveAppMode, response.activeMode ?? AppMode.passenger);
     unawaited(SessionRestoreService.enableBiometricLoginIfAvailable());
     changeSubscribeTopic();
-    await getGoogleMapKeyForApiCall();
+    unawaited(getGoogleMapKeyForApiCall());
     if (!context.mounted) return;
     if (response.activeMode == AppMode.driver) {
       openScreenWithClearPrevious(context, const DriverHome(isFromLogin: true));

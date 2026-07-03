@@ -16,6 +16,7 @@ class PassengerVehicleDeck extends StatefulWidget {
   final ServiceTypeItem? selected;
   final String? serviceMode;
   final ValueChanged<int> onSelect;
+  final String? sectionLabel;
 
   const PassengerVehicleDeck({
     super.key,
@@ -23,6 +24,7 @@ class PassengerVehicleDeck extends StatefulWidget {
     required this.selected,
     required this.onSelect,
     this.serviceMode,
+    this.sectionLabel,
   });
 
   @override
@@ -87,7 +89,7 @@ class _PassengerVehicleDeckState extends State<PassengerVehicleDeck> {
               bottom: 4.h,
             ),
             child: XistiSectionLabel(
-              label: textOnly ? 'Tipo de carga' : 'Elige tu medio',
+              label: sectionLabel ?? (textOnly ? 'Tipo de carga' : 'Elige tu medio'),
               accent: accent,
               trailing: active.matchesSelection(widget.selected)
                   ? GestureDetector(

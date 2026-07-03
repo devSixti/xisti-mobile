@@ -627,8 +627,27 @@ class PassengerHomeBloc extends Bloc {
       return;
     }
     if (ServiceModeKind.isSharedRideMode(mode)) {
-      filteredServicesSubject.add([]);
-      subjectSelectedServiceData.add(null);
+      final cars = XistiVehicleCatalog.transportOptions()
+          .where((item) => [
+                XistiVehicleCatalog.carroEconomico,
+                XistiVehicleCatalog.carroEco,
+                XistiVehicleCatalog.carroComodo,
+              ].contains(item.deliveryVariant))
+          .toList();
+      filteredServicesSubject.add(cars);
+      final selectedVariant = selectedSharedRideVehicleSubject.valueOrNull;
+      if (selectedVariant != null) {
+        final idx = cars.indexWhere((item) => item.deliveryVariant == selectedVariant);
+        if (idx >= 0) {
+          subjectSelectedServiceData.add(cars[idx]);
+        } else {
+          subjectSelectedServiceData.add(null);
+        }
+      } else if (cars.isNotEmpty) {
+        subjectSelectedServiceData.add(cars.first);
+      } else {
+        subjectSelectedServiceData.add(null);
+      }
       return;
     }
     ServiceModeGroup? matched;
@@ -670,7 +689,9 @@ class PassengerHomeBloc extends Bloc {
     if (position < 0 || position >= filtered.length) return;
     final selectedServiceType = filtered[position];
     subjectSelectedServiceData.sink.add(selectedServiceType);
-    if (isAcarreosMode) {
+    if (isSharedRidesMode) {
+      selectSharedRideVehicle(selectedServiceType.deliveryVariant);
+    } else if (isAcarreosMode) {
       final variant = selectedServiceType.deliveryVariant ?? '';
       DeliveryVehicleOption? matched;
       for (final opt in acarreoVehicleOptions) {
@@ -757,6 +778,18 @@ class PassengerHomeBloc extends Bloc {
 
   void selectSharedRideVehicle(String? variant) {
     selectedSharedRideVehicleSubject.add(variant);
+    if (!isSharedRidesMode) {
+      return;
+    }
+    if (variant == null) {
+      subjectSelectedServiceData.add(null);
+      return;
+    }
+    final filtered = filteredServicesSubject.valueOrNull ?? [];
+    final idx = filtered.indexWhere((item) => item.deliveryVariant == variant);
+    if (idx >= 0) {
+      subjectSelectedServiceData.add(filtered[idx]);
+    }
   }
 
   Future<void> callSharedRideSearch() async {
