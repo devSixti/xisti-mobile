@@ -123,111 +123,122 @@ class _DriverVehicleDetailsScreenState extends State<DriverVehicleDetailsScreen>
   }
 
   Widget _vehicleFamilySelectionView({required List<ServiceList> allServices, required ServiceList selected}) {
-    final isMoto = selected.serviceId == ServiceType.bike;
-    final isCar = selected.serviceId == ServiceType.taxi;
-    final isBike = selected.serviceId == ServiceType.courier ||
-        selected.deliveryVariant == XistiVehicleCatalog.bicicleta;
-    final isCarga = selected.serviceId == ServiceType.rickshaw ||
-        XistiVehicleCatalog.isAcarreoVariant(selected.deliveryVariant);
+    final selectedVariant = selected.deliveryVariant.trim();
 
-    Widget familyChip({required String label, required String iconVariant, required bool active, required VoidCallback onTap}) {
+    Widget vehicleChip({required String label, required String iconVariant, required bool active, required VoidCallback onTap}) {
       final theme = getCurrentTheme(context);
-      return Expanded(
-        child: GestureDetector(
-          onTap: onTap,
-          child: Container(
-            margin: EdgeInsetsDirectional.only(end: 8.w),
-            padding: EdgeInsetsDirectional.symmetric(vertical: 16.h, horizontal: 6.w),
-            decoration: BoxDecoration(
-              color: Colors.transparent,
-              borderRadius: BorderRadius.circular(18.r),
-              border: Border.all(
-                color: active ? theme.colorPrimary : theme.colorBorder.withValues(alpha: 0.5),
-                width: active ? 2.w : 1.w,
+      return GestureDetector(
+        onTap: onTap,
+        child: Container(
+          width: 100.w,
+          margin: EdgeInsetsDirectional.only(end: 10.w),
+          padding: EdgeInsetsDirectional.symmetric(vertical: 14.h, horizontal: 6.w),
+          decoration: BoxDecoration(
+            color: Colors.transparent,
+            borderRadius: BorderRadius.circular(18.r),
+            border: Border.all(
+              color: active ? theme.colorPrimary : theme.colorBorder.withValues(alpha: 0.5),
+              width: active ? 2.w : 1.w,
+            ),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              XistiVehicleImage(imagePath: XistiVehicleCatalog.iconAsset(iconVariant), size: 64.w),
+              SizedBox(height: 6.h),
+              Text(
+                label,
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: bodyText(context: context, fontWeight: active ? FontWeight.w700 : FontWeight.w500, fontSize: textSize10px),
               ),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                XistiVehicleImage(imagePath: XistiVehicleCatalog.iconAsset(iconVariant), size: 72.w),
-                SizedBox(height: 6.h),
-                Text(
-                  label,
-                  textAlign: TextAlign.center,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: bodyText(context: context, fontWeight: active ? FontWeight.w700 : FontWeight.w500, fontSize: textSize12px),
-                ),
-              ],
-            ),
+            ],
           ),
         ),
       );
     }
 
+    ServiceList? _findVariant(String variant) {
+      final list = _bloc?.serviceList ?? [];
+      for (final s in list) {
+        if (s.deliveryVariant.trim() == variant) return s;
+      }
+      return null;
+    }
+
+    final chipData = <({String label, String icon, String variant, bool active})>[
+      (label: languages.vehicleMoto, icon: XistiVehicleCatalog.motoMedio, variant: XistiVehicleCatalog.motoMedio, active: false),
+      (label: languages.vehicleCarro, icon: XistiVehicleCatalog.carroEco, variant: XistiVehicleCatalog.carroEco, active: false),
+      (label: languages.vehicleBicicleta, icon: XistiVehicleCatalog.bicicleta, variant: XistiVehicleCatalog.bicicleta, active: false),
+      (label: languages.haulMotocarguero, icon: XistiVehicleCatalog.motocarguero, variant: XistiVehicleCatalog.motocarguero, active: false),
+      (label: languages.haulTruck, icon: XistiVehicleCatalog.camionAcarreo, variant: XistiVehicleCatalog.camionAcarreo, active: false),
+      (label: languages.haulCage, icon: XistiVehicleCatalog.jaulaAcarreo, variant: XistiVehicleCatalog.jaulaAcarreo, active: false),
+    ];
+
+    bool _isActiveChip(String chipVariant) {
+      if (chipVariant == XistiVehicleCatalog.motoMedio) {
+        return selected.serviceId == ServiceType.bike;
+      }
+      if (chipVariant == XistiVehicleCatalog.carroEco) {
+        return selected.serviceId == ServiceType.taxi;
+      }
+      if (chipVariant == XistiVehicleCatalog.bicicleta) {
+        return selected.serviceId == ServiceType.courier || selectedVariant == XistiVehicleCatalog.bicicleta;
+      }
+      return selectedVariant == chipVariant;
+    }
+
+    void _onChipTap(String chipVariant) {
+      if (chipVariant == XistiVehicleCatalog.motoMedio) {
+        final variants = _bloc?.variantsForFamily(ServiceType.bike) ?? [];
+        if (variants.isNotEmpty) _bloc?.selectTransportVariant(variants.first);
+      } else if (chipVariant == XistiVehicleCatalog.carroEco) {
+        final variants = _bloc?.variantsForFamily(ServiceType.taxi) ?? [];
+        if (variants.isNotEmpty) _bloc?.selectTransportVariant(variants.first);
+      } else if (chipVariant == XistiVehicleCatalog.bicicleta) {
+        final bike = _bloc?.serviceList.where((s) => s.serviceId == ServiceType.courier || s.deliveryVariant == XistiVehicleCatalog.bicicleta).toList() ?? [];
+        if (bike.isNotEmpty) _bloc?.selectTransportVariant(bike.first);
+      } else {
+        final target = _findVariant(chipVariant);
+        if (target != null) _bloc?.selectTransportVariant(target);
+      }
+    }
+
     return Padding(
       padding: EdgeInsetsDirectional.only(bottom: 20.h),
       child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            familyChip(
-              label: languages.vehicleMoto,
-              iconVariant: XistiVehicleCatalog.motoMedio,
-              active: isMoto,
-              onTap: () {
-                final variants = _bloc?.variantsForFamily(ServiceType.bike) ?? [];
-                if (variants.isNotEmpty) _bloc?.selectTransportVariant(variants.first);
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            height: 120.h,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              padding: EdgeInsetsDirectional.zero,
+              itemCount: chipData.length,
+              itemBuilder: (context, index) {
+                final chip = chipData[index];
+                return vehicleChip(
+                  label: chip.label,
+                  iconVariant: chip.icon,
+                  active: _isActiveChip(chip.variant),
+                  onTap: () => _onChipTap(chip.variant),
+                );
               },
             ),
-            familyChip(
-              label: languages.vehicleCarro,
-              iconVariant: XistiVehicleCatalog.carroEco,
-              active: isCar,
-              onTap: () {
-                final variants = _bloc?.variantsForFamily(ServiceType.taxi) ?? [];
-                if (variants.isNotEmpty) _bloc?.selectTransportVariant(variants.first);
-              },
-            ),
-            familyChip(
-              label: languages.vehicleBicicleta,
-              iconVariant: XistiVehicleCatalog.bicicleta,
-              active: isBike,
-              onTap: () {
-                final bike = _bloc?.serviceList
-                        .where((s) =>
-                            s.serviceId == ServiceType.courier ||
-                            s.deliveryVariant == XistiVehicleCatalog.bicicleta)
-                        .toList() ??
-                    [];
-                if (bike.isNotEmpty) _bloc?.selectTransportVariant(bike.first);
-              },
-            ),
-            familyChip(
-              label: languages.vehicleCarga,
-              iconVariant: XistiVehicleCatalog.motocarguero,
-              active: isCarga,
-              onTap: () {
-                final carga = _bloc?.serviceList
-                        .where((s) =>
-                            s.serviceId == ServiceType.rickshaw ||
-                            XistiVehicleCatalog.isAcarreoVariant(s.deliveryVariant))
-                        .toList() ??
-                    [];
-                if (carga.isNotEmpty) _bloc?.selectTransportVariant(carga.first);
-              },
-            ),
-          ],
-        ),
-        SizedBox(height: 16.h),
-        _vehicleVariantSelection(selected: selected),
-      ],
-    ),
+          ),
+          SizedBox(height: 16.h),
+          _vehicleVariantSelection(selected: selected),
+        ],
+      ),
     );
   }
 
   Widget _vehicleVariantSelection({required ServiceList selected}) {
+    if (selected.serviceId == ServiceType.rickshaw ||
+        XistiVehicleCatalog.isAcarreoVariant(selected.deliveryVariant)) {
+      return const SizedBox.shrink();
+    }
     final variants = _bloc?.variantsForFamily(selected.serviceId) ?? [];
     if (variants.isEmpty) return const SizedBox.shrink();
 

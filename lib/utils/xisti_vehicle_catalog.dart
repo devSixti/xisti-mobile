@@ -313,12 +313,15 @@ abstract final class XistiVehicleCatalog {
     final merged = <ServiceList>[];
     for (final c in _driverCatalogRows()) {
       final existing = byVariant[c.variant];
-      final vehicleTypes = existing?.vehicleTypeList ??
+      var vehicleTypes = existing?.vehicleTypeList ??
           typesByServiceId[c.serviceId] ??
           [];
+      if (vehicleTypes.isEmpty && isAcarreoVariant(c.variant)) {
+        vehicleTypes = [_syntheticVehicleType(c.variant)];
+      }
       final filteredTypes = _filterVehicleTypesForVariant(c.variant, c.serviceId, vehicleTypes);
       merged.add(ServiceList(
-        serviceId: c.serviceId,
+        serviceId: existing?.serviceId ?? c.serviceId,
         serviceName: existing?.serviceName.isNotEmpty == true ? existing!.serviceName : _localizedLabel(c.variant),
         serviceIcon: iconAsset(c.variant, delivery: c.deliveryOnly),
         serviceDescription: existing?.serviceDescription ?? '',
@@ -331,6 +334,15 @@ abstract final class XistiVehicleCatalog {
       ));
     }
     return merged;
+  }
+
+  static VehicleTypeList _syntheticVehicleType(String variant) {
+    const ids = {motocarguero: 9001, camionAcarreo: 9002, jaulaAcarreo: 9003};
+    return VehicleTypeList(
+      vehicleTypeId: ids[variant] ?? 9001,
+      vehicleTypeName: _localizedLabel(variant),
+      vehicleIcon: iconAsset(variant),
+    );
   }
 
   static List<VehicleTypeList> _filterVehicleTypesForVariant(
