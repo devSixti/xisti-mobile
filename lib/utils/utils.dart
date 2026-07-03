@@ -137,7 +137,7 @@ Future<void> clearSessionCredentials() async {
 
 Future<void> syncOtpDeliveryChannelFromResend() async {
   try {
-    final response = BaseModel.fromJson(await OtpVerifyRepo().callResendOtpApi());
+    final response = BaseModel.fromJson(await OtpVerifyRepo().callResendOtpApi(forceResend: false));
     final channel = response.otpDeliveryChannel;
     if (channel.isNotEmpty) {
       await putDataInSettingBox(hiveOtpDeliveryChannel, channel);
@@ -146,7 +146,6 @@ Future<void> syncOtpDeliveryChannelFromResend() async {
 }
 
 Future<void> navigateToOtpResume(BuildContext context) async {
-  await syncOtpDeliveryChannelFromResend();
   if (!context.mounted) return;
   openScreenWithClearPrevious(context, const OtpVerifyScreen());
 }
@@ -220,7 +219,6 @@ Future<void> manageLoginResponse(
     Future<void> routeToPhoneOtp() async {
       await putDataInSettingBox(hiveUserVerified, 0);
       await markPhoneOtpPending();
-      await syncOtpDeliveryChannelFromResend();
       if (!context.mounted) return;
       openScreenWithClearPrevious(context, const OtpVerifyScreen());
     }
@@ -256,7 +254,6 @@ Future<void> manageLoginResponse(
       } else {
         await putDataInSettingBox(hiveUserVerified, 0);
         await markPhoneOtpPending();
-        await syncOtpDeliveryChannelFromResend();
         if (!context.mounted) return;
         openScreenWithClearPrevious(context, const OtpVerifyScreen());
       }

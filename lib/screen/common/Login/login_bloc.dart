@@ -32,6 +32,7 @@ class LoginBloc extends Bloc {
     String? countryCode,
     required String phoneNum,
   }) async {
+    await putDataInSettingBox(hivePendingPhoneOtp, false);
     if (loginType == LoginType.email) {
       clearPendingSignupData();
     }

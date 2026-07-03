@@ -112,7 +112,7 @@ class OtpVerifyBloc extends Bloc {
     )) {
       subjectResend.sink.add(ApiResponse.loading());
       try {
-        var response = BaseModel.fromJson(await _otpVerifyRepo.callResendOtpApi(channel: channel));
+        var response = BaseModel.fromJson(await _otpVerifyRepo.callResendOtpApi(channel: channel, forceResend: true));
 
         String message = getApiMsg(response.message);
         if (!context.mounted) return;

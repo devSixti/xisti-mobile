@@ -16,13 +16,14 @@ class OtpVerifyRepo {
     return response;
   }
 
-  Future callResendOtpApi({String channel = 'sms'}) async {
+  Future callResendOtpApi({String channel = 'sms', bool forceResend = false}) async {
     final response = await _apiBaseHelper.post(
       ApiConst.endPointResendOtp,
       body: {
         ApiParam.paramUserId: getIntFromUserInfoBox(hiveUserId),
         ApiParam.paramAccessToken: getStringFromSettingBox(hiveAccessToken),
         ApiParam.paramChannel: channel,
+        ApiParam.paramForceResend: forceResend ? 1 : 0,
       },
     );
     return response;

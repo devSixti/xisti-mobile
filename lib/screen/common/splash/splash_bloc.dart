@@ -22,7 +22,6 @@ import '../../../utils/utils.dart';
 import '../../driverMode/driverHome/driver_home.dart';
 import '../../passengerMode/passengerHome/passenger_home.dart';
 import '../languageCurrency/language_currency_screen.dart';
-import '../otpVerify/otp_verify_repo.dart';
 import '../otpVerify/otp_verify_screen.dart';
 import 'splash_dl.dart';
 import 'splash_repo.dart';
@@ -246,9 +245,6 @@ class SplashBloc extends Bloc {
   }
 
   Future<void> _resumePendingOtp() async {
-    try {
-      await OtpVerifyRepo().callResendOtpApi();
-    } catch (_) {}
     if (!context.mounted) return;
     openScreenWithClearPrevious(context, const OtpVerifyScreen());
   }
