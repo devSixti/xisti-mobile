@@ -34,42 +34,65 @@ class OtpVerifyBloc extends Bloc {
   DateTime timer = DateTime.now();
   PinInputController pinInputController = PinInputController();
 
-  Future<void> verify() async {
-    if (await isNetworkConnected(
-      onRetryPressedCallApi: () {
-        verify();
-      },
-    )) {
-      subjectVerify.sink.add(ApiResponse.loading());
-      try {
-        var response = LoginPojo.fromJson(await _otpVerifyRepo.callVerifyOtpApi(otpController.value));
+  bool _verifyInFlight = false;
+  bool _verifyCompleted = false;
 
-        final message = getApiMsg(response.message, response.messageCode);
-        subjectVerify.sink.add(ApiResponse.completed(response));
-        if (!context.mounted) return;
-        if (isApiStatus(context, response.status ?? 0, message, false, messageCode: response.messageCode ?? 0)) {
-          await markSessionAuthenticated();
-          final pendingSocialSignup = getBoolFromSettingBox(hivePendingSignupAfterOtp);
-          final registrationComplete = (response.isRegister ?? 0) == 1;
-          if (pendingSocialSignup && !registrationComplete) {
-            await _completePendingSignup();
-          } else {
-            if (pendingSocialSignup) {
-              clearPendingSignupData();
-            }
-            await manageLoginResponse(context, response);
-          }
-        } else if (response.status == 4 || response.status == 5) {
-          await clearSessionCredentials();
-          if (context.mounted) {
-            await navigateToWelcome(context);
-          }
-        } else {
-          openSimpleSnackbar(context, message);
-        }
-      } catch (e) {
-        subjectVerify.sink.add(ApiResponse.error(e.toString()));
+  Future<void> verify() async {
+    if (_verifyInFlight || _verifyCompleted) {
+      return;
+    }
+    if (otpController.valueOrNull?.length != 6) {
+      return;
+    }
+    _verifyInFlight = true;
+    subjectVerify.sink.add(ApiResponse.loading());
+    try {
+      if (!await isNetworkConnected(
+        onRetryPressedCallApi: () {
+          _verifyInFlight = false;
+          verify();
+        },
+      )) {
+        subjectVerify.sink.add(ApiResponse.error(languages.internetConnLostMessage));
+        return;
       }
+
+      var response = LoginPojo.fromJson(await _otpVerifyRepo.callVerifyOtpApi(otpController.value));
+
+      final message = getApiMsg(response.message, response.messageCode);
+      subjectVerify.sink.add(ApiResponse.completed(response));
+      if (!context.mounted) return;
+      if (isApiStatus(context, response.status ?? 0, message, false, messageCode: response.messageCode ?? 0)) {
+        _verifyCompleted = true;
+        await markSessionAuthenticated();
+        final pendingSocialSignup = getBoolFromSettingBox(hivePendingSignupAfterOtp);
+        final registrationComplete = (response.isRegister ?? 0) == 1;
+        if (pendingSocialSignup && !registrationComplete) {
+          await _completePendingSignup();
+        } else {
+          if (pendingSocialSignup) {
+            clearPendingSignupData();
+          }
+          await manageLoginResponse(context, response);
+        }
+      } else if (response.status == 4 || response.status == 5) {
+        _verifyCompleted = true;
+        await clearSessionCredentials();
+        if (context.mounted) {
+          await navigateToWelcome(context);
+        }
+      } else {
+        if (response.messageCode == 429) {
+          _verifyCompleted = true;
+        }
+        openSimpleSnackbar(context, message);
+      }
+    } catch (e) {
+      subjectVerify.sink.add(ApiResponse.error(e.toString()));
+      if (!context.mounted) return;
+      openSimpleSnackbar(context, e.toString());
+    } finally {
+      _verifyInFlight = false;
     }
   }
 

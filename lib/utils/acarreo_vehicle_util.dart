@@ -5,8 +5,7 @@ import 'app_mobile_settings.dart';
 
 /// Passenger acarreo vehicle cards (motocarguero, camión, jaula).
 class AcarreoVehicleUtil {
-  static const String iconBase =
-      'https://admin.appzimo.com/assets/images/vehicle-service';
+  static const String iconBase = AcarreoIconUtil.iconBase;
 
   static const String _iconVersion = AcarreoIconUtil.iconVersion;
 

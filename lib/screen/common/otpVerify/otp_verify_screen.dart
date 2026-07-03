@@ -25,18 +25,21 @@ class OtpVerifyScreen extends StatefulWidget {
 
 class _OtpVerifyScreenState extends State<OtpVerifyScreen> {
   OtpVerifyBloc? _bloc;
+  bool _qaAutoVerifyScheduled = false;
 
   @override
   void didChangeDependencies() {
+    super.didChangeDependencies();
     _bloc ??= OtpVerifyBloc(context);
-    if (isQaReviewPhone()) {
+    if (!_qaAutoVerifyScheduled && isQaReviewPhone()) {
+      _qaAutoVerifyScheduled = true;
       _bloc?.otpController.add(kQaReviewFixedOtp);
       _bloc?.pinInputController.text = kQaReviewFixedOtp;
       WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
         _bloc?.verify();
       });
     }
-    super.didChangeDependencies();
   }
 
   @override

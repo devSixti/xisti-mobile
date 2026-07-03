@@ -5,7 +5,9 @@ import '../appThemeManager/app_theme_colors.dart';
 
 /// Shared sizing and card styling for vehicle service icons (all modes).
 class AcarreoIconUtil {
-  static const String iconVersion = '1.0.10';
+  static const String iconVersion = '1.0.11';
+
+  static const String iconBase = 'https://admin.xistiapp.com/assets/images/vehicle-service';
 
   /// Inner padding so icons sit inside bordered tiles without touching edges.
   static const double cardIconPadding = 10;
