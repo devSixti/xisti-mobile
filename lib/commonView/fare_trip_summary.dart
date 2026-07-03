@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../main.dart';
-import 'utils.dart';
+import '../utils/utils.dart';
 
 class FareTripSummary extends StatelessWidget {
   final double recommendedFare;

@@ -16,6 +16,7 @@ class ItemVehicleType extends StatelessWidget {
   final bool expanded;
   final bool wireframeTile;
   final bool photoTile;
+  final bool textOnlyTile;
   final double? photoTileHeight;
 
   const ItemVehicleType({
@@ -26,15 +27,60 @@ class ItemVehicleType extends StatelessWidget {
     this.expanded = false,
     this.wireframeTile = false,
     this.photoTile = false,
+    this.textOnlyTile = false,
     this.photoTileHeight,
   });
 
   @override
   Widget build(BuildContext context) {
+    if (textOnlyTile) {
+      return _textOnlyTile(context);
+    }
     if (photoTile || wireframeTile) {
       return _panelTile(context);
     }
     return _legacyTile(context);
+  }
+
+  Widget _textOnlyTile(BuildContext context) {
+    final theme = getCurrentTheme(context);
+    final accent = XistiUiTokens.accentForMode(serviceMode);
+    final tileW = expanded ? double.infinity : 96.w;
+
+    return SizedBox(
+      width: tileW,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            width: expanded ? double.infinity : 88.w,
+            padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 14.h),
+            decoration: BoxDecoration(
+              color: isSelected ? accent.withValues(alpha: 0.12) : Colors.transparent,
+              borderRadius: BorderRadius.circular(16.r),
+              border: Border.all(
+                color: isSelected ? accent : theme.colorDarkBorder,
+                width: isSelected ? 2.w : 1.w,
+              ),
+            ),
+            alignment: Alignment.center,
+            child: Text(
+              serviceTypeItem.serviceName ?? '-',
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: bodyText(
+                context: context,
+                textColor: isSelected ? accent : theme.colorTextCommon,
+                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                fontSize: textSize12px,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _panelTile(BuildContext context) {

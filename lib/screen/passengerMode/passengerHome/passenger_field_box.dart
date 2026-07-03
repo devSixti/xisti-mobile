@@ -9,7 +9,7 @@ class PassengerBoxTextField extends StatelessWidget {
   final TextEditingController? controller;
   final String hint;
   final String? label;
-  final IconData icon;
+  final IconData? icon;
   final TextInputType keyboardType;
   final int maxLines;
   final List<TextInputFormatter>? inputFormatters;
@@ -20,7 +20,7 @@ class PassengerBoxTextField extends StatelessWidget {
     this.controller,
     required this.hint,
     this.label,
-    required this.icon,
+    this.icon,
     this.keyboardType = TextInputType.text,
     this.maxLines = 1,
     this.inputFormatters,
@@ -55,11 +55,13 @@ class PassengerBoxTextField extends StatelessWidget {
           child: Row(
             crossAxisAlignment: maxLines > 1 ? CrossAxisAlignment.start : CrossAxisAlignment.center,
             children: [
-              Padding(
-                padding: EdgeInsetsDirectional.only(top: maxLines > 1 ? 8.h : 0),
-                child: Icon(icon, color: theme.colorIconCommon, size: 25.sp),
-              ),
-              SizedBox(width: 10.w),
+              if (icon != null) ...[
+                Padding(
+                  padding: EdgeInsetsDirectional.only(top: maxLines > 1 ? 8.h : 0),
+                  child: Icon(icon, color: theme.colorIconCommon, size: 25.sp),
+                ),
+                SizedBox(width: 10.w),
+              ],
               Expanded(
                 child: TextField(
                   controller: controller,
@@ -97,14 +99,14 @@ class PassengerBoxTextField extends StatelessWidget {
 class PassengerBoxDateField extends StatelessWidget {
   final String hint;
   final String valueLabel;
-  final IconData icon;
+  final IconData? icon;
   final VoidCallback onTap;
 
   const PassengerBoxDateField({
     super.key,
     required this.hint,
     required this.valueLabel,
-    required this.icon,
+    this.icon,
     required this.onTap,
   });
 
@@ -122,8 +124,10 @@ class PassengerBoxDateField extends StatelessWidget {
         padding: EdgeInsetsDirectional.only(start: 15.w, end: 15.w, top: 12.h, bottom: 12.h),
         child: Row(
           children: [
-            Icon(icon, color: theme.colorIconCommon, size: 25.sp),
-            SizedBox(width: 10.w),
+            if (icon != null) ...[
+              Icon(icon, color: theme.colorIconCommon, size: 25.sp),
+              SizedBox(width: 10.w),
+            ],
             Expanded(
               child: Text(
                 valueLabel,

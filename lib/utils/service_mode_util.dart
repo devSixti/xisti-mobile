@@ -14,8 +14,7 @@ class ServiceModeKind {
 
   static bool isEncomiendasMode(String? mode) => mode == encomiendas;
 
-  static bool isDeliveryLikeMode(String? mode) =>
-      mode == delivery || mode == encomiendas;
+  static bool isDeliveryLikeMode(String? mode) => mode == delivery;
 
   static const Set<int> transportServiceIds = {
     ServiceType.taxi,
@@ -113,8 +112,8 @@ class ServiceModeKind {
   ) {
     return groups
         .where((g) {
+          if (g.mode == ServiceModeKind.encomiendas) return false;
           if (g.mode == expreso && !isExpresoMobileEnabled()) return false;
-          if (g.mode == encomiendas && !isEncomiendasMobileEnabled()) return false;
           if ((g.mode == acarreos || g.mode == carga) && !isAcarreosMobileEnabled()) return false;
           return true;
         })
@@ -163,7 +162,6 @@ class ServiceModeKind {
     }
 
     addIfMissing(expreso, languages.serviceModeShare, 3);
-    addIfMissing(encomiendas, languages.serviceModeErrand, 4);
     if (isAcarreosMobileEnabled()) {
       addIfMissing(acarreos, languages.serviceModeHauling, 5);
     }

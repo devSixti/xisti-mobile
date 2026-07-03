@@ -157,4 +157,29 @@ class PassengerHomeRepo {
       await _apiBaseHelper.post(ApiConst.endPointSharedRideJoin, body: body),
     );
   }
+
+  Future<Map<String, dynamic>> sharedRideCreateOffer({
+    required String tripKind,
+    required String originTown,
+    required String destinationTown,
+    required String tripDate,
+    required int seatsTotal,
+    required double farePerPerson,
+  }) async {
+    return Map<String, dynamic>.from(
+      await _apiBaseHelper.post(
+        ApiConst.endPointSharedRideCreateOffer,
+        body: {
+          ApiParam.paramUserId: getIntFromUserInfoBox(hiveUserId),
+          ApiParam.paramAccessToken: getStringFromSettingBox(hiveAccessToken),
+          ApiParam.paramTripKind: tripKind,
+          ApiParam.paramOriginTown: originTown,
+          ApiParam.paramDestinationTown: destinationTown,
+          ApiParam.paramTripDate: tripDate,
+          ApiParam.paramSeatsTotal: seatsTotal,
+          ApiParam.paramFarePerPerson: farePerPerson,
+        },
+      ),
+    );
+  }
 }

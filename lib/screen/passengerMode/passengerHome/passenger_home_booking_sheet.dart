@@ -52,6 +52,16 @@ class PassengerHomeBookingSheet extends StatelessWidget {
           border: Border(
             top: BorderSide(color: accent.withValues(alpha: 0.85), width: 2.w),
           ),
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            stops: const [0.0, 0.12, 1.0],
+            colors: [
+              accent.withValues(alpha: 0.08),
+              theme.colorScaffoldBg,
+              theme.colorScaffoldBg,
+            ],
+          ),
         ),
         child: expandToFill
             ? Padding(

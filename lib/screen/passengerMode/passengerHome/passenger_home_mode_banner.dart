@@ -1,37 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../../../main.dart';
-import '../../../utils/service_mode_util.dart';
 import '../../../utils/utils.dart';
-import '../../../utils/xisti_ui_tokens.dart';
+import '../../../utils/xisti_service_mode_presentation.dart';
 
-String xistiModeBannerCopy(String? mode) {
-  switch (mode) {
-    case ServiceModeKind.delivery:
-      return languages.modeBannerDelivery;
-    case ServiceModeKind.encomiendas:
-      return languages.modeBannerErrand;
-    case ServiceModeKind.expreso:
-      return languages.modeBannerExpreso;
-    case ServiceModeKind.transport:
-    default:
-      return languages.modeBannerTransport;
-  }
-}
+String xistiModeBannerCopy(String? mode) => XistiServiceModePresentation.subtitle(mode ?? ServiceModeKind.transport);
 
-IconData xistiModeBannerIcon(String? mode) {
-  switch (mode) {
-    case ServiceModeKind.delivery:
-      return CustomIcons.orderId;
-    case ServiceModeKind.encomiendas:
-      return CustomIcons.myWallet;
-    case ServiceModeKind.expreso:
-      return CustomIcons.car;
-    default:
-      return CustomIcons.hailRide;
-  }
-}
+IconData xistiModeBannerIcon(String? mode) => XistiServiceModePresentation.icon(mode ?? ServiceModeKind.transport);
 
 /// Animated accent strip reflecting the active service mode.
 class PassengerHomeModeBanner extends StatelessWidget {

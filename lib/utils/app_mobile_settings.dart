@@ -139,8 +139,7 @@ void applySocialLoginSettingsFromApi(dynamic json) {
 bool isExpresoMobileEnabled() =>
     getIntFromSettingBox(hiveEnableExpresoMobile) == 1;
 
-bool isEncomiendasMobileEnabled() =>
-    getIntFromSettingBox(hiveEnableEncomiendasMobile) == 1;
+bool isEncomiendasMobileEnabled() => false;
 
 bool isAcarreosMobileEnabled() =>
     getIntFromSettingBox(hiveEnableAcarreosMobile, defaultValue: 1) == 1;

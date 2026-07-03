@@ -13,7 +13,7 @@ import '../../../networking/api_response.dart';
 import '../../../utils/app_mobile_settings.dart';
 import '../../../utils/map_style_hot_reload.dart';
 import '../../../utils/utils.dart';
-import '../../../utils/xisti_ui_tokens.dart';
+import '../../../utils/xisti_service_mode_presentation.dart';
 import 'passenger_home_activity_hub.dart';
 import 'passenger_home_barrio_shortcuts.dart';
 import 'passenger_home_barrio_shortcuts_ui.dart';
@@ -23,12 +23,15 @@ import 'passenger_vehicle_deck.dart';
 import 'passenger_home_bloc.dart';
 import 'passenger_home_booking_sheet.dart';
 import 'passenger_home_dl.dart';
-import 'encomienda_quick_fields.dart';
 import 'delivery_quick_fields.dart';
 import 'delivery_direction_selector.dart';
 import 'shared_ride_kind_selector.dart';
 import 'shared_ride_fields.dart';
 import 'acarreo_quick_fields.dart';
+import 'mode_service_hint.dart';
+import 'service_mode_context_strip.dart';
+import 'xisti_section_label.dart';
+import '../../../utils/delivery_direction_kind.dart';
 import '../../../utils/shared_ride_kind.dart';
 import '../../../utils/service_mode_util.dart';
 import 'service_mode_selector.dart';
@@ -105,7 +108,6 @@ class _PassengerHomeState extends State<PassengerHome> {
               serviceModeSelector(),
               addressSelection(),
               serviceData(),
-              encomiendaFields(),
               confirmBtnAndOtherOption(),
             ],
           ),
@@ -222,6 +224,8 @@ class _PassengerHomeState extends State<PassengerHome> {
     return [
       _panelHandle(),
       serviceModeSelector(),
+      serviceModeContextStrip(),
+      modeServiceHint(),
       sharedRideKindSelector(),
       deliveryDirectionSelector(),
       Padding(
@@ -230,18 +234,44 @@ class _PassengerHomeState extends State<PassengerHome> {
       ),
       sharedRideAddressFields(),
       serviceData(fillAvailable: false),
-      Padding(
-        padding: EdgeInsetsDirectional.only(bottom: 8.h),
-        child: _cityZoneShortcuts(),
-      ),
-      deliveryFields(),
+      cityZoneShortcuts(),
       acarreoQuickFields(),
-      encomiendaFields(),
       confirmBtnAndOtherOption(),
       SizedBox(height: 4.h),
       activityHubCard(),
     ];
   }
+
+  Widget serviceModeContextStrip() => StreamBuilder<String>(
+    stream: _bloc?.selectedServiceModeSubject,
+    builder: (context, snap) {
+      return ServiceModeContextStrip(mode: snap.data);
+    },
+  );
+
+  Widget modeServiceHint() => StreamBuilder<String>(
+    stream: _bloc?.selectedServiceModeSubject,
+    builder: (context, snap) {
+      final mode = snap.data;
+      return ModeServiceHint(
+        mode: mode,
+        apiDisclaimer: _bloc?.disclaimerTextForMode(mode),
+      );
+    },
+  );
+
+  Widget cityZoneShortcuts() => StreamBuilder<String>(
+    stream: _bloc?.selectedServiceModeSubject,
+    builder: (context, modeSnap) {
+      if (!XistiServiceModePresentation.showsBarrioShortcuts(modeSnap.data)) {
+        return const SizedBox.shrink();
+      }
+      return Padding(
+        padding: EdgeInsetsDirectional.only(bottom: 8.h),
+        child: _cityZoneShortcuts(),
+      );
+    },
+  );
 
   bool _isSharedRidesMode(String? mode) => ServiceModeKind.isSharedRideMode(mode);
 
@@ -254,9 +284,18 @@ class _PassengerHomeState extends State<PassengerHome> {
       return StreamBuilder<String>(
         stream: _bloc?.selectedSharedRideKindSubject,
         builder: (context, kindSnap) {
-          return SharedRideKindSelector(
-            selectedKind: kindSnap.data ?? SharedRideKind.defaultKind,
-            onKindChanged: _bloc!.selectSharedRideKind,
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              XistiSectionLabel(
+                label: 'Tipo de ruta',
+                accent: XistiUiTokens.accentForMode(snap.data),
+              ),
+              SharedRideKindSelector(
+                selectedKind: kindSnap.data ?? SharedRideKind.defaultKind,
+                onKindChanged: _bloc!.selectSharedRideKind,
+              ),
+            ],
           );
         },
       );
@@ -273,14 +312,23 @@ class _PassengerHomeState extends State<PassengerHome> {
           end: commonHorizontalPadding,
           bottom: 8.h,
         ),
-        child: StreamBuilder<String>(
-          stream: _bloc?.selectedDeliveryDirectionSubject,
-          builder: (context, dirSnap) {
-            return DeliveryDirectionSelector(
-              selected: dirSnap.data ?? 'send',
-              onChanged: _bloc!.selectDeliveryDirection,
-            );
-          },
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            XistiSectionLabel(
+              label: '¿Envías o recibes?',
+              accent: XistiUiTokens.deliveryAccent,
+            ),
+            StreamBuilder<String>(
+              stream: _bloc?.selectedDeliveryDirectionSubject,
+              builder: (context, dirSnap) {
+                return DeliveryDirectionSelector(
+                  selected: dirSnap.data ?? 'send',
+                  onChanged: _bloc!.selectDeliveryDirection,
+                );
+              },
+            ),
+          ],
         ),
       );
     },
@@ -441,36 +489,6 @@ class _PassengerHomeState extends State<PassengerHome> {
     );
   }
 
-  Widget deliveryLegalNoticeBanner() => StreamBuilder<String>(
-    stream: _bloc?.selectedServiceModeSubject,
-    builder: (context, snap) {
-      final mode = snap.data ?? ServiceModeKind.transport;
-      final showNotice = mode == ServiceModeKind.delivery || mode == ServiceModeKind.encomiendas;
-      if (!showNotice) return const SizedBox.shrink();
-      return Padding(
-        padding: EdgeInsetsDirectional.only(
-          start: commonHorizontalPadding,
-          end: commonHorizontalPadding,
-          top: 4.h,
-          bottom: 4.h,
-        ),
-        child: Container(
-          width: double.infinity,
-          padding: EdgeInsetsDirectional.all(12.w),
-          decoration: BoxDecoration(
-            color: XistiBrand.legalOrangeBg,
-            borderRadius: BorderRadius.circular(XistiUiTokens.cardRadius),
-            border: Border.all(color: XistiBrand.legalOrange.withValues(alpha: 0.35)),
-          ),
-          child: Text(
-            languages.deliveryLegalNotice,
-            style: bodyText(context: context, fontSize: textSize12px, textColor: XistiBrand.legalOrange),
-          ),
-        ),
-      );
-    },
-  );
-
   Widget _legacyMapChrome() {
     return Stack(
       children: [
@@ -548,17 +566,6 @@ class _PassengerHomeState extends State<PassengerHome> {
       ),
     );
   }
-
-  Widget encomiendaFields() => StreamBuilder<String>(
-    stream: _bloc?.selectedServiceModeSubject,
-    builder: (context, snap) {
-      if (snap.data != ServiceModeKind.encomiendas) return const SizedBox.shrink();
-      return EncomiendaQuickFields(
-        purchaseDescriptionController: _bloc!.purchaseDescriptionTEC,
-        priceCapController: _bloc!.priceCapTEC,
-      );
-    },
-  );
 
   Widget deliveryFields() => StreamBuilder<String>(
     stream: _bloc?.selectedServiceModeSubject,
@@ -697,10 +704,17 @@ class _PassengerHomeState extends State<PassengerHome> {
   Widget fromAddress() => StreamBuilder<String>(
     stream: _bloc?.selectedServiceModeSubject,
     builder: (context, snapMode) {
-      final pickupHint = snapMode.data == ServiceModeKind.encomiendas ? languages.whereToBuy : languages.pickUpLocation;
-      return StreamBuilder<SearchedLocation?>(
+      final isDelivery = snapMode.data == ServiceModeKind.delivery;
+      return StreamBuilder<String>(
+        stream: isDelivery ? _bloc?.selectedDeliveryDirectionSubject : null,
+        builder: (context, dirSnap) {
+          final pickupHint = isDelivery
+              ? DeliveryDirectionKind.pickupHint(dirSnap.data ?? DeliveryDirectionKind.send)
+              : languages.pickUpLocation;
+          return StreamBuilder<SearchedLocation?>(
         stream: _bloc?.fromAddressController,
         builder: (context, snap) {
+          final accent = XistiUiTokens.accentForMode(snapMode.data);
           return GestureDetector(
         onTap: () {
           _bloc?.selectAddress(selectedIndex: 1);
@@ -714,7 +728,7 @@ class _PassengerHomeState extends State<PassengerHome> {
           padding: EdgeInsetsDirectional.only(start: 15.w, end: 15.w, top: 12.h, bottom: 12.h),
           child: Row(
             children: [
-              Icon(CustomIcons.pickupLocation, color: getCurrentTheme(context).colorIconCommon, size: 25.sp),
+              Icon(CustomIcons.pickupLocation, color: accent, size: 25.sp),
               Expanded(
                 child: Container(
                   margin: EdgeInsetsDirectional.only(start: 10.w, end: 10.w),
@@ -746,16 +760,25 @@ class _PassengerHomeState extends State<PassengerHome> {
       );
         },
       );
+        },
+      );
     },
   );
 
   Widget toAddress() => StreamBuilder<String>(
     stream: _bloc?.selectedServiceModeSubject,
     builder: (context, snapMode) {
-      final dropHint = snapMode.data == ServiceModeKind.encomiendas ? languages.whereToDeliver : languages.dropLocation;
-      return StreamBuilder<SearchedLocation?>(
+      final isDelivery = snapMode.data == ServiceModeKind.delivery;
+      return StreamBuilder<String>(
+        stream: isDelivery ? _bloc?.selectedDeliveryDirectionSubject : null,
+        builder: (context, dirSnap) {
+          final dropHint = isDelivery
+              ? DeliveryDirectionKind.dropHint(dirSnap.data ?? DeliveryDirectionKind.send)
+              : languages.dropLocation;
+          return StreamBuilder<SearchedLocation?>(
         stream: _bloc?.toAddressController,
         builder: (context, snap) {
+          final accent = XistiUiTokens.accentForMode(snapMode.data);
           return GestureDetector(
         onTap: () {
           _bloc?.selectAddress(selectedIndex: 2);
@@ -769,7 +792,7 @@ class _PassengerHomeState extends State<PassengerHome> {
           padding: EdgeInsetsDirectional.only(start: 15.w, end: 15.w, top: 12.h, bottom: 12.h),
           child: Row(
             children: [
-              Icon(CustomIcons.dropLocation, color: getCurrentTheme(context).colorIconCommon, size: 25.sp),
+              Icon(CustomIcons.dropLocation, color: accent, size: 25.sp),
               Expanded(
                 child: Container(
                   margin: EdgeInsetsDirectional.only(start: 10.w, end: 10.w),
@@ -799,6 +822,8 @@ class _PassengerHomeState extends State<PassengerHome> {
             ],
           ),
         ),
+      );
+        },
       );
         },
       );
@@ -1071,6 +1096,7 @@ class _PassengerHomeState extends State<PassengerHome> {
     bool photoTile = false,
     double? photoTileHeight,
   }) {
+    final textOnly = ServiceModeKind.isAcarreosMode(serviceMode);
     return GestureDetector(
       onTap: () => _bloc?.vehicleSelect(position),
       child: StreamBuilder<ServiceTypeItem?>(
@@ -1083,8 +1109,9 @@ class _PassengerHomeState extends State<PassengerHome> {
             isSelected: item.matchesSelection(selected),
             serviceMode: serviceMode,
             expanded: serviceTypeList.length <= 2 && !photoTile,
-            wireframeTile: wireframe && !photoTile,
+            wireframeTile: wireframe && !photoTile && !textOnly,
             photoTile: photoTile,
+            textOnlyTile: textOnly,
             photoTileHeight: photoTileHeight,
           );
         },

@@ -125,6 +125,8 @@ class _DriverVehicleDetailsScreenState extends State<DriverVehicleDetailsScreen>
   Widget _vehicleFamilySelectionView({required List<ServiceList> allServices, required ServiceList selected}) {
     final isMoto = selected.serviceId == ServiceType.bike;
     final isCar = selected.serviceId == ServiceType.taxi;
+    final isBike = selected.serviceId == ServiceType.courier ||
+        selected.deliveryVariant == XistiVehicleCatalog.bicicleta;
 
     Widget familyChip({required String label, required String iconVariant, required bool active, required VoidCallback onTap}) {
       final theme = getCurrentTheme(context);
@@ -180,6 +182,20 @@ class _DriverVehicleDetailsScreenState extends State<DriverVehicleDetailsScreen>
                 if (variants.isNotEmpty) _bloc?.selectTransportVariant(variants.first);
               },
             ),
+            familyChip(
+              label: languages.vehicleBicicleta,
+              iconVariant: XistiVehicleCatalog.bicicleta,
+              active: isBike,
+              onTap: () {
+                final bike = _bloc?.serviceList
+                        .where((s) =>
+                            s.serviceId == ServiceType.courier ||
+                            s.deliveryVariant == XistiVehicleCatalog.bicicleta)
+                        .toList() ??
+                    [];
+                if (bike.isNotEmpty) _bloc?.selectTransportVariant(bike.first);
+              },
+            ),
           ],
         ),
         SizedBox(height: 16.h),
@@ -196,7 +212,7 @@ class _DriverVehicleDetailsScreenState extends State<DriverVehicleDetailsScreen>
     return CustomDropDownFieldWithTextFieldCustom<ServiceList>(
       selectionItemList: variants,
       selectedItemStream: _bloc?.serviceTypeSelection,
-      selectedItemTEC: _bloc?.vehicleTypeTEC ?? TextEditingController(),
+      selectedItemTEC: _bloc?.variantTEC ?? TextEditingController(),
       getLabel: (item) => item.serviceName,
       isSelected: (item, selectedItem) =>
           item.serviceId == selectedItem.serviceId && item.deliveryVariant == selectedItem.deliveryVariant,

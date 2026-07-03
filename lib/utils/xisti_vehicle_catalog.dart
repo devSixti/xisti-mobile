@@ -243,6 +243,7 @@ abstract final class XistiVehicleCatalog {
     carroComodo,
     motoBajo,
     motoAlto,
+    bicicleta,
   ];
 
   /// Driver manage-vehicle screen: only viajes matrix (no envío genérico).
@@ -272,14 +273,14 @@ abstract final class XistiVehicleCatalog {
       final existing = byVariant[c.variant];
       final vehicleTypes = existing?.vehicleTypeList ??
           typesByServiceId[c.serviceId] ??
-          typesByServiceId[ServiceType.taxi] ??
           [];
+      final filteredTypes = _filterVehicleTypesForVariant(c.variant, c.serviceId, vehicleTypes);
       merged.add(ServiceList(
         serviceId: c.serviceId,
         serviceName: existing?.serviceName.isNotEmpty == true ? existing!.serviceName : _localizedLabel(c.variant),
         serviceIcon: iconAsset(c.variant, delivery: c.deliveryOnly),
         serviceDescription: existing?.serviceDescription ?? '',
-        vehicleTypeList: vehicleTypes,
+        vehicleTypeList: filteredTypes,
         supportsPassengerTransportToggle: existing?.supportsPassengerTransportToggle ?? c.deliveryOnly,
         isDeliveryOnlyService: existing?.isDeliveryOnlyService ?? c.deliveryOnly,
         requiresTechnicalInspection:
@@ -288,6 +289,27 @@ abstract final class XistiVehicleCatalog {
       ));
     }
     return merged;
+  }
+
+  static List<VehicleTypeList> _filterVehicleTypesForVariant(
+    String variant,
+    int serviceId,
+    List<VehicleTypeList> types,
+  ) {
+    if (types.isEmpty) return types;
+    final lower = (String name) => name.toLowerCase();
+    if (variant == bicicleta) {
+      final bikes = types
+          .where((t) => lower(t.vehicleTypeName ?? '').contains('bicicleta'))
+          .toList();
+      return bikes.isNotEmpty ? bikes : types;
+    }
+    if (serviceId == ServiceType.bike || serviceId == ServiceType.taxi) {
+      return types
+          .where((t) => !lower(t.vehicleTypeName ?? '').contains('bicicleta'))
+          .toList();
+    }
+    return types;
   }
 }
 

@@ -11,8 +11,6 @@ String xistiHomeHeroSubtitleForMode(String? mode) {
   switch (mode) {
     case ServiceModeKind.delivery:
       return languages.homeHeroSubtitleDelivery;
-    case ServiceModeKind.encomiendas:
-      return languages.homeHeroSubtitleErrand;
     case ServiceModeKind.expreso:
       return languages.homeHeroSubtitleExpreso;
     case ServiceModeKind.transport:
@@ -55,8 +53,8 @@ class PassengerHomeSearchCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = getCurrentTheme(context);
     final accent = XistiUiTokens.accentForMode(serviceMode);
-    final pickupHint = serviceMode == ServiceModeKind.encomiendas ? languages.whereToBuy : languages.pickUpLocation;
-    final dropHint = serviceMode == ServiceModeKind.encomiendas ? languages.whereToDeliver : languages.dropLocation;
+    final pickupHint = languages.pickUpLocation;
+    final dropHint = languages.dropLocation;
     final showRecents = (dropoff?.name ?? '').isEmpty && recentTrips.isNotEmpty;
     final cardPadV = compactModern ? 8.h : 10.h;
     final cardPadH = compactModern ? 12.w : 14.w;

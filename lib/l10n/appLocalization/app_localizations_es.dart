@@ -1641,7 +1641,7 @@ class AppLocalizationsEs extends AppLocalizations {
       'Tienda o lugar de compra (ej. Éxito Calle 80)';
 
   @override
-  String get errandDescription => 'Descripción del acarreo';
+  String get errandDescription => 'Descripción de la carga';
 
   @override
   String get proposedValueRequired => 'Valor que propones (obligatorio)';
@@ -1690,7 +1690,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get searchSharedRides => 'Buscar recorridos compartidos';
 
   @override
-  String get sendHaulingRequest => 'Enviar solicitud de acarreo';
+  String get sendHaulingRequest => 'Enviar solicitud de carga';
 
   @override
   String get goOnlineToPublishSharedRides =>
@@ -1712,7 +1712,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get serviceModeErrand => 'Encomienda';
 
   @override
-  String get serviceModeHauling => 'Acarreos';
+  String get serviceModeHauling => 'Carga';
 
   @override
   String get serviceModeShareSubtitle => 'Pueblo a pueblo o pueblo a ciudad';
@@ -1721,7 +1721,8 @@ class AppLocalizationsEs extends AppLocalizations {
   String get serviceModeErrandSubtitle => 'Compras en tienda por ti';
 
   @override
-  String get serviceModeHaulingSubtitle => 'Trasteos, mudanzas y cargas';
+  String get serviceModeHaulingSubtitle =>
+      'Trasteos, mudanzas y cargas pesadas';
 
   @override
   String get sharedRideTownToCity => 'Pueblo a ciudad';
@@ -1780,7 +1781,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get chipShare => 'Compartir';
 
   @override
-  String get chipHauling => 'Acarreos';
+  String get chipHauling => 'Carga';
 
   @override
   String get chipDelivery => 'Envío';

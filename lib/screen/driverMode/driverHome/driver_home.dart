@@ -10,6 +10,7 @@ import '../../../commonView/common_view.dart';
 import '../../../commonView/custom_rounded_button.dart';
 import '../../../commonView/driver_status_button.dart';
 import '../../../commonView/no_record_found.dart';
+import '../../../utils/app_mobile_settings.dart';
 import '../../../utils/utils.dart';
 import '../../common/account/account_screen.dart';
 import '../../common/selectLocation/select_location.dart';
@@ -17,6 +18,7 @@ import 'driver_home_bloc.dart';
 import 'driver_home_dl.dart';
 import 'driver_ride_request_overlay.dart';
 import 'driver_ride_request_detail_panel.dart';
+import 'shared_ride_create_sheet.dart';
 
 class DriverHome extends StatefulWidget {
   final bool isFromLogin;
@@ -216,6 +218,68 @@ class _DriverHomeState extends State<DriverHome> with WidgetsBindingObserver {
                 );
               },
             ),
+            if (isExpresoMobileEnabled())
+              StreamBuilder<bool>(
+                stream: _bloc?.statusSwitchSubject,
+                builder: (context, snapSwitch) {
+                  final online = snapSwitch.data ?? false;
+                  return Positioned(
+                    left: commonHorizontalPadding,
+                    bottom: 16.h,
+                    child: Material(
+                      elevation: 6,
+                      borderRadius: BorderRadius.circular(14.r),
+                      color: getCurrentTheme(context).colorScaffoldBg,
+                      child: InkWell(
+                        onTap: online
+                            ? () {
+                                showModalBottomSheet<void>(
+                                  context: context,
+                                  isScrollControlled: true,
+                                  backgroundColor: Colors.transparent,
+                                  builder: (_) => const SharedRideCreateSheet(),
+                                );
+                              }
+                            : () => openSimpleSnackbar(
+                                  context,
+                                  languages.goOnlineToPublishSharedRides,
+                                ),
+                        borderRadius: BorderRadius.circular(14.r),
+                        child: Container(
+                          padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(14.r),
+                            border: Border.all(
+                              color: getCurrentTheme(context).colorPrimary.withValues(alpha: 0.55),
+                              width: 1.5.w,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.route_outlined,
+                                color: getCurrentTheme(context).colorPrimary,
+                                size: 20.sp,
+                              ),
+                              SizedBox(width: 8.w),
+                              Text(
+                                languages.sharedRide,
+                                style: bodyText(
+                                  context: context,
+                                  textColor: getCurrentTheme(context).colorPrimary,
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: textSize13px,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
           ],
         ),
       ),

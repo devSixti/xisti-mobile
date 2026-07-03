@@ -53,7 +53,7 @@ class DriverVehicleDetailsBloc extends Bloc {
   final vehiclePlateNumberTEC = TextEditingController();
   final vehicleColorTEC = TextEditingController();
   final vehicleYearTEC = TextEditingController();
-  final vehicleTypeTEC = TextEditingController();
+  final variantTEC = TextEditingController();
   final technicalInspectionExpiryTEC = TextEditingController();
   DateTime? technicalInspectionExpiryDate;
 
@@ -264,6 +264,7 @@ class DriverVehicleDetailsBloc extends Bloc {
         ),
       );
       serviceTypeSelection.sink.add(serviceListItem);
+      variantTEC.text = serviceListItem.serviceName;
       List<VehicleTypeList> vehicleList = serviceListItem.vehicleTypeList;
       VehicleTypeList? vehicleTypeList;
       if (vehicleList.isNotEmpty) {
@@ -310,11 +311,10 @@ class DriverVehicleDetailsBloc extends Bloc {
 
   void setSelectedVehicleType(VehicleTypeList? vehicleTypeList) {
     vehicleTypeSelection.sink.add(vehicleTypeList);
-    vehicleTypeTEC.text = vehicleTypeList?.vehicleTypeName ?? "";
   }
 
   void _onTransportVariantChanged(ServiceList variant) {
-    vehicleTypeTEC.text = variant.serviceName;
+    variantTEC.text = variant.serviceName;
     _syncVehicleTypeForService(variant);
   }
 
@@ -331,10 +331,37 @@ class DriverVehicleDetailsBloc extends Bloc {
     final current = vehicleTypeSelection.valueOrNull;
     final keepCurrent = current != null &&
         types.any((t) => t.vehicleTypeId == current.vehicleTypeId);
-    setSelectedVehicleType(keepCurrent ? current : types.first);
+    setSelectedVehicleType(keepCurrent ? current : _defaultVehicleType(service, types));
+  }
+
+  VehicleTypeList _defaultVehicleType(ServiceList service, List<VehicleTypeList> types) {
+    final variant = service.deliveryVariant.trim();
+    if (variant == XistiVehicleCatalog.bicicleta) {
+      return types.firstWhere(
+        (t) => (t.vehicleTypeName ?? '').toLowerCase().contains('bicicleta'),
+        orElse: () => types.first,
+      );
+    }
+    if (service.serviceId == ServiceType.bike) {
+      return types.firstWhere(
+        (t) => !(t.vehicleTypeName ?? '').toLowerCase().contains('bicicleta'),
+        orElse: () => types.first,
+      );
+    }
+    return types.firstWhere(
+      (t) => !(t.vehicleTypeName ?? '').toLowerCase().contains('bicicleta'),
+      orElse: () => types.first,
+    );
   }
 
   List<ServiceList> variantsForFamily(int serviceId) {
+    if (serviceId == ServiceType.courier) {
+      return serviceList
+          .where((s) =>
+              s.serviceId == ServiceType.courier ||
+              s.deliveryVariant == XistiVehicleCatalog.bicicleta)
+          .toList();
+    }
     return serviceList.where((s) => s.serviceId == serviceId).toList();
   }
 
@@ -422,6 +449,6 @@ class DriverVehicleDetailsBloc extends Bloc {
     vehicleColorTEC.dispose();
     vehicleYearTEC.dispose();
     technicalInspectionExpiryTEC.dispose();
-    vehicleTypeTEC.dispose();
+    variantTEC.dispose();
   }
 }

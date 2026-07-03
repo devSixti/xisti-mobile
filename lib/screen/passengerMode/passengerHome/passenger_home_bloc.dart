@@ -562,6 +562,22 @@ class PassengerHomeBloc extends Bloc {
   bool get isAcarreosMode =>
       ServiceModeKind.isAcarreosMode(selectedServiceModeSubject.valueOrNull);
 
+  String? disclaimerTextForMode(String? mode) {
+    switch (mode) {
+      case ServiceModeKind.delivery:
+        return deliveryPassengerDisclaimer;
+      case ServiceModeKind.encomiendas:
+        return encomiendaPassengerDisclaimer;
+      case ServiceModeKind.expreso:
+        return sharedRidePassengerDisclaimer;
+      case ServiceModeKind.acarreos:
+      case ServiceModeKind.carga:
+        return acarreoPassengerDisclaimer;
+      default:
+        return null;
+    }
+  }
+
   bool get isDeliverySend =>
       selectedDeliveryDirectionSubject.valueOrNull != DeliveryDirectionKind.receive;
 
@@ -902,6 +918,7 @@ class PassengerHomeBloc extends Bloc {
         return OfferFareAndBookSheet(
           isCourier: isCourierLikeBooking && !isEncomiendasMode,
           isEncomienda: isEncomiendasMode,
+          isDeliveryReceive: isDeliveryMode && isDeliveryReceive,
           deliveryVehicleOptions: deliveryVehicleOptions,
           deliveryDisclaimer: isEncomiendasMode ? encomiendaPassengerDisclaimer : deliveryPassengerDisclaimer,
           selectedDeliveryVehicleServiceId: selectedDeliveryVehicleServiceId.valueOrNull,

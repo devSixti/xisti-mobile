@@ -29,6 +29,7 @@ class OfferFareAndBookSheet extends StatefulWidget {
   final String destinationPaymentMethod, packageWeightKg, packageHeightCm, packageWidthCm, packageLengthCm;
   final bool isCourier;
   final bool isEncomienda;
+  final bool isDeliveryReceive;
   final List<DeliveryVehicleOption> deliveryVehicleOptions;
   final String deliveryDisclaimer;
   final int? selectedDeliveryVehicleServiceId;
@@ -56,6 +57,7 @@ class OfferFareAndBookSheet extends StatefulWidget {
     super.key,
     required this.isCourier,
     this.isEncomienda = false,
+    this.isDeliveryReceive = false,
     required this.deliveryVehicleOptions,
     required this.deliveryDisclaimer,
     this.selectedDeliveryVehicleServiceId,
@@ -341,7 +343,7 @@ class _OfferFareAndBookSheetState extends State<OfferFareAndBookSheet> {
         keyboardType: TextInputType.phone,
         controller: _bloc?.recipientNumberController,
         inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-        hint: languages.contactNumber,
+        hint: widget.isDeliveryReceive ? languages.phoneAtPickup : languages.contactNumber,
         prefix: CustomCountryCodePicker(
           showDropDownButton: true,
           flagWidth: 35.w,
@@ -387,7 +389,7 @@ class _OfferFareAndBookSheetState extends State<OfferFareAndBookSheet> {
       child: TextFormFieldCustom(
         controller: _bloc?.recipientNameController,
         keyboardType: TextInputType.text,
-        hint: languages.recipientName,
+        hint: widget.isDeliveryReceive ? languages.contactName : languages.recipientName,
         setError: true,
         inputFormatters: [
           FilteringTextInputFormatter.allow(RegExp(r'[A-Za-z ]')),

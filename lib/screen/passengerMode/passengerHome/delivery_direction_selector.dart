@@ -44,8 +44,9 @@ class DeliveryDirectionSelector extends StatelessWidget {
     return InkWell(
       onTap: () => onChanged(value),
       borderRadius: BorderRadius.circular(12.r),
-      child: Container(
-        padding: EdgeInsetsDirectional.symmetric(vertical: 7.h, horizontal: 6.w),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 220),
+        padding: EdgeInsetsDirectional.symmetric(vertical: 8.h, horizontal: 6.w),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12.r),
           border: Border.all(
@@ -53,9 +54,17 @@ class DeliveryDirectionSelector extends StatelessWidget {
             width: active ? 2 : 1,
           ),
           color: active ? XistiUiTokens.deliveryAccent.withValues(alpha: 0.08) : getCurrentTheme(context).colorTextFieldBg,
+          boxShadow: active ? XistiUiTokens.neonGlow(XistiUiTokens.deliveryAccent, alpha: 0.12) : null,
         ),
         alignment: Alignment.center,
-        child: Text(label, style: bodyText(context: context, fontWeight: active ? FontWeight.w600 : FontWeight.w400)),
+        child: Text(
+          label,
+          style: bodyText(
+            context: context,
+            fontWeight: active ? FontWeight.w700 : FontWeight.w500,
+            textColor: active ? XistiUiTokens.deliveryAccent : getCurrentTheme(context).colorTextCommon,
+          ),
+        ),
       ),
     );
   }

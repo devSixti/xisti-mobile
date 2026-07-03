@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../bottomSheet/vehicle_information_sheet.dart';
 import '../../../commonView/xisti_vehicle_image.dart';
 import '../../../utils/custom_icons.dart';
+import '../../../utils/service_mode_util.dart';
 import '../../../utils/utils.dart';
 import '../../../utils/xisti_ui_tokens.dart';
 import 'passenger_home_dl.dart';
@@ -71,6 +72,7 @@ class _PassengerVehicleDeckState extends State<PassengerVehicleDeck> {
     final theme = getCurrentTheme(context);
     final accent = XistiUiTokens.accentForMode(widget.serviceMode);
     final active = widget.vehicles[_page.clamp(0, widget.vehicles.length - 1)];
+    final textOnly = ServiceModeKind.isAcarreosMode(widget.serviceMode);
 
     return Padding(
       padding: EdgeInsetsDirectional.only(bottom: 6.h),
@@ -95,7 +97,7 @@ class _PassengerVehicleDeckState extends State<PassengerVehicleDeck> {
                 ),
                 SizedBox(width: 8.w),
                 Text(
-                  'Elige tu medio',
+                  textOnly ? 'Tipo de carga' : 'Elige tu medio',
                   style: bodyText(
                     context: context,
                     fontWeight: FontWeight.w700,
@@ -112,7 +114,7 @@ class _PassengerVehicleDeckState extends State<PassengerVehicleDeck> {
             ),
           ),
           SizedBox(
-            height: 118.h,
+            height: textOnly ? 72.h : 118.h,
             child: PageView.builder(
               controller: _pageController,
               itemCount: widget.vehicles.length,
@@ -143,27 +145,46 @@ class _PassengerVehicleDeckState extends State<PassengerVehicleDeck> {
                         children: [
                           if (isActive)
                             Container(
-                              width: 56.w,
+                              width: textOnly ? 40.w : 56.w,
                               height: 3.h,
                               margin: EdgeInsetsDirectional.only(bottom: 6.h),
                               decoration: BoxDecoration(
                                 color: accent,
                                 borderRadius: BorderRadius.circular(2.r),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: accent.withValues(alpha: 0.55),
-                                    blurRadius: 8,
-                                    spreadRadius: 1,
-                                  ),
-                                ],
+                                boxShadow: textOnly
+                                    ? null
+                                    : [
+                                        BoxShadow(
+                                          color: accent.withValues(alpha: 0.55),
+                                          blurRadius: 8,
+                                          spreadRadius: 1,
+                                        ),
+                                      ],
                               ),
                             )
                           else
                             SizedBox(height: 9.h),
-                          XistiVehicleImage(
-                            imagePath: item.serviceIcon,
-                            size: isActive ? 88.w : 64.w,
-                          ),
+                          if (textOnly)
+                            Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 12.w),
+                              child: Text(
+                                item.serviceName ?? '-',
+                                textAlign: TextAlign.center,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: bodyText(
+                                  context: context,
+                                  textColor: isActive ? accent : theme.colorTextCommon,
+                                  fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
+                                  fontSize: isActive ? textSize14px : textSize12px,
+                                ),
+                              ),
+                            )
+                          else
+                            XistiVehicleImage(
+                              imagePath: item.serviceIcon,
+                              size: isActive ? 88.w : 64.w,
+                            ),
                         ],
                       ),
                     ),
