@@ -89,7 +89,7 @@ class _PassengerVehicleDeckState extends State<PassengerVehicleDeck> {
               bottom: 4.h,
             ),
             child: XistiSectionLabel(
-              label: sectionLabel ?? (textOnly ? 'Tipo de carga' : 'Elige tu medio'),
+              label: widget.sectionLabel ?? (textOnly ? 'Tipo de carga' : 'Elige tu medio'),
               accent: accent,
               trailing: active.matchesSelection(widget.selected)
                   ? GestureDetector(
