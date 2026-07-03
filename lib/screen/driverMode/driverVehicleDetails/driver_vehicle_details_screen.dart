@@ -127,6 +127,8 @@ class _DriverVehicleDetailsScreenState extends State<DriverVehicleDetailsScreen>
     final isCar = selected.serviceId == ServiceType.taxi;
     final isBike = selected.serviceId == ServiceType.courier ||
         selected.deliveryVariant == XistiVehicleCatalog.bicicleta;
+    final isCarga = selected.serviceId == ServiceType.rickshaw ||
+        XistiVehicleCatalog.isAcarreoVariant(selected.deliveryVariant);
 
     Widget familyChip({required String label, required String iconVariant, required bool active, required VoidCallback onTap}) {
       final theme = getCurrentTheme(context);
@@ -135,7 +137,7 @@ class _DriverVehicleDetailsScreenState extends State<DriverVehicleDetailsScreen>
           onTap: onTap,
           child: Container(
             margin: EdgeInsetsDirectional.only(end: 8.w),
-            padding: EdgeInsetsDirectional.symmetric(vertical: 20.h, horizontal: 8.w),
+            padding: EdgeInsetsDirectional.symmetric(vertical: 16.h, horizontal: 6.w),
             decoration: BoxDecoration(
               color: Colors.transparent,
               borderRadius: BorderRadius.circular(18.r),
@@ -147,9 +149,15 @@ class _DriverVehicleDetailsScreenState extends State<DriverVehicleDetailsScreen>
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                XistiVehicleImage(imagePath: XistiVehicleCatalog.iconAsset(iconVariant), size: 96.w),
-                SizedBox(height: 8.h),
-                Text(label, style: bodyText(context: context, fontWeight: active ? FontWeight.w700 : FontWeight.w500)),
+                XistiVehicleImage(imagePath: XistiVehicleCatalog.iconAsset(iconVariant), size: 72.w),
+                SizedBox(height: 6.h),
+                Text(
+                  label,
+                  textAlign: TextAlign.center,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: bodyText(context: context, fontWeight: active ? FontWeight.w700 : FontWeight.w500, fontSize: textSize12px),
+                ),
               ],
             ),
           ),
@@ -194,6 +202,20 @@ class _DriverVehicleDetailsScreenState extends State<DriverVehicleDetailsScreen>
                         .toList() ??
                     [];
                 if (bike.isNotEmpty) _bloc?.selectTransportVariant(bike.first);
+              },
+            ),
+            familyChip(
+              label: languages.vehicleCarga,
+              iconVariant: XistiVehicleCatalog.motocarguero,
+              active: isCarga,
+              onTap: () {
+                final carga = _bloc?.serviceList
+                        .where((s) =>
+                            s.serviceId == ServiceType.rickshaw ||
+                            XistiVehicleCatalog.isAcarreoVariant(s.deliveryVariant))
+                        .toList() ??
+                    [];
+                if (carga.isNotEmpty) _bloc?.selectTransportVariant(carga.first);
               },
             ),
           ],

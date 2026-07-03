@@ -13,6 +13,9 @@ abstract final class XistiVehicleCatalog {
   static const String motoBajo = 'moto_bajo_cilindraje';
   static const String motoMedio = 'moto_medio_cilindraje';
   static const String bicicleta = 'bicicleta';
+  static const String motocarguero = 'motocarguero';
+  static const String camionAcarreo = 'camion_acarreo';
+  static const String jaulaAcarreo = 'jaula_acarreo';
 
   static const _iconBase = 'assets/images/vehicle_home';
   static const _iconDeliveryBase = 'assets/images/vehicle_home_delivery';
@@ -27,7 +30,14 @@ abstract final class XistiVehicleCatalog {
   static bool isDeliveryThemedVariant(String? variant) =>
       deliveryThemedVariants.contains(variant);
 
+  static const Set<String> acarreoVariants = {motocarguero, camionAcarreo, jaulaAcarreo};
+
+  static bool isAcarreoVariant(String? variant) => acarreoVariants.contains(variant);
+
   static String iconAsset(String variant, {bool delivery = false}) {
+    if (isAcarreoVariant(variant)) {
+      return '$_iconBase/$variant.png';
+    }
     final assetVariant = delivery && isDeliveryThemedVariant(variant)
         ? variant
         : _displayIconVariant(variant);
@@ -67,6 +77,12 @@ abstract final class XistiVehicleCatalog {
         return languages.vehicleMoto;
       case bicicleta:
         return languages.vehicleBicicleta;
+      case motocarguero:
+        return languages.haulMotocarguero;
+      case camionAcarreo:
+        return languages.haulTruck;
+      case jaulaAcarreo:
+        return languages.haulCage;
       default:
         return variant;
     }
@@ -218,6 +234,9 @@ abstract final class XistiVehicleCatalog {
   }) {
     final v = (variant ?? '').trim();
     if (v.isNotEmpty) {
+      if (isAcarreoVariant(v)) {
+        return iconAsset(v);
+      }
       final useDelivery = delivery || (v != carroEconomico && isDeliveryThemedVariant(v));
       if (useDelivery && isDeliveryThemedVariant(v)) {
         return deliveryIconAsset(v);
@@ -235,6 +254,8 @@ abstract final class XistiVehicleCatalog {
         return delivery ? deliveryIconAsset(motoMedio) : iconAsset(motoBajo);
       case ServiceType.courier:
         return deliveryIconAsset(bicicleta);
+      case ServiceType.rickshaw:
+        return iconAsset(motocarguero);
       default:
         break;
     }
@@ -250,6 +271,9 @@ abstract final class XistiVehicleCatalog {
         _DriverCatalogRow(ServiceType.bike, motoMedio, true, false),
         _DriverCatalogRow(ServiceType.taxi, carroEconomico, true, false),
         _DriverCatalogRow(ServiceType.courier, bicicleta, true, false),
+        _DriverCatalogRow(ServiceType.rickshaw, motocarguero, true, false),
+        _DriverCatalogRow(ServiceType.rickshaw, camionAcarreo, true, false),
+        _DriverCatalogRow(ServiceType.rickshaw, jaulaAcarreo, true, false),
       ];
 
   static const transportRegistrationVariants = [
@@ -259,6 +283,9 @@ abstract final class XistiVehicleCatalog {
     motoBajo,
     motoAlto,
     bicicleta,
+    motocarguero,
+    camionAcarreo,
+    jaulaAcarreo,
   ];
 
   /// Driver manage-vehicle screen: only viajes matrix (no envío genérico).

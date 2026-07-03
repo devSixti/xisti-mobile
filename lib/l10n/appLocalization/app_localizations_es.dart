@@ -1529,6 +1529,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get vehicleBicicleta => 'Bicicleta';
 
   @override
+  String get vehicleCarga => 'Carga';
+
+  @override
   String get vehicleTrip => 'Viaje';
 
   @override

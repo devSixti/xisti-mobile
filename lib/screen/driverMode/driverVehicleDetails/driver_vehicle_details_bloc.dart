@@ -362,6 +362,13 @@ class DriverVehicleDetailsBloc extends Bloc {
               s.deliveryVariant == XistiVehicleCatalog.bicicleta)
           .toList();
     }
+    if (serviceId == ServiceType.rickshaw) {
+      return serviceList
+          .where((s) =>
+              s.serviceId == ServiceType.rickshaw ||
+              XistiVehicleCatalog.isAcarreoVariant(s.deliveryVariant))
+          .toList();
+    }
     return serviceList.where((s) => s.serviceId == serviceId).toList();
   }
 

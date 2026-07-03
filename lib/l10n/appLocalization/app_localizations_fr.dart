@@ -1537,6 +1537,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get vehicleBicicleta => 'Vélo';
 
   @override
+  String get vehicleCarga => 'Fret';
+
+  @override
   String get vehicleTrip => 'Trajet';
 
   @override

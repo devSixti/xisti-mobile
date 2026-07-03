@@ -1524,6 +1524,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get vehicleBicicleta => 'Bicicleta';
 
   @override
+  String get vehicleCarga => 'Frete';
+
+  @override
   String get vehicleTrip => 'Viagem';
 
   @override

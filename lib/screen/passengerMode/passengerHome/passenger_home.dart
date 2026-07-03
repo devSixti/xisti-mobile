@@ -233,7 +233,6 @@ class _PassengerHomeState extends State<PassengerHome> {
         padding: EdgeInsetsDirectional.only(top: 4.h, bottom: 8.h),
         child: addressSelection(),
       ),
-      sharedRideAddressFields(),
       serviceData(fillAvailable: false),
       cityZoneShortcuts(),
       acarreoQuickFields(),
@@ -1052,7 +1051,11 @@ class _PassengerHomeState extends State<PassengerHome> {
                           vehicles: serviceTypeList,
                           selected: snapSelected.data,
                           serviceMode: modeSnap.data,
-                          sectionLabel: _isSharedRidesMode(modeSnap.data) ? 'Tipo de vehículo' : null,
+                          sectionLabel: _isSharedRidesMode(modeSnap.data)
+                              ? 'Tipo de vehículo'
+                              : _isAcarreosMode(modeSnap.data)
+                                  ? 'Tipo de carga'
+                                  : null,
                           onSelect: (index) => _bloc?.vehicleSelect(index),
                         ),
                         if (_isSharedRidesMode(modeSnap.data))
@@ -1136,7 +1139,7 @@ class _PassengerHomeState extends State<PassengerHome> {
     bool photoTile = false,
     double? photoTileHeight,
   }) {
-    final textOnly = ServiceModeKind.isAcarreosMode(serviceMode);
+    final textOnly = false;
     return GestureDetector(
       onTap: () => _bloc?.vehicleSelect(position),
       child: StreamBuilder<ServiceTypeItem?>(

@@ -2972,6 +2972,12 @@ abstract class AppLocalizations {
   /// **'Bicycle'**
   String get vehicleBicicleta;
 
+  /// No description provided for @vehicleCarga.
+  ///
+  /// In en, this message translates to:
+  /// **'Hauling'**
+  String get vehicleCarga;
+
   /// No description provided for @vehicleTrip.
   ///
   /// In en, this message translates to:

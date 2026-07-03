@@ -1520,6 +1520,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get vehicleBicicleta => 'Bicycle';
 
   @override
+  String get vehicleCarga => 'Hauling';
+
+  @override
   String get vehicleTrip => 'Trip';
 
   @override

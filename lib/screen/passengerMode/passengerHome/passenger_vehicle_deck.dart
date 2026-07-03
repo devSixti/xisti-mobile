@@ -4,7 +4,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../bottomSheet/vehicle_information_sheet.dart';
 import '../../../commonView/xisti_vehicle_image.dart';
 import '../../../utils/custom_icons.dart';
-import '../../../utils/service_mode_util.dart';
 import '../../../utils/utils.dart';
 import '../../../utils/xisti_ui_tokens.dart';
 import 'passenger_home_dl.dart';
@@ -75,7 +74,6 @@ class _PassengerVehicleDeckState extends State<PassengerVehicleDeck> {
     final theme = getCurrentTheme(context);
     final accent = XistiUiTokens.accentForMode(widget.serviceMode);
     final active = widget.vehicles[_page.clamp(0, widget.vehicles.length - 1)];
-    final textOnly = ServiceModeKind.isAcarreosMode(widget.serviceMode);
 
     return Padding(
       padding: EdgeInsetsDirectional.only(bottom: 6.h),
@@ -89,7 +87,7 @@ class _PassengerVehicleDeckState extends State<PassengerVehicleDeck> {
               bottom: 4.h,
             ),
             child: XistiSectionLabel(
-              label: widget.sectionLabel ?? (textOnly ? 'Tipo de carga' : 'Elige tu medio'),
+              label: widget.sectionLabel ?? 'Elige tu medio',
               accent: accent,
               trailing: active.matchesSelection(widget.selected)
                   ? GestureDetector(
@@ -100,7 +98,7 @@ class _PassengerVehicleDeckState extends State<PassengerVehicleDeck> {
             ),
           ),
           SizedBox(
-            height: textOnly ? 72.h : 118.h,
+            height: 118.h,
             child: PageView.builder(
               controller: _pageController,
               itemCount: widget.vehicles.length,
@@ -131,46 +129,27 @@ class _PassengerVehicleDeckState extends State<PassengerVehicleDeck> {
                         children: [
                           if (isActive)
                             Container(
-                              width: textOnly ? 40.w : 56.w,
+                              width: 56.w,
                               height: 3.h,
                               margin: EdgeInsetsDirectional.only(bottom: 6.h),
                               decoration: BoxDecoration(
                                 color: accent,
                                 borderRadius: BorderRadius.circular(2.r),
-                                boxShadow: textOnly
-                                    ? null
-                                    : [
-                                        BoxShadow(
-                                          color: accent.withValues(alpha: 0.55),
-                                          blurRadius: 8,
-                                          spreadRadius: 1,
-                                        ),
-                                      ],
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: accent.withValues(alpha: 0.55),
+                                    blurRadius: 8,
+                                    spreadRadius: 1,
+                                  ),
+                                ],
                               ),
                             )
                           else
                             SizedBox(height: 9.h),
-                          if (textOnly)
-                            Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 12.w),
-                              child: Text(
-                                item.serviceName ?? '-',
-                                textAlign: TextAlign.center,
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                                style: bodyText(
-                                  context: context,
-                                  textColor: isActive ? accent : theme.colorTextCommon,
-                                  fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
-                                  fontSize: textSize14px,
-                                ),
-                              ),
-                            )
-                          else
-                            XistiVehicleImage(
-                              imagePath: item.serviceIcon,
-                              size: isActive ? 88.w : 64.w,
-                            ),
+                          XistiVehicleImage(
+                            imagePath: item.serviceIcon,
+                            size: isActive ? 88.w : 64.w,
+                          ),
                         ],
                       ),
                     ),
@@ -179,28 +158,25 @@ class _PassengerVehicleDeckState extends State<PassengerVehicleDeck> {
               },
             ),
           ),
-          if (textOnly)
-            const SizedBox.shrink()
-          else
-            Padding(
-              padding: EdgeInsetsDirectional.symmetric(horizontal: commonHorizontalPadding),
-              child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 200),
-                child: Text(
-                  active.serviceName ?? '-',
-                  key: ValueKey(active.serviceName),
-                  textAlign: TextAlign.center,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: bodyText(
-                    context: context,
-                    textColor: accent,
-                    fontWeight: FontWeight.w700,
-                    fontSize: textSize14px,
-                  ),
+          Padding(
+            padding: EdgeInsetsDirectional.symmetric(horizontal: commonHorizontalPadding),
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 200),
+              child: Text(
+                active.serviceName ?? '-',
+                key: ValueKey(active.serviceName),
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: bodyText(
+                  context: context,
+                  textColor: accent,
+                  fontWeight: FontWeight.w700,
+                  fontSize: textSize14px,
                 ),
               ),
             ),
+          ),
           SizedBox(height: 6.h),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,

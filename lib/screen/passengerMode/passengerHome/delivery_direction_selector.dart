@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../../../commonView/common_view.dart';
 import '../../../utils/delivery_direction_kind.dart';
 import '../../../utils/utils.dart';
 import '../../../utils/xisti_ui_tokens.dart';
@@ -25,45 +24,60 @@ class DeliveryDirectionSelector extends StatelessWidget {
             context,
             DeliveryDirectionKind.send,
             DeliveryDirectionKind.label(DeliveryDirectionKind.send),
+            Icons.call_made_rounded,
           ),
         ),
-        SizedBox(width: 10.w),
+        SizedBox(width: 8.w),
         Expanded(
           child: _chip(
             context,
             DeliveryDirectionKind.receive,
             DeliveryDirectionKind.label(DeliveryDirectionKind.receive),
+            Icons.call_received_rounded,
           ),
         ),
       ],
     );
   }
 
-  Widget _chip(BuildContext context, String value, String label) {
+  Widget _chip(BuildContext context, String value, String label, IconData icon) {
     final active = selected == value;
-    return InkWell(
+    final accent = XistiUiTokens.deliveryAccent;
+    final theme = getCurrentTheme(context);
+    return GestureDetector(
       onTap: () => onChanged(value),
-      borderRadius: BorderRadius.circular(12.r),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 220),
         padding: EdgeInsetsDirectional.symmetric(vertical: 10.h, horizontal: 8.w),
         decoration: BoxDecoration(
+          color: active ? accent.withValues(alpha: 0.12) : theme.colorScaffoldBg,
           borderRadius: BorderRadius.circular(12.r),
           border: Border.all(
-            color: active ? XistiUiTokens.deliveryAccent : getCurrentTheme(context).colorTextFieldBorder,
-            width: active ? 2 : 1,
+            color: active ? accent : theme.colorTextFieldBorder,
+            width: active ? 1.5 : 1,
           ),
-          color: active ? XistiUiTokens.deliveryAccent.withValues(alpha: 0.08) : getCurrentTheme(context).colorTextFieldBg,
-          boxShadow: active ? XistiUiTokens.neonGlow(XistiUiTokens.deliveryAccent, alpha: 0.12) : null,
+          boxShadow: active ? XistiUiTokens.neonGlow(accent, alpha: 0.15) : null,
         ),
-        alignment: Alignment.center,
-        child: Text(
-          label,
-          style: bodyText(
-            context: context,
-            fontWeight: active ? FontWeight.w700 : FontWeight.w500,
-            textColor: active ? XistiUiTokens.deliveryAccent : getCurrentTheme(context).colorTextCommon,
-          ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 16.sp, color: active ? accent : theme.colorIconCommon),
+            SizedBox(width: 5.w),
+            Flexible(
+              child: Text(
+                label,
+                maxLines: 1,
+                textAlign: TextAlign.center,
+                overflow: TextOverflow.ellipsis,
+                style: bodyText(
+                  context: context,
+                  fontSize: 11.5.sp,
+                  fontWeight: active ? FontWeight.w600 : FontWeight.w500,
+                  textColor: active ? accent : theme.colorTextCommon,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
