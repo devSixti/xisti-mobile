@@ -60,7 +60,7 @@ class FareTripSummary extends StatelessWidget {
           _bullet(context, '${languages.maxFare}: ${getAmountWithCurrency(maxFare)}'),
           SizedBox(height: 4.h),
           Text(
-            'Estimación según ruta, tiempo y tarifa del vehículo.',
+            languages.fareEstimateDisclaimer,
             style: bodyText(context: context, fontSize: textSize12px, textColor: theme.colorTextLight),
           ),
         ],

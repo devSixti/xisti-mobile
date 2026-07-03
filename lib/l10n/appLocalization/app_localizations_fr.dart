@@ -52,7 +52,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get minute => 'minute';
 
   @override
-  String get minutes => 'minutes';
+  String get minutes => 'Minutes';
 
   @override
   String get seconds => 'secondes';
@@ -474,6 +474,10 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get maxFare => 'Tarif maximum';
+
+  @override
+  String get fareEstimateDisclaimer =>
+      'Estimation selon l\'itinéraire, le temps et le tarif du véhicule.';
 
   @override
   String get recipientName => 'Nom du destinataire';
@@ -1740,33 +1744,35 @@ class AppLocalizationsFr extends AppLocalizations {
   String get sharedRideTownToTown => 'Village à village';
 
   @override
-  String get sharedRideOriginTownHint => 'Origin town';
+  String get sharedRideOriginTownHint => 'Commune d\'origine';
 
   @override
-  String get sharedRideDestinationCityHint => 'Destination city';
+  String get sharedRideDestinationCityHint => 'Ville de destination';
 
   @override
-  String get sharedRideDestinationTownHint => 'Destination town';
+  String get sharedRideDestinationTownHint => 'Commune de destination';
 
   @override
-  String get sharedRideDestinationRequiredCity => 'Enter the destination city';
+  String get sharedRideDestinationRequiredCity =>
+      'Indiquez la ville de destination';
 
   @override
-  String get sharedRideDestinationRequiredTown => 'Enter the destination town';
+  String get sharedRideDestinationRequiredTown =>
+      'Indiquez la commune de destination';
 
   @override
   String get sharedRideContributionNotice =>
-      'The contribution is voluntary and agreed between passengers and driver.';
+      'La contribution est volontaire et convenue entre passagers et conducteur.';
 
   @override
   String get sharedRideMatchNotifyWhenAvailable =>
-      'We will notify you when rides are available on this route.';
+      'Nous vous préviendrons lorsqu\'il y aura des trajets sur cet itinéraire.';
 
   @override
-  String get perPersonSuffix => 'per person';
+  String get perPersonSuffix => 'par personne';
 
   @override
-  String get estimatedServiceDate => 'Estimated service date';
+  String get estimatedServiceDate => 'Date estimée du service';
 
   @override
   String get errandPickup => 'Retraits';

@@ -13,7 +13,7 @@
   "hour": "ora",
   "hours": "ore",
   "minute": "minuto",
-  "minutes": "minuti",
+  "minutes": "Minuti",
   "seconds": "secondi",
   "justNow": "proprio ora",
   "ago": "fa",
@@ -599,5 +599,15 @@
   "sessionExpired": "La sessione è scaduta. Accedi di nuovo.",
   "userNotFound": "Utente non trovato",
   "emailAlreadyRegistered": "Questa email è già registrata",
-  "phoneAlreadyRegistered": "Questo numero di telefono è già registrato"
+  "phoneAlreadyRegistered": "Questo numero di telefono è già registrato",
+  "sharedRideOriginTownHint": "Comune di partenza",
+  "sharedRideDestinationCityHint": "Città di destinazione",
+  "sharedRideDestinationTownHint": "Comune di destinazione",
+  "sharedRideDestinationRequiredCity": "Inserisci la città di destinazione",
+  "sharedRideDestinationRequiredTown": "Inserisci il comune di destinazione",
+  "sharedRideContributionNotice": "Il contributo è volontario e concordato tra passeggeri e conducente.",
+  "sharedRideMatchNotifyWhenAvailable": "Ti avviseremo quando ci saranno corse su questo percorso.",
+  "perPersonSuffix": "a persona",
+  "estimatedServiceDate": "Data stimata del servizio",
+  "fareEstimateDisclaimer": "Stima in base a percorso, tempo e tariffa del veicolo."
 }

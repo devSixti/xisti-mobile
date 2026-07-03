@@ -191,7 +191,7 @@ abstract class AppLocalizations {
   /// No description provided for @minutes.
   ///
   /// In en, this message translates to:
-  /// **'minutes'**
+  /// **'Minutes'**
   String get minutes;
 
   /// No description provided for @seconds.
@@ -973,6 +973,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Max. fare'**
   String get maxFare;
+
+  /// No description provided for @fareEstimateDisclaimer.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimate based on route, time and vehicle fare.'**
+  String get fareEstimateDisclaimer;
 
   /// No description provided for @recipientName.
   ///

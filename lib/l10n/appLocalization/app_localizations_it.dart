@@ -52,7 +52,7 @@ class AppLocalizationsIt extends AppLocalizations {
   String get minute => 'minuto';
 
   @override
-  String get minutes => 'minuti';
+  String get minutes => 'Minuti';
 
   @override
   String get seconds => 'secondi';
@@ -475,6 +475,10 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get maxFare => 'Tariffa max.';
+
+  @override
+  String get fareEstimateDisclaimer =>
+      'Stima in base a percorso, tempo e tariffa del veicolo.';
 
   @override
   String get recipientName => 'Nome del Destinatario';
@@ -1732,33 +1736,35 @@ class AppLocalizationsIt extends AppLocalizations {
   String get sharedRideTownToTown => 'Paese a paese';
 
   @override
-  String get sharedRideOriginTownHint => 'Origin town';
+  String get sharedRideOriginTownHint => 'Comune di partenza';
 
   @override
-  String get sharedRideDestinationCityHint => 'Destination city';
+  String get sharedRideDestinationCityHint => 'Città di destinazione';
 
   @override
-  String get sharedRideDestinationTownHint => 'Destination town';
+  String get sharedRideDestinationTownHint => 'Comune di destinazione';
 
   @override
-  String get sharedRideDestinationRequiredCity => 'Enter the destination city';
+  String get sharedRideDestinationRequiredCity =>
+      'Inserisci la città di destinazione';
 
   @override
-  String get sharedRideDestinationRequiredTown => 'Enter the destination town';
+  String get sharedRideDestinationRequiredTown =>
+      'Inserisci il comune di destinazione';
 
   @override
   String get sharedRideContributionNotice =>
-      'The contribution is voluntary and agreed between passengers and driver.';
+      'Il contributo è volontario e concordato tra passeggeri e conducente.';
 
   @override
   String get sharedRideMatchNotifyWhenAvailable =>
-      'We will notify you when rides are available on this route.';
+      'Ti avviseremo quando ci saranno corse su questo percorso.';
 
   @override
-  String get perPersonSuffix => 'per person';
+  String get perPersonSuffix => 'a persona';
 
   @override
-  String get estimatedServiceDate => 'Estimated service date';
+  String get estimatedServiceDate => 'Data stimata del servizio';
 
   @override
   String get errandPickup => 'Ritiri';

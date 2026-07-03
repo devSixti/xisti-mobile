@@ -52,7 +52,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get minute => 'minuto';
 
   @override
-  String get minutes => 'minutos';
+  String get minutes => 'Minutos';
 
   @override
   String get seconds => 'segundos';
@@ -473,6 +473,10 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get maxFare => 'Tarifa máx.';
+
+  @override
+  String get fareEstimateDisclaimer =>
+      'Estimativa conforme rota, tempo e tarifa do veículo.';
 
   @override
   String get recipientName => 'Nome do Destinatário';
@@ -1725,33 +1729,34 @@ class AppLocalizationsPt extends AppLocalizations {
   String get sharedRideTownToTown => 'Cidade a cidade';
 
   @override
-  String get sharedRideOriginTownHint => 'Origin town';
+  String get sharedRideOriginTownHint => 'Município de origem';
 
   @override
-  String get sharedRideDestinationCityHint => 'Destination city';
+  String get sharedRideDestinationCityHint => 'Cidade de destino';
 
   @override
-  String get sharedRideDestinationTownHint => 'Destination town';
+  String get sharedRideDestinationTownHint => 'Cidade/município de destino';
 
   @override
-  String get sharedRideDestinationRequiredCity => 'Enter the destination city';
+  String get sharedRideDestinationRequiredCity => 'Informe a cidade de destino';
 
   @override
-  String get sharedRideDestinationRequiredTown => 'Enter the destination town';
+  String get sharedRideDestinationRequiredTown =>
+      'Informe o município de destino';
 
   @override
   String get sharedRideContributionNotice =>
-      'The contribution is voluntary and agreed between passengers and driver.';
+      'A contribuição é voluntária e acordada entre passageiros e motorista.';
 
   @override
   String get sharedRideMatchNotifyWhenAvailable =>
-      'We will notify you when rides are available on this route.';
+      'Avisaremos quando houver trajetos nesta rota.';
 
   @override
-  String get perPersonSuffix => 'per person';
+  String get perPersonSuffix => 'por pessoa';
 
   @override
-  String get estimatedServiceDate => 'Estimated service date';
+  String get estimatedServiceDate => 'Data estimada do serviço';
 
   @override
   String get errandPickup => 'Coletas';

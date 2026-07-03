@@ -52,7 +52,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get minute => 'minute';
 
   @override
-  String get minutes => 'minutes';
+  String get minutes => 'Minutes';
 
   @override
   String get seconds => 'seconds';
@@ -469,6 +469,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get maxFare => 'Max. fare';
+
+  @override
+  String get fareEstimateDisclaimer =>
+      'Estimate based on route, time and vehicle fare.';
 
   @override
   String get recipientName => 'Recipient\'s Name';
