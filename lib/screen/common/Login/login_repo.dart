@@ -41,6 +41,7 @@ class LoginRepo {
         ApiParam.paramSelectLanguage: getLanguageFromUserPrefBox(),
         ApiParam.paramSelectCurrency: getStringFromSettingBox(hiveSelectedCurrency)
       },
+      showServerErrorOnFailure: false,
     );
     return response;
   }
