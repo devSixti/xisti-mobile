@@ -1740,6 +1740,35 @@ class AppLocalizationsFr extends AppLocalizations {
   String get sharedRideTownToTown => 'Village à village';
 
   @override
+  String get sharedRideOriginTownHint => 'Origin town';
+
+  @override
+  String get sharedRideDestinationCityHint => 'Destination city';
+
+  @override
+  String get sharedRideDestinationTownHint => 'Destination town';
+
+  @override
+  String get sharedRideDestinationRequiredCity => 'Enter the destination city';
+
+  @override
+  String get sharedRideDestinationRequiredTown => 'Enter the destination town';
+
+  @override
+  String get sharedRideContributionNotice =>
+      'The contribution is voluntary and agreed between passengers and driver.';
+
+  @override
+  String get sharedRideMatchNotifyWhenAvailable =>
+      'We will notify you when rides are available on this route.';
+
+  @override
+  String get perPersonSuffix => 'per person';
+
+  @override
+  String get estimatedServiceDate => 'Estimated service date';
+
+  @override
   String get errandPickup => 'Retraits';
 
   @override

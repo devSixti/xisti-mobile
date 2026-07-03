@@ -1,1 +1,37 @@
-{}
+{
+  "fr": [
+    "sharedRideOriginTownHint",
+    "sharedRideDestinationCityHint",
+    "sharedRideDestinationTownHint",
+    "sharedRideDestinationRequiredCity",
+    "sharedRideDestinationRequiredTown",
+    "sharedRideContributionNotice",
+    "sharedRideMatchNotifyWhenAvailable",
+    "perPersonSuffix",
+    "estimatedServiceDate"
+  ],
+
+  "it": [
+    "sharedRideOriginTownHint",
+    "sharedRideDestinationCityHint",
+    "sharedRideDestinationTownHint",
+    "sharedRideDestinationRequiredCity",
+    "sharedRideDestinationRequiredTown",
+    "sharedRideContributionNotice",
+    "sharedRideMatchNotifyWhenAvailable",
+    "perPersonSuffix",
+    "estimatedServiceDate"
+  ],
+
+  "pt": [
+    "sharedRideOriginTownHint",
+    "sharedRideDestinationCityHint",
+    "sharedRideDestinationTownHint",
+    "sharedRideDestinationRequiredCity",
+    "sharedRideDestinationRequiredTown",
+    "sharedRideContributionNotice",
+    "sharedRideMatchNotifyWhenAvailable",
+    "perPersonSuffix",
+    "estimatedServiceDate"
+  ]
+}

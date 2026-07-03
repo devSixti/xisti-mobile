@@ -150,6 +150,10 @@ class ApiConst {
 
   //Ride Book
   static const endPointTransportRideBooking = "ride-booking";
+  static const endPointSharedRideCreateOffer = "shared-ride-create-offer";
+  static const endPointSharedRideSearch = "shared-ride-search";
+  static const endPointSharedRideJoin = "shared-ride-join";
+  static const endPointSharedRideMyOffers = "shared-ride-my-offers";
   static const endPointFindDriver = "driver-bid-list";
   static const endPointUpdatePrice = "update-price";
   static const endPointAcceptRide = "accept-ride";
@@ -275,6 +279,19 @@ class ApiParam {
   static const paramPackageWidthCm = "package_width_cm";
   static const paramPackageLengthCm = "package_length_cm";
   static const paramRequestedVehicleServiceId = "requested_vehicle_service_id";
+  static const paramTripKind = "trip_kind";
+  static const paramOriginTown = "origin_town";
+  static const paramDestinationTown = "destination_town";
+  static const paramTripDate = "trip_date";
+  static const paramSeatsTotal = "seats_total";
+  static const paramFarePerPerson = "fare_per_person";
+  static const paramOfferId = "offer_id";
+  static const paramSearchId = "search_id";
+  static const paramDeliveryDirection = "delivery_direction";
+  static const paramAcarreoVehicleVariant = "acarreo_vehicle_variant";
+  static const paramEstimatedServiceDate = "estimated_service_date";
+  static const paramSenderName = "sender_name";
+  static const paramSenderNumber = "sender_contact_number";
   static const paramAcceptDelivery = "accept_delivery";
   static const paramDeliveryVariant = "delivery_variant";
   static const paramAlsoTransportPassengers = "also_transport_passengers";

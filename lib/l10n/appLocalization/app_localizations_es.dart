@@ -1703,7 +1703,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get serviceModeTrips => 'Viajes';
 
   @override
-  String get serviceModeDelivery => 'Envío';
+  String get serviceModeDelivery => 'Entregas';
 
   @override
   String get serviceModeShare => 'Compartir';
@@ -1728,6 +1728,35 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get sharedRideTownToTown => 'Pueblo a pueblo';
+
+  @override
+  String get sharedRideOriginTownHint => 'Pueblo de origen';
+
+  @override
+  String get sharedRideDestinationCityHint => 'Ciudad de destino';
+
+  @override
+  String get sharedRideDestinationTownHint => 'Pueblo de destino';
+
+  @override
+  String get sharedRideDestinationRequiredCity => 'Indica la ciudad de destino';
+
+  @override
+  String get sharedRideDestinationRequiredTown => 'Indica el pueblo de destino';
+
+  @override
+  String get sharedRideContributionNotice =>
+      'El aporte es voluntario y se acuerda entre pasajeros y conductor.';
+
+  @override
+  String get sharedRideMatchNotifyWhenAvailable =>
+      'Te avisaremos cuando haya recorridos en esta ruta.';
+
+  @override
+  String get perPersonSuffix => 'por persona';
+
+  @override
+  String get estimatedServiceDate => 'Fecha estimada del servicio';
 
   @override
   String get errandPickup => 'Recogidas';

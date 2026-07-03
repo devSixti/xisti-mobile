@@ -46,4 +46,34 @@ class CurrencyDisplayUtil {
     if (upper.contains('COP') || upper.contains('COL')) return '\$';
     return storedSymbol.trim().isEmpty ? '\$' : storedSymbol.trim();
   }
+
+  /// ISO-style display label for amounts: "$ 13.000", "€ 25", "R$ 100".
+  static String formatAmount(String storedSymbol, String formattedNumber) {
+    final code = _resolveCurrencyCode(storedSymbol);
+    switch (code) {
+      case 'COP':
+        return '\$ $formattedNumber';
+      case 'USD':
+        return '\$ $formattedNumber USD';
+      case 'EUR':
+        return '€ $formattedNumber EUR';
+      case 'BRL':
+        return 'R\$ $formattedNumber BRL';
+      case 'ARS':
+        return '\$ $formattedNumber ARS';
+      default:
+        final prefix = amountPrefix(storedSymbol);
+        return prefix.isEmpty ? formattedNumber : '$prefix $formattedNumber';
+    }
+  }
+
+  static String _resolveCurrencyCode(String storedSymbol) {
+    final upper = storedSymbol.trim().toUpperCase();
+    if (upper.contains('COP') || upper.contains('COL')) return 'COP';
+    if (upper.contains('USD') || upper.contains('US\$')) return 'USD';
+    if (upper.contains('EUR') || upper.contains('€')) return 'EUR';
+    if (upper.contains('BRL') || upper.contains('R\$')) return 'BRL';
+    if (upper.contains('ARS')) return 'ARS';
+    return upper.length == 3 ? upper : 'COP';
+  }
 }

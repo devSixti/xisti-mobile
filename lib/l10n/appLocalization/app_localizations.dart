@@ -2303,7 +2303,7 @@ abstract class AppLocalizations {
   /// No description provided for @emptyDocument.
   ///
   /// In en, this message translates to:
-  /// **'The document is not required for this service'**
+  /// **'No documents are pending upload. If you think this is an error, contact support.'**
   String get emptyDocument;
 
   /// No description provided for @document.
@@ -3343,6 +3343,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Town to town'**
   String get sharedRideTownToTown;
+
+  /// No description provided for @sharedRideOriginTownHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Origin town'**
+  String get sharedRideOriginTownHint;
+
+  /// No description provided for @sharedRideDestinationCityHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Destination city'**
+  String get sharedRideDestinationCityHint;
+
+  /// No description provided for @sharedRideDestinationTownHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Destination town'**
+  String get sharedRideDestinationTownHint;
+
+  /// No description provided for @sharedRideDestinationRequiredCity.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the destination city'**
+  String get sharedRideDestinationRequiredCity;
+
+  /// No description provided for @sharedRideDestinationRequiredTown.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the destination town'**
+  String get sharedRideDestinationRequiredTown;
+
+  /// No description provided for @sharedRideContributionNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'The contribution is voluntary and agreed between passengers and driver.'**
+  String get sharedRideContributionNotice;
+
+  /// No description provided for @sharedRideMatchNotifyWhenAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'We will notify you when rides are available on this route.'**
+  String get sharedRideMatchNotifyWhenAvailable;
+
+  /// No description provided for @perPersonSuffix.
+  ///
+  /// In en, this message translates to:
+  /// **'per person'**
+  String get perPersonSuffix;
+
+  /// No description provided for @estimatedServiceDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimated service date'**
+  String get estimatedServiceDate;
 
   /// No description provided for @errandPickup.
   ///

@@ -26,6 +26,7 @@ import '../constant/constant.dart';
 import '../services/session_restore_service.dart';
 import 'api_message_localizer.dart';
 import 'app_mobile_settings.dart';
+import 'currency_display_util.dart';
 import 'mobile_auth_header.dart' as mobile_auth;
 import 'phone_util.dart';
 import '../constant/dimensions.dart';
@@ -533,10 +534,12 @@ String getAmountWithCurrency(dynamic amount, {int numberAfterPoint = 2}) {
   String selectedCurrency = getStringFromSettingBox(hiveSelectedCurrency);
   if (selectedCurrency.isEmpty) {
     selectedCurrency = defaultCurrency;
-  } else if (selectedCurrency == "COL\$") {
-    selectedCurrency = "COP";
   }
-  return "$selectedCurrency ${_formatAmountNumber(amount, numberAfterPoint: numberAfterPoint)}";
+  final digits = numberAfterPoint == 2 ? getCurrencyFractionDigits() : numberAfterPoint;
+  return CurrencyDisplayUtil.formatAmount(
+    selectedCurrency,
+    _formatAmountNumber(amount, numberAfterPoint: digits),
+  );
 }
 
 String getEditableAmount(dynamic amount, {int numberAfterPoint = 2}) {

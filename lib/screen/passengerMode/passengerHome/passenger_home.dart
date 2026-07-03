@@ -25,6 +25,11 @@ import 'passenger_home_booking_sheet.dart';
 import 'passenger_home_dl.dart';
 import 'encomienda_quick_fields.dart';
 import 'delivery_quick_fields.dart';
+import 'delivery_direction_selector.dart';
+import 'shared_ride_kind_selector.dart';
+import 'shared_ride_fields.dart';
+import 'acarreo_quick_fields.dart';
+import '../../../utils/shared_ride_kind.dart';
 import '../../../utils/service_mode_util.dart';
 import 'service_mode_selector.dart';
 
@@ -217,21 +222,111 @@ class _PassengerHomeState extends State<PassengerHome> {
     return [
       _panelHandle(),
       serviceModeSelector(),
+      sharedRideKindSelector(),
+      deliveryDirectionSelector(),
       Padding(
         padding: EdgeInsetsDirectional.only(top: 4.h, bottom: 8.h),
         child: addressSelection(),
       ),
+      sharedRideAddressFields(),
       serviceData(fillAvailable: false),
       Padding(
         padding: EdgeInsetsDirectional.only(bottom: 8.h),
         child: _cityZoneShortcuts(),
       ),
+      deliveryFields(),
+      acarreoQuickFields(),
       encomiendaFields(),
       confirmBtnAndOtherOption(),
       SizedBox(height: 4.h),
       activityHubCard(),
     ];
   }
+
+  bool _isSharedRidesMode(String? mode) => ServiceModeKind.isSharedRideMode(mode);
+
+  bool _isAcarreosMode(String? mode) => ServiceModeKind.isAcarreosMode(mode);
+
+  Widget sharedRideKindSelector() => StreamBuilder<String>(
+    stream: _bloc?.selectedServiceModeSubject,
+    builder: (context, snap) {
+      if (!_isSharedRidesMode(snap.data)) return const SizedBox.shrink();
+      return StreamBuilder<String>(
+        stream: _bloc?.selectedSharedRideKindSubject,
+        builder: (context, kindSnap) {
+          return SharedRideKindSelector(
+            selectedKind: kindSnap.data ?? SharedRideKind.defaultKind,
+            onKindChanged: _bloc!.selectSharedRideKind,
+          );
+        },
+      );
+    },
+  );
+
+  Widget deliveryDirectionSelector() => StreamBuilder<String>(
+    stream: _bloc?.selectedServiceModeSubject,
+    builder: (context, snap) {
+      if (snap.data != ServiceModeKind.delivery) return const SizedBox.shrink();
+      return Padding(
+        padding: EdgeInsetsDirectional.only(
+          start: commonHorizontalPadding,
+          end: commonHorizontalPadding,
+          bottom: 8.h,
+        ),
+        child: StreamBuilder<String>(
+          stream: _bloc?.selectedDeliveryDirectionSubject,
+          builder: (context, dirSnap) {
+            return DeliveryDirectionSelector(
+              selected: dirSnap.data ?? 'send',
+              onChanged: _bloc!.selectDeliveryDirection,
+            );
+          },
+        ),
+      );
+    },
+  );
+
+  Widget sharedRideAddressFields() => StreamBuilder<String>(
+    stream: _bloc?.selectedServiceModeSubject,
+    builder: (context, snap) {
+      if (!_isSharedRidesMode(snap.data)) return const SizedBox.shrink();
+      return StreamBuilder<DateTime?>(
+        stream: _bloc?.sharedRideTripDateSubject,
+        builder: (context, dateSnap) {
+          return StreamBuilder<String>(
+            stream: _bloc?.selectedSharedRideKindSubject,
+            builder: (context, kindSnap) {
+              return SharedRideFields(
+                tripKind: kindSnap.data ?? SharedRideKind.defaultKind,
+                originController: _bloc!.sharedRideOriginTEC,
+                destinationController: _bloc!.sharedRideDestinationTEC,
+                tripDate: dateSnap.data,
+                onDateChanged: (d) => _bloc!.sharedRideTripDateSubject.add(d),
+              );
+            },
+          );
+        },
+      );
+    },
+  );
+
+  Widget acarreoQuickFields() => StreamBuilder<String>(
+    stream: _bloc?.selectedServiceModeSubject,
+    builder: (context, snap) {
+      if (!_isAcarreosMode(snap.data)) return const SizedBox.shrink();
+      return StreamBuilder<DateTime?>(
+        stream: _bloc?.acarreoEstimatedDateSubject,
+        builder: (context, dateSnap) {
+          return AcarreoQuickFields(
+            descriptionController: _bloc!.acarreoDescriptionTEC,
+            fareController: _bloc!.acarreoFareTEC,
+            estimatedDate: dateSnap.data,
+            onDateChanged: (d) => _bloc!.acarreoEstimatedDateSubject.add(d),
+          );
+        },
+      );
+    },
+  );
 
   Widget _modernBookingPanel() {
     return Column(
@@ -503,7 +598,11 @@ class _PassengerHomeState extends State<PassengerHome> {
   );
 
   Widget addressSelection() {
-    return Padding(
+    return StreamBuilder<String>(
+      stream: _bloc?.selectedServiceModeSubject,
+      builder: (context, snap) {
+        if (_isSharedRidesMode(snap.data)) return const SizedBox.shrink();
+        return Padding(
       padding: EdgeInsetsDirectional.only(start: commonHorizontalPadding, end: commonHorizontalPadding),
       child: Column(
         children: [
@@ -513,6 +612,8 @@ class _PassengerHomeState extends State<PassengerHome> {
           toAddress(),
         ],
       ),
+    );
+      },
     );
   }
 
@@ -715,10 +816,16 @@ class _PassengerHomeState extends State<PassengerHome> {
   }
 
   Widget _confirmBtnAndOtherOptionContent(Color accent) {
-    return StreamBuilder<ServiceTypeItem?>(
+    return StreamBuilder<String>(
+      stream: _bloc?.selectedServiceModeSubject,
+      builder: (context, modeSnap) {
+        final mode = modeSnap.data;
+        final isShared = _isSharedRidesMode(mode);
+        final isAcarreo = _isAcarreosMode(mode);
+        return StreamBuilder<ServiceTypeItem?>(
       stream: _bloc?.subjectSelectedServiceData,
       builder: (context, snapService) {
-        final hideStopsAndOptions = _bloc?.isEncomiendasMode ?? false;
+        final hideStopsAndOptions = (_bloc?.isEncomiendasMode ?? false) || isShared || isAcarreo;
         return Container(
           padding: EdgeInsetsDirectional.only(start: commonHorizontalPadding, end: commonHorizontalPadding),
           margin: EdgeInsetsDirectional.only(
@@ -770,19 +877,30 @@ class _PassengerHomeState extends State<PassengerHome> {
                           stream: _bloc?.mapApiSubject,
                           builder: (context, snapMapLoad) {
                             bool isMapLoad = snapMapLoad.data ?? false;
-                            return CustomRoundedButton(
+                            final btnLabel = isShared
+                                ? languages.searchSharedRides
+                                : (isAcarreo ? languages.sendHaulingRequest : languages.offerMyFare);
+                            final busy = isCalculateLoading || isBookLoading || isMapLoad;
+                            return StreamBuilder<ApiResponse<Map<String, dynamic>>>(
+                              stream: isShared ? _bloc?.sharedRideSearchSubject : null,
+                              builder: (context, snapSearch) {
+                                final searchLoading =
+                                    isShared && snapSearch.hasData && snapSearch.data?.status == Status.loading;
+                                return CustomRoundedButton(
                               context,
-                              languages.offerMyFare,
-                              (isCalculateLoading || isBookLoading || isMapLoad)
+                              btnLabel,
+                              (busy || searchLoading)
                                   ? null
                                   : () {
                                       openRequiredInfoBottomSheet(context, () {
                                         _bloc?.openOfferFareBottomSheet();
                                       });
                                     },
-                              setProgress: (isCalculateLoading || isBookLoading || isMapLoad),
+                              setProgress: busy || searchLoading,
                               bgColor: accent,
                               textColor: XistiBrand.dark,
+                            );
+                              },
                             );
                           },
                         );
@@ -835,6 +953,8 @@ class _PassengerHomeState extends State<PassengerHome> {
             ],
           ),
         );
+      },
+    );
       },
     );
   }

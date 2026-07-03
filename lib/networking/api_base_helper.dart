@@ -302,7 +302,11 @@ String? extractApiErrorMessage(dynamic data) {
     }
   }
   if (data is String && data.trim().isNotEmpty) {
-    return data;
+    final trimmed = data.trim();
+    if (trimmed.startsWith('<!DOCTYPE') || trimmed.startsWith('<html')) {
+      return null;
+    }
+    return trimmed;
   }
   return null;
 }

@@ -9,6 +9,8 @@ class ServiceModeKind {
   static const String delivery = 'delivery';
   static const String expreso = 'expreso';
   static const String encomiendas = 'encomiendas';
+  static const String acarreos = 'acarreos';
+  static const String carga = 'carga';
 
   static bool isEncomiendasMode(String? mode) => mode == encomiendas;
 
@@ -28,7 +30,13 @@ class ServiceModeKind {
     return transport;
   }
 
-  static bool isExpresoMode(String? mode) => mode == expreso;
+  static bool isExpresoMode(String? mode) =>
+      mode == expreso || mode == 'viajes_compartidos';
+
+  static bool isAcarreosMode(String? mode) =>
+      mode == acarreos || mode == carga;
+
+  static bool isSharedRideMode(String? mode) => isExpresoMode(mode);
 
   static bool isDeliveryServiceId(int? serviceId) =>
       serviceId != null && deliveryServiceIds.contains(serviceId);
@@ -107,6 +115,7 @@ class ServiceModeKind {
         .where((g) {
           if (g.mode == expreso && !isExpresoMobileEnabled()) return false;
           if (g.mode == encomiendas && !isEncomiendasMobileEnabled()) return false;
+          if ((g.mode == acarreos || g.mode == carga) && !isAcarreosMobileEnabled()) return false;
           return true;
         })
         .map(_filterActiveVehicleServicesInGroup)
@@ -155,6 +164,9 @@ class ServiceModeKind {
 
     addIfMissing(expreso, languages.serviceModeShare, 3);
     addIfMissing(encomiendas, languages.serviceModeErrand, 4);
+    if (isAcarreosMobileEnabled()) {
+      addIfMissing(acarreos, languages.serviceModeHauling, 5);
+    }
     result.sort((a, b) => a.displayOrder.compareTo(b.displayOrder));
     return result;
   }
@@ -198,11 +210,14 @@ class ServiceModeKind {
     }
     switch (mode) {
       case delivery:
-        return localized(() => languages.serviceModeDelivery, 'Envío');
+        return localized(() => languages.serviceModeDelivery, 'Entregas');
       case expreso:
-        return localized(() => languages.serviceModeShare, 'Expreso');
+        return localized(() => languages.serviceModeShare, 'Compartido');
       case encomiendas:
         return localized(() => languages.serviceModeErrand, 'Encomiendas');
+      case acarreos:
+      case carga:
+        return localized(() => languages.serviceModeHauling, 'Carga');
       case transport:
       default:
         return localized(() => languages.serviceModeTrips, 'Viajes');
@@ -223,6 +238,24 @@ class ServiceModeKind {
           serviceIcon: o.serviceIcon,
           serviceMode: serviceMode,
           deliveryVariant: o.deliveryVariant,
+        ),
+      );
+    }
+    return items;
+  }
+
+  static List<ServiceTypeItem> serviceItemsFromAcarreoOptions(
+    List<DeliveryVehicleOption> options,
+  ) {
+    final items = <ServiceTypeItem>[];
+    for (final o in options) {
+      items.add(
+        ServiceTypeItem(
+          serviceId: o.vehicleServiceId,
+          serviceName: o.label,
+          serviceIcon: o.serviceIcon,
+          serviceMode: acarreos,
+          deliveryVariant: o.acarreoVariant ?? o.deliveryVariant,
         ),
       );
     }

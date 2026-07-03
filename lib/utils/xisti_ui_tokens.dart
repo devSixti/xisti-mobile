@@ -103,6 +103,8 @@ abstract final class XistiUiTokens {
     }
   }
 
+  static Color get deliveryAccent => XistiBrand.purple;
+
   static Color polylineColorForMode(String? mode) {
     switch (mode) {
       case ServiceModeKind.delivery:

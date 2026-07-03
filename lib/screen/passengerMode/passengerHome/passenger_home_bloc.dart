@@ -16,8 +16,11 @@ import '../../../hive/hive_helper.dart';
 import '../../../main.dart';
 import '../../../networking/base_dl.dart';
 import '../../../utils/app_mobile_settings.dart';
+import '../../../utils/acarreo_vehicle_util.dart';
 import '../../../utils/destination_payment_util.dart';
+import '../../../utils/delivery_direction_kind.dart';
 import '../../../utils/get_route_utils.dart';
+import '../../../utils/shared_ride_kind.dart';
 import '../../../services/passenger_location_history_service.dart';
 import '../../../utils/service_mode_util.dart';
 import '../../../utils/xisti_vehicle_catalog.dart';
@@ -36,6 +39,7 @@ import 'passenger_home_dl.dart';
 import 'passenger_home_repo.dart';
 import 'psHomeBottomSheet/offerFareAndBookSheet/offer_fare_and_book_sheet.dart';
 import 'psHomeBottomSheet/additionalOptionSheet/additional_option_sheet.dart';
+import 'shared_ride_matches_sheet.dart';
 
 class PassengerHomeBloc extends Bloc {
   BuildContext context;
@@ -100,9 +104,26 @@ class PassengerHomeBloc extends Bloc {
   final priceCapTEC = TextEditingController();
   final mapStyle = BehaviorSubject<String>.seeded("");
   List<DeliveryVehicleOption> deliveryVehicleOptions = [];
+  List<DeliveryVehicleOption> acarreoVehicleOptions = [];
   String deliveryPassengerDisclaimer = '';
   String encomiendaPassengerDisclaimer = '';
+  String sharedRidePassengerDisclaimer = '';
+  String acarreoPassengerDisclaimer = '';
   final selectedDeliveryVehicleServiceId = BehaviorSubject<int?>();
+  final selectedAcarreoVariantSubject = BehaviorSubject<String?>();
+  final selectedSharedRideKindSubject =
+      BehaviorSubject<String>.seeded(SharedRideKind.defaultKind);
+  final sharedRideTripDateSubject = BehaviorSubject<DateTime?>();
+  final acarreoEstimatedDateSubject = BehaviorSubject<DateTime?>();
+  final sharedRideSearchSubject = BehaviorSubject<ApiResponse<Map<String, dynamic>>>();
+  final selectedDeliveryDirectionSubject =
+      BehaviorSubject<String>.seeded(DeliveryDirectionKind.send);
+  final sharedRideOriginTEC = TextEditingController();
+  final sharedRideDestinationTEC = TextEditingController();
+  final acarreoDescriptionTEC = TextEditingController();
+  final acarreoFareTEC = TextEditingController();
+  final senderNameController = BehaviorSubject<String>();
+  final senderNumberController = BehaviorSubject<String>();
   final locationHistorySubject = BehaviorSubject<List<Map<String, dynamic>>>.seeded([]);
   final activityHubSubject = BehaviorSubject<PassengerActivitySnapshot?>.seeded(null);
   final activeCityZonesSubject = BehaviorSubject<List<XistiBarrioShortcut>>.seeded(
@@ -185,10 +206,18 @@ class PassengerHomeBloc extends Bloc {
           if (deliveryVehicleOptions.length < XistiVehicleCatalog.deliveryOptions().length) {
             deliveryVehicleOptions = XistiVehicleCatalog.deliveryOptions();
           }
+          acarreoVehicleOptions = AcarreoVehicleUtil.effectiveOptions(
+            response.acarreoVehicleOptions ?? [],
+          );
           deliveryPassengerDisclaimer = response.deliveryPassengerDisclaimer ?? '';
           encomiendaPassengerDisclaimer = response.encomiendaPassengerDisclaimer ?? '';
+          sharedRidePassengerDisclaimer = response.sharedRidePassengerDisclaimer ?? '';
+          acarreoPassengerDisclaimer = response.acarreoPassengerDisclaimer ?? '';
           if (deliveryVehicleOptions.isNotEmpty) {
             selectedDeliveryVehicleServiceId.add(deliveryVehicleOptions.first.vehicleServiceId);
+          }
+          if (acarreoVehicleOptions.isNotEmpty) {
+            selectedAcarreoVariantSubject.add(acarreoVehicleOptions.first.acarreoVariant);
           }
           _applyHomeServices(response);
           await refreshLocationHistory();
@@ -306,8 +335,13 @@ class PassengerHomeBloc extends Bloc {
       rideBookSubject.add(ApiResponse.loading());
       try {
         final encomienda = isEncomiendasMode;
+        final acarreo = isAcarreosMode;
         final deliveryLike = isCourierLikeBooking;
-        final bookServiceId = encomienda || isDeliveryMode
+        if (acarreo) {
+          itemDescController.sink.add(acarreoDescriptionTEC.text.trim());
+          offerFareAmountController.sink.add(acarreoFareTEC.text.trim());
+        }
+        final bookServiceId = encomienda || acarreo || isDeliveryMode
             ? (selectedDeliveryVehicleServiceId.valueOrNull ?? subjectSelectedServiceData.valueOrNull?.serviceId ?? 0)
             : (subjectSelectedServiceData.valueOrNull?.serviceId ?? 0);
 
@@ -319,19 +353,32 @@ class PassengerHomeBloc extends Bloc {
         addressList.add(toAddressController.value!);
         final selectedService = subjectSelectedServiceData.valueOrNull;
         final bookVariant = (selectedService?.deliveryVariant ?? '').trim();
+        final userName = getStringFromUserInfoBox(hiveUserName);
+        final userPhone = getStringFromUserInfoBox(hiveContactNumber);
+        String recipientName = deliveryLike ? recipientNameController.valueOrNull ?? "" : "";
+        String recipientNumber = deliveryLike ? recipientNumberController.valueOrNull ?? "" : "";
+        if (isDeliveryMode && deliveryLike) {
+          if (isDeliveryReceive) {
+            recipientName = userName;
+            recipientNumber = userPhone;
+          }
+        }
+        final offeredFare = snapFareToNegotiationStep(
+          getDoubleFromDynamic(offerFareAmountController.valueOrNull ?? "0"),
+        );
         var response = RideBookPojo.fromJson(
           await _passengerHomeRepo.bookRide(
             addressList: jsonEncode(addressList),
             estimatedTime: timeController.valueOrNull ?? 0,
-            offeredFare: offerFareAmountController.valueOrNull ?? "0",
+            offeredFare: getEditableAmount(offeredFare, numberAfterPoint: 0),
             additionalRemark: commentController.valueOrNull ?? "",
             paymentType: paymentTypeController.valueOrNull ?? 0,
             serviceId: bookServiceId,
             minFareAmount: minPriceSubject.valueOrNull ?? 0,
             maxFareAmount: maxPriceSubject.valueOrNull ?? 0,
             totalDistance: distanceController.valueOrNull ?? 0,
-            recipientName: deliveryLike ? recipientNameController.valueOrNull ?? "" : "",
-            recipientNumber: deliveryLike ? recipientNumberController.valueOrNull ?? "" : "",
+            recipientName: recipientName,
+            recipientNumber: recipientNumber,
             itemDecs: deliveryLike ? itemDescController.valueOrNull ?? "" : "",
             estimatePrice: deliveryLike
                 ? (encomienda
@@ -361,8 +408,15 @@ class PassengerHomeBloc extends Bloc {
             packageWidthCm: deliveryLike && !encomienda ? packageWidthController.valueOrNull ?? "" : "",
             packageLengthCm: deliveryLike && !encomienda ? packageLengthController.valueOrNull ?? "" : "",
             requestedVehicleServiceId: deliveryLike ? (selectedDeliveryVehicleServiceId.valueOrNull ?? bookServiceId) : 0,
-            errandType: encomienda ? 'encomienda' : (deliveryLike ? 'delivery' : ''),
+            errandType: acarreo ? 'acarreo' : (encomienda ? 'encomienda' : (deliveryLike ? 'delivery' : '')),
             deliveryVariant: bookVariant,
+            deliveryDirection: isDeliveryMode ? (selectedDeliveryDirectionSubject.valueOrNull ?? DeliveryDirectionKind.send) : '',
+            senderName: isDeliveryMode && isDeliveryReceive ? (senderNameController.valueOrNull ?? '') : '',
+            senderNumber: isDeliveryMode && isDeliveryReceive ? (senderNumberController.valueOrNull ?? '') : '',
+            acarreoVehicleVariant: acarreo ? (selectedAcarreoVariantSubject.valueOrNull ?? '') : '',
+            estimatedServiceDate: acarreo && acarreoEstimatedDateSubject.valueOrNull != null
+                ? '${acarreoEstimatedDateSubject.value!.year}-${acarreoEstimatedDateSubject.value!.month.toString().padLeft(2, '0')}-${acarreoEstimatedDateSubject.value!.day.toString().padLeft(2, '0')}'
+                : '',
           ),
         );
         String message = getApiMsg(response.message, response.messageCode);
@@ -483,6 +537,9 @@ class PassengerHomeBloc extends Bloc {
     } else {
       subjectSelectedServiceData.add(null);
     }
+    if (ServiceModeKind.isSharedRideMode(mode)) {
+      selectedSharedRideKindSubject.add(SharedRideKind.defaultKind);
+    }
     if (mode != ServiceModeKind.delivery) {
       packageWeightController.add('');
       packageHeightController.add('');
@@ -497,6 +554,18 @@ class PassengerHomeBloc extends Bloc {
 
   bool get isDeliveryMode =>
       (selectedServiceModeSubject.valueOrNull ?? ServiceModeKind.transport) == ServiceModeKind.delivery;
+
+  bool get isSharedRidesMode =>
+      ServiceModeKind.isSharedRideMode(selectedServiceModeSubject.valueOrNull);
+
+  bool get isAcarreosMode =>
+      ServiceModeKind.isAcarreosMode(selectedServiceModeSubject.valueOrNull);
+
+  bool get isDeliverySend =>
+      selectedDeliveryDirectionSubject.valueOrNull != DeliveryDirectionKind.receive;
+
+  bool get isDeliveryReceive =>
+      selectedDeliveryDirectionSubject.valueOrNull == DeliveryDirectionKind.receive;
 
   bool get isCourierLikeBooking {
     final mode = selectedServiceModeSubject.valueOrNull ?? ServiceModeKind.transport;
@@ -524,12 +593,24 @@ class PassengerHomeBloc extends Bloc {
   }
 
   void _refreshFilteredServices(List<ServiceModeGroup> groups, String mode) {
+    if (ServiceModeKind.isAcarreosMode(mode)) {
+      final opts = AcarreoVehicleUtil.effectiveOptions(acarreoVehicleOptions);
+      if (opts.isNotEmpty) {
+        filteredServicesSubject.add(ServiceModeKind.serviceItemsFromAcarreoOptions(opts));
+        return;
+      }
+    }
     if (ServiceModeKind.isDeliveryLikeMode(mode)) {
       final list = XistiVehicleCatalog.mergeDeliveryApi(
         deliveryVehicleOptions,
         serviceMode: mode,
       );
       filteredServicesSubject.add(list);
+      return;
+    }
+    if (ServiceModeKind.isSharedRideMode(mode)) {
+      filteredServicesSubject.add([]);
+      subjectSelectedServiceData.add(null);
       return;
     }
     ServiceModeGroup? matched;
@@ -557,6 +638,11 @@ class PassengerHomeBloc extends Bloc {
     } else if (list.isEmpty && deliveryVehicleOptions.isNotEmpty) {
       list = XistiVehicleCatalog.mergeDeliveryApi(deliveryVehicleOptions);
     }
+    if (list.isEmpty && ServiceModeKind.isAcarreosMode(mode) && acarreoVehicleOptions.isNotEmpty) {
+      list = ServiceModeKind.serviceItemsFromAcarreoOptions(
+        AcarreoVehicleUtil.effectiveOptions(acarreoVehicleOptions),
+      );
+    }
     list.sort(_serviceDisplayOrder);
     filteredServicesSubject.add(list);
   }
@@ -566,7 +652,23 @@ class PassengerHomeBloc extends Bloc {
     if (position < 0 || position >= filtered.length) return;
     final selectedServiceType = filtered[position];
     subjectSelectedServiceData.sink.add(selectedServiceType);
-    if (ServiceModeKind.isDeliveryLikeMode(selectedServiceModeSubject.valueOrNull)) {
+    if (isAcarreosMode) {
+      final variant = selectedServiceType.deliveryVariant ?? '';
+      DeliveryVehicleOption? matched;
+      for (final opt in acarreoVehicleOptions) {
+        if ((opt.acarreoVariant ?? opt.deliveryVariant ?? '') == variant) {
+          matched = opt;
+          break;
+        }
+      }
+      matched ??= (position >= 0 && position < acarreoVehicleOptions.length)
+          ? acarreoVehicleOptions[position]
+          : null;
+      if (matched != null) {
+        selectedDeliveryVehicleServiceId.add(matched.vehicleServiceId);
+        selectedAcarreoVariantSubject.add(matched.acarreoVariant);
+      }
+    } else if (ServiceModeKind.isDeliveryLikeMode(selectedServiceModeSubject.valueOrNull)) {
       final variant = selectedServiceType.deliveryVariant ?? '';
       DeliveryVehicleOption? matched;
       for (final opt in deliveryVehicleOptions) {
@@ -625,7 +727,141 @@ class PassengerHomeBloc extends Bloc {
     );
   }
 
+  void selectDeliveryDirection(String direction) {
+    if (selectedDeliveryDirectionSubject.valueOrNull == direction) return;
+    selectedDeliveryDirectionSubject.add(direction);
+  }
+
+  void selectSharedRideKind(String kind) {
+    if (selectedSharedRideKindSubject.valueOrNull == kind) return;
+    selectedSharedRideKindSubject.add(kind);
+  }
+
+  Future<void> callSharedRideSearch() async {
+    final origin = sharedRideOriginTEC.text.trim();
+    final destination = sharedRideDestinationTEC.text.trim();
+    final tripDate = sharedRideTripDateSubject.valueOrNull;
+    if (origin.isEmpty || destination.isEmpty) {
+      final kind = selectedSharedRideKindSubject.valueOrNull ?? SharedRideKind.defaultKind;
+      openSimpleSnackbar(context, SharedRideKind.destinationRequiredMessage(kind));
+      return;
+    }
+    if (tripDate == null) {
+      openSimpleSnackbar(context, languages.selectSharedRideDate);
+      return;
+    }
+    if (!await isNetworkConnected(onRetryPressedCallApi: callSharedRideSearch)) {
+      return;
+    }
+    sharedRideSearchSubject.add(ApiResponse.loading());
+    try {
+      final dateStr =
+          '${tripDate.year}-${tripDate.month.toString().padLeft(2, '0')}-${tripDate.day.toString().padLeft(2, '0')}';
+      final raw = await _passengerHomeRepo.sharedRideSearch(
+        tripKind: selectedSharedRideKindSubject.valueOrNull ?? SharedRideKind.defaultKind,
+        originTown: origin,
+        destinationTown: destination,
+        tripDate: dateStr,
+      );
+      final status = int.tryParse('${raw['status']}') ?? 0;
+      final message = raw['message']?.toString() ?? '';
+      if (!context.mounted) return;
+      if (status == 1) {
+        sharedRideSearchSubject.add(ApiResponse.completed(raw));
+        await showModalBottomSheet<void>(
+          context: context,
+          isScrollControlled: true,
+          backgroundColor: Colors.transparent,
+          builder: (ctx) => SharedRideMatchesSheet(
+            message: message,
+            scheduled: (raw['scheduled'] ?? 0) == 1,
+            matches: (raw['matches'] as List?)?.cast<Map<String, dynamic>>() ?? [],
+            onJoin: (offerId) => joinSharedRide(offerId, searchId: raw['search_id'] as int?),
+          ),
+        );
+      } else {
+        sharedRideSearchSubject.add(ApiResponse.error(message));
+        openSimpleSnackbar(context, message);
+      }
+    } catch (e) {
+      sharedRideSearchSubject.add(ApiResponse.error(e.toString()));
+      if (context.mounted) openSimpleSnackbar(context, e.toString());
+    }
+  }
+
+  Future<void> joinSharedRide(int offerId, {int? searchId}) async {
+    if (!await isNetworkConnected(onRetryPressedCallApi: () => joinSharedRide(offerId, searchId: searchId))) {
+      return;
+    }
+    try {
+      final raw = await _passengerHomeRepo.sharedRideJoin(offerId: offerId, searchId: searchId);
+      final status = int.tryParse('${raw['status']}') ?? 0;
+      final message = raw['message']?.toString() ?? '';
+      if (!context.mounted) return;
+      if (status == 1) {
+        final rideId = int.tryParse('${raw['ride_id']}') ?? 0;
+        if (rideId > 0) {
+          Navigator.pop(context);
+          openScreenWithClearPrevious(context, PassengerRunningRide(rideId: rideId));
+        } else {
+          openSimpleSnackbar(context, message);
+        }
+      } else {
+        openSimpleSnackbar(context, message);
+      }
+    } catch (e) {
+      if (context.mounted) openSimpleSnackbar(context, e.toString());
+    }
+  }
+
+  Future<void> callSubmitAcarreoRequest() async {
+    if (getStringFromUserInfoBox(hiveProfileImage).trim().isEmpty) {
+      showProfileImageRequiredSheet(context);
+      return;
+    }
+    if ((fromAddressController.valueOrNull?.name ?? '').isEmpty) {
+      openSimpleSnackbar(context, languages.selectPickup);
+      return;
+    }
+    if ((toAddressController.valueOrNull?.name ?? '').isEmpty) {
+      openSimpleSnackbar(context, languages.selectDrop);
+      return;
+    }
+    if (acarreoDescriptionTEC.text.trim().isEmpty) {
+      openSimpleSnackbar(context, languages.errandDescription);
+      return;
+    }
+    if (acarreoFareTEC.text.trim().isEmpty || (double.tryParse(acarreoFareTEC.text.trim()) ?? 0) <= 0) {
+      openSimpleSnackbar(context, 'Indica el valor que ofreces');
+      return;
+    }
+    if (acarreoEstimatedDateSubject.valueOrNull == null) {
+      openSimpleSnackbar(context, 'Selecciona la fecha estimada');
+      return;
+    }
+    if ((selectedAcarreoVariantSubject.valueOrNull ?? '').isEmpty) {
+      openSimpleSnackbar(context, languages.selectVehicle);
+      return;
+    }
+    itemDescController.sink.add(acarreoDescriptionTEC.text.trim());
+    offerFareAmountController.sink.add(acarreoFareTEC.text.trim());
+    minPriceSubject.sink.add(0);
+    maxPriceSubject.sink.add(0);
+    recommendedPriceSubject.sink.add(0);
+    distanceController.sink.add(0);
+    timeController.sink.add(0);
+    await callBookRideApi();
+  }
+
   void openOfferFareBottomSheet() {
+    if (isAcarreosMode) {
+      callSubmitAcarreoRequest();
+      return;
+    }
+    if (isSharedRidesMode) {
+      callSharedRideSearch();
+      return;
+    }
     if (getStringFromUserInfoBox(hiveProfileImage).trim().isEmpty) {
       showProfileImageRequiredSheet(context);
       return;
@@ -1215,6 +1451,14 @@ class PassengerHomeBloc extends Bloc {
     recipientNumberController.close();
     itemEstimatedPriceController.close();
     selectedDeliveryVehicleServiceId.close();
+    selectedAcarreoVariantSubject.close();
+    selectedSharedRideKindSubject.close();
+    sharedRideTripDateSubject.close();
+    acarreoEstimatedDateSubject.close();
+    sharedRideSearchSubject.close();
+    selectedDeliveryDirectionSubject.close();
+    senderNameController.close();
+    senderNumberController.close();
     locationHistorySubject.close();
     activityHubSubject.close();
     activeCityZonesSubject.close();

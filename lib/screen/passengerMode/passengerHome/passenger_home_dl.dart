@@ -25,6 +25,9 @@ class ServiceTypeModel {
     this.deliveryVehicleOptions,
     this.deliveryPassengerDisclaimer,
     this.encomiendaPassengerDisclaimer,
+    this.acarreoVehicleOptions,
+    this.sharedRidePassengerDisclaimer,
+    this.acarreoPassengerDisclaimer,
   });
 
   ServiceTypeModel.fromJson(dynamic json) {
@@ -74,6 +77,14 @@ class ServiceTypeModel {
     }
     deliveryPassengerDisclaimer = json['delivery_passenger_disclaimer']?.toString();
     encomiendaPassengerDisclaimer = json['encomienda_passenger_disclaimer']?.toString();
+    sharedRidePassengerDisclaimer = json['shared_ride_passenger_disclaimer']?.toString();
+    acarreoPassengerDisclaimer = json['acarreo_passenger_disclaimer']?.toString();
+    if (json['acarreo_vehicle_options'] != null) {
+      acarreoVehicleOptions = [];
+      for (final raw in json['acarreo_vehicle_options'] as List) {
+        acarreoVehicleOptions?.add(DeliveryVehicleOption.fromJson(raw));
+      }
+    }
     applyAppMobileSettingsFromJson(json);
   }
 
@@ -92,6 +103,9 @@ class ServiceTypeModel {
   List<DeliveryVehicleOption>? deliveryVehicleOptions;
   String? deliveryPassengerDisclaimer;
   String? encomiendaPassengerDisclaimer;
+  String? sharedRidePassengerDisclaimer;
+  String? acarreoPassengerDisclaimer;
+  List<DeliveryVehicleOption>? acarreoVehicleOptions;
 
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{};
@@ -417,6 +431,7 @@ class DeliveryVehicleOption {
     this.label,
     this.serviceIcon,
     this.deliveryVariant,
+    this.acarreoVariant,
   });
 
   DeliveryVehicleOption.fromJson(dynamic json) {
@@ -426,10 +441,12 @@ class DeliveryVehicleOption {
     label = json['label']?.toString() ?? '';
     serviceIcon = json['service_icon']?.toString() ?? '';
     deliveryVariant = json['delivery_variant']?.toString();
+    acarreoVariant = json['acarreo_variant']?.toString();
   }
 
   int? vehicleServiceId;
   String? label;
   String? serviceIcon;
   String? deliveryVariant;
+  String? acarreoVariant;
 }

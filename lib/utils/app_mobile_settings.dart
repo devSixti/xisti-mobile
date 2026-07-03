@@ -61,6 +61,9 @@ void applyAppMobileSettingsFromJson(dynamic json) {
   if (map.containsKey('enable_xisti_new_home_layout')) {
     putDataInSettingBox(hiveXistiNewHomeLayout, _toInt(map['enable_xisti_new_home_layout'], 1));
   }
+  if (map.containsKey('enable_acarreos_mobile')) {
+    putDataInSettingBox(hiveEnableAcarreosMobile, _toInt(map['enable_acarreos_mobile'], 1));
+  }
 }
 
 /// Injected at build time: `--dart-define=XISTI_APP_KEY=...` (or legacy `QA_APP_KEY`).
@@ -139,6 +142,9 @@ bool isExpresoMobileEnabled() =>
 bool isEncomiendasMobileEnabled() =>
     getIntFromSettingBox(hiveEnableEncomiendasMobile) == 1;
 
+bool isAcarreosMobileEnabled() =>
+    getIntFromSettingBox(hiveEnableAcarreosMobile, defaultValue: 1) == 1;
+
 bool isCourierPackageDimensionsRequired() =>
     getIntFromSettingBox(hiveRequireCourierPackageDimensions) == 1;
 
@@ -183,16 +189,25 @@ double applyRegionalMinFareFloor(dynamic apiMinFare) {
   return api < regional ? regional : api;
 }
 
-/// Keeps recommended/min/max fare coherent after regional floors (moto short trips).
+/// Rounds a fare to the nearest configured negotiation step (e.g. 500 COP).
+double snapFareToNegotiationStep(double amount, {double? step}) {
+  final negotiationStep = step ?? getFareNegotiationStepFromSettings();
+  if (negotiationStep <= 1) {
+    return amount.roundToDouble();
+  }
+  return ((amount / negotiationStep).round() * negotiationStep).toDouble();
+}
+
+/// Applies regional floor and negotiation-step snapping for passenger fares.
 ({double recommended, double minPrice, double maxPrice}) normalizePassengerFareRange({
   required dynamic recommendedFare,
   required dynamic minPrice,
   required dynamic maxPrice,
 }) {
   final step = getFareNegotiationStepFromSettings();
-  var min = applyRegionalMinFareFloor(minPrice);
-  var max = double.tryParse(maxPrice?.toString() ?? '') ?? 0;
-  var recommended = double.tryParse(recommendedFare?.toString() ?? '') ?? 0;
+  var min = snapFareToNegotiationStep(applyRegionalMinFareFloor(minPrice), step: step);
+  var max = snapFareToNegotiationStep(double.tryParse(maxPrice?.toString() ?? '') ?? 0, step: step);
+  var recommended = snapFareToNegotiationStep(double.tryParse(recommendedFare?.toString() ?? '') ?? 0, step: step);
   if (recommended < min) {
     recommended = min;
   }

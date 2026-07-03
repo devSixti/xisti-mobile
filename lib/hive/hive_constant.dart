@@ -60,6 +60,7 @@ const String hiveAdminCommissionPercent = "adminCommissionPercent";
 const String hiveDriverCancelUntilStatus = "driverCancelUntilStatus";
 const String hiveDestinationPaymentMethods = "destinationPaymentMethods";
 const String hiveEnableExpresoMobile = "enableExpresoMobile";
+const String hiveEnableAcarreosMobile = "enableAcarreosMobile";
 const String hiveEnableEncomiendasMobile = "enableEncomiendasMobile";
 const String hiveRequireCourierPackageDimensions = "requireCourierPackageDimensions";
 const String hiveXistiNewHomeLayout = "xistiNewHomeLayout";

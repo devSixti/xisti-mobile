@@ -47,6 +47,11 @@ class PassengerHomeRepo {
     int requestedVehicleServiceId = 0,
     String errandType = '',
     String deliveryVariant = '',
+    String deliveryDirection = '',
+    String senderName = '',
+    String senderNumber = '',
+    String acarreoVehicleVariant = '',
+    String estimatedServiceDate = '',
   }) async {
     final response = await _apiBaseHelper.post(
       ApiConst.endPointTransportRideBooking,
@@ -81,6 +86,11 @@ class PassengerHomeRepo {
         if (requestedVehicleServiceId > 0) ApiParam.paramRequestedVehicleServiceId: requestedVehicleServiceId,
         if (errandType.isNotEmpty) ApiParam.paramErrandType: errandType,
         if (deliveryVariant.trim().isNotEmpty) ApiParam.paramDeliveryVariant: deliveryVariant.trim(),
+        if (deliveryDirection.isNotEmpty) ApiParam.paramDeliveryDirection: deliveryDirection,
+        if (senderName.isNotEmpty) ApiParam.paramSenderName: senderName,
+        if (senderNumber.isNotEmpty) ApiParam.paramSenderNumber: senderNumber,
+        if (acarreoVehicleVariant.isNotEmpty) ApiParam.paramAcarreoVehicleVariant: acarreoVehicleVariant,
+        if (estimatedServiceDate.isNotEmpty) ApiParam.paramEstimatedServiceDate: estimatedServiceDate,
       },
     );
     return response;
@@ -111,5 +121,40 @@ class PassengerHomeRepo {
       },
     );
     return response;
+  }
+
+  Future<Map<String, dynamic>> sharedRideSearch({
+    required String tripKind,
+    required String originTown,
+    required String destinationTown,
+    required String tripDate,
+  }) async {
+    return Map<String, dynamic>.from(
+      await _apiBaseHelper.post(
+        ApiConst.endPointSharedRideSearch,
+        body: {
+          ApiParam.paramUserId: getIntFromUserInfoBox(hiveUserId),
+          ApiParam.paramAccessToken: getStringFromSettingBox(hiveAccessToken),
+          ApiParam.paramTripKind: tripKind,
+          ApiParam.paramOriginTown: originTown,
+          ApiParam.paramDestinationTown: destinationTown,
+          ApiParam.paramTripDate: tripDate,
+        },
+      ),
+    );
+  }
+
+  Future<Map<String, dynamic>> sharedRideJoin({required int offerId, int? searchId}) async {
+    final body = <String, dynamic>{
+      ApiParam.paramUserId: getIntFromUserInfoBox(hiveUserId),
+      ApiParam.paramAccessToken: getStringFromSettingBox(hiveAccessToken),
+      ApiParam.paramOfferId: offerId,
+    };
+    if (searchId != null && searchId > 0) {
+      body[ApiParam.paramSearchId] = searchId;
+    }
+    return Map<String, dynamic>.from(
+      await _apiBaseHelper.post(ApiConst.endPointSharedRideJoin, body: body),
+    );
   }
 }
