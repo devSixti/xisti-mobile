@@ -176,6 +176,71 @@ bool requiresPhoneOtpOnSignup() {
   return loginType != LoginType.email && loginType != LoginType.biometric;
 }
 
+bool isAppleLoginType([String? loginType]) {
+  return (loginType ?? getStringFromUserInfoBox(hiveLoginType)) == LoginType.apple;
+}
+
+bool isValidSocialProvidedName(String? name) {
+  final trimmed = (name ?? '').trim();
+  return trimmed.isNotEmpty && trimmed != '-' && trimmed.toUpperCase() != 'N/A';
+}
+
+bool signupHidesNameField() {
+  if (!isSocialLoginType()) {
+    return false;
+  }
+  if (isAppleLoginType()) {
+    return true;
+  }
+  return isValidSocialProvidedName(getStringFromUserInfoBox(hivePendingSignupFullName)) ||
+      isValidSocialProvidedName(getStringFromUserInfoBox(hiveUserName));
+}
+
+bool signupHidesEmailField() {
+  if (!isSocialLoginType()) {
+    return false;
+  }
+  final email = getStringFromUserInfoBox(hivePendingSignupEmail).trim().isNotEmpty
+      ? getStringFromUserInfoBox(hivePendingSignupEmail).trim()
+      : getStringFromUserInfoBox(hiveEmail).trim();
+  if (email.isEmpty && isAppleLoginType()) {
+    return getStringFromUserInfoBox(hiveAppleCachedEmail).trim().isNotEmpty;
+  }
+  return email.isNotEmpty;
+}
+
+bool signupNameFieldReadOnly() {
+  return isSocialLoginType() && !isAppleLoginType() && !signupHidesNameField() && isValidSocialProvidedName(fullNameFromSignupHive());
+}
+
+bool signupEmailFieldReadOnly() {
+  return isSocialLoginType() && !isAppleLoginType() && !signupHidesEmailField();
+}
+
+String fullNameFromSignupHive() {
+  final pending = getStringFromUserInfoBox(hivePendingSignupFullName).trim();
+  if (pending.isNotEmpty) {
+    return pending;
+  }
+  final stored = getStringFromUserInfoBox(hiveUserName).trim();
+  if (stored.isNotEmpty) {
+    return stored;
+  }
+  return getStringFromUserInfoBox(hiveAppleCachedFullName).trim();
+}
+
+String emailFromSignupHive() {
+  final pending = getStringFromUserInfoBox(hivePendingSignupEmail).trim();
+  if (pending.isNotEmpty) {
+    return pending;
+  }
+  final stored = getStringFromUserInfoBox(hiveEmail).trim();
+  if (stored.isNotEmpty) {
+    return stored;
+  }
+  return getStringFromUserInfoBox(hiveAppleCachedEmail).trim();
+}
+
 void stashSocialSignupIdentity({
   required String loginType,
   String? name,
@@ -183,15 +248,23 @@ void stashSocialSignupIdentity({
   String? loginId,
 }) {
   putDataInUserInfoBox(hiveLoginType, loginType);
-  final trimmedName = (name ?? '').trim();
-  if (trimmedName.isNotEmpty && trimmedName != '-' && trimmedName.toUpperCase() != 'N/A') {
-    putDataInUserInfoBox(hiveUserName, trimmedName);
-    putDataInUserInfoBox(hivePendingSignupFullName, trimmedName);
+  if (loginType == LoginType.apple && (loginId ?? '').trim().isNotEmpty) {
+    putDataInUserInfoBox(hiveAppleUserIdentifier, loginId!.trim());
+  }
+  if (isValidSocialProvidedName(name)) {
+    putDataInUserInfoBox(hiveUserName, name!.trim());
+    putDataInUserInfoBox(hivePendingSignupFullName, name.trim());
+    if (loginType == LoginType.apple) {
+      putDataInUserInfoBox(hiveAppleCachedFullName, name.trim());
+    }
   }
   final normalizedEmail = (email ?? '').trim();
   if (normalizedEmail.isNotEmpty) {
     putDataInUserInfoBox(hiveEmail, normalizedEmail);
     putDataInUserInfoBox(hivePendingSignupEmail, normalizedEmail);
+    if (loginType == LoginType.apple) {
+      putDataInUserInfoBox(hiveAppleCachedEmail, normalizedEmail);
+    }
   }
 }
 
@@ -214,12 +287,8 @@ Future<void> manageLoginResponse(
   }
 
   final preservedLoginType = getStringFromUserInfoBox(hiveLoginType);
-  final preservedName = getStringFromUserInfoBox(hivePendingSignupFullName).trim().isNotEmpty
-      ? getStringFromUserInfoBox(hivePendingSignupFullName)
-      : getStringFromUserInfoBox(hiveUserName);
-  final preservedEmail = getStringFromUserInfoBox(hivePendingSignupEmail).trim().isNotEmpty
-      ? getStringFromUserInfoBox(hivePendingSignupEmail)
-      : getStringFromUserInfoBox(hiveEmail);
+  final preservedName = fullNameFromSignupHive();
+  final preservedEmail = emailFromSignupHive();
 
   await setDataInHive(response);
 

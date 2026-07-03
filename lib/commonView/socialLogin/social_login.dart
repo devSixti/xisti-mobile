@@ -9,6 +9,8 @@ import 'package:http/http.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 import '../../config/google_sign_in_config.dart';
+import '../../hive/hive_constant.dart';
+import '../../hive/hive_helper.dart';
 import '../../utils/utils.dart';
 import 'social_login_bloc.dart';
 
@@ -219,17 +221,38 @@ class _SocialLoginState extends State<SocialLogin> {
   }
 
   Future<void> _signInWithApple() async {
-    final credential = await SignInWithApple.getAppleIDCredential(scopes: [AppleIDAuthorizationScopes.email, AppleIDAuthorizationScopes.fullName]);
-    var id = credential.userIdentifier ?? '';
-    var email = credential.email ?? '';
+    try {
+      final credential = await SignInWithApple.getAppleIDCredential(scopes: [AppleIDAuthorizationScopes.email, AppleIDAuthorizationScopes.fullName]);
+      final id = credential.userIdentifier ?? '';
+      var email = credential.email ?? '';
 
-    String givenName = credential.givenName ?? '';
-    String familyName = credential.familyName ?? '';
-    String fullName = '$givenName $familyName';
-    if (givenName.trim().isEmpty && familyName.trim().isEmpty) {
-      fullName = 'N/A';
+      String givenName = credential.givenName ?? '';
+      String familyName = credential.familyName ?? '';
+      var fullName = '$givenName $familyName'.trim();
+
+      final cachedAppleId = getStringFromUserInfoBox(hiveAppleUserIdentifier);
+      if (id.isNotEmpty && cachedAppleId == id) {
+        if (!isValidSocialProvidedName(fullName)) {
+          fullName = getStringFromUserInfoBox(hiveAppleCachedFullName);
+        }
+        if (email.isEmpty) {
+          email = getStringFromUserInfoBox(hiveAppleCachedEmail);
+        }
+      }
+
+      if (id.isNotEmpty) {
+        putDataInUserInfoBox(hiveAppleUserIdentifier, id);
+      }
+      if (isValidSocialProvidedName(fullName)) {
+        putDataInUserInfoBox(hiveAppleCachedFullName, fullName.trim());
+      }
+      if (email.trim().isNotEmpty) {
+        putDataInUserInfoBox(hiveAppleCachedEmail, email.trim());
+      }
+
+      widget.function.call(loginType: LoginType.apple, name: fullName, email: email, id: id);
+    } catch (error) {
+      _reportSocialError(error.toString());
     }
-
-    widget.function.call(loginType: LoginType.apple, name: fullName, email: email, id: id);
   }
 }

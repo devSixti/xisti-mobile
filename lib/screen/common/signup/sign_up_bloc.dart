@@ -78,9 +78,9 @@ class SignUpBloc extends Bloc {
     buttonHide();
   }
 
-  bool get hideNameField => false;
+  bool get hideNameField => signupHidesNameField();
 
-  bool get hideEmailField => false;
+  bool get hideEmailField => signupHidesEmailField();
 
   final fullNameController = TextEditingController();
   final emailController = TextEditingController();
@@ -122,7 +122,12 @@ class SignUpBloc extends Bloc {
       subject.sink.add(ApiResponse.loading());
       try {
         var response = LoginPojo.fromJson(
-          await _signUpRepo.signUp(fullNameController.text.trim(), emailController.text.trim(), referralCodeController.text.trim(), multipartFile),
+          await _signUpRepo.signUp(
+            hideNameField ? fullNameFromSignupHive() : fullNameController.text.trim(),
+            hideEmailField ? emailFromSignupHive() : emailController.text.trim(),
+            referralCodeController.text.trim(),
+            multipartFile,
+          ),
         );
         final message = getApiMsg(response.message, response.messageCode);
         subject.sink.add(ApiResponse.completed(response));
@@ -143,8 +148,14 @@ class SignUpBloc extends Bloc {
 
   void _storePendingSignupData() {
     putDataInSettingBox(hivePendingSignupAfterOtp, true);
-    putDataInUserInfoBox(hivePendingSignupFullName, fullNameController.text.trim());
-    putDataInUserInfoBox(hivePendingSignupEmail, emailController.text.trim());
+    putDataInUserInfoBox(
+      hivePendingSignupFullName,
+      hideNameField ? fullNameFromSignupHive() : fullNameController.text.trim(),
+    );
+    putDataInUserInfoBox(
+      hivePendingSignupEmail,
+      hideEmailField ? emailFromSignupHive() : emailController.text.trim(),
+    );
     putDataInUserInfoBox(hivePendingSignupReferral, referralCodeController.text.trim());
     final profile = imgFileController.valueOrNull;
     if (profile != null) {

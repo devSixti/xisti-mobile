@@ -32,6 +32,17 @@ class SplashRepo {
     return response;
   }
 
+  Future validateSessionApi() async {
+    final response = await _apiBaseHelper.post(
+      ApiConst.endPointGetDetail,
+      body: {
+        ApiParam.paramUserId: getIntFromUserInfoBox(hiveUserId),
+        ApiParam.paramAccessToken: getStringFromSettingBox(hiveAccessToken),
+      },
+    );
+    return response;
+  }
+
   Future appVersionCheckApi() async {
     final response = await _apiBaseHelper.post(
       ApiConst.endPointAppVersionCheck,

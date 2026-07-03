@@ -11,6 +11,7 @@ import '../../../blocs/bloc.dart';
 import '../../../bottomSheet/common_bottom_sheet.dart';
 import '../../../bottomSheet/location_disclosure_sheet.dart';
 import '../../../hive/hive_helper.dart';
+import '../../../networking/base_dl.dart';
 import '../../../services/market_config_repo.dart';
 import '../../../services/app_telemetry.dart';
 import '../../../services/ride_session_manager.dart';
@@ -279,13 +280,59 @@ class SplashBloc extends Bloc {
 
     if (isLoggedIn()) {
       RideSessionManager.instance.restoreFromOfflineCache();
+      validateSessionAndContinue();
+    } else {
+      _openWelcomeAfterDelay();
+    }
+  }
+
+  Future<void> validateSessionAndContinue() async {
+    if (!await isNetworkConnected(
+      onRetryPressedCallApi: () {
+        validateSessionAndContinue();
+      },
+    )) {
       if (getIntFromSettingBox(hiveAppMode) == AppMode.driver) {
         callDriverRunningServiceApi();
       } else {
         callPassengerRunningServiceApi();
       }
-    } else {
-      _openWelcomeAfterDelay();
+      return;
+    }
+
+    try {
+      final sessionResponse = BaseModel.fromJson(await _splashRepo.validateSessionApi());
+      if (!context.mounted) return;
+      final sessionMessage = getApiMsg(sessionResponse.message, sessionResponse.messageCode);
+      if (!isApiStatus(context, sessionResponse.status, sessionMessage, false, showMess: false)) {
+        if (sessionResponse.status == 4 || sessionResponse.status == 5) {
+          await clearSessionCredentials();
+          _openWelcomeAfterDelay();
+        } else if (needsPhoneOtpCompletion() || sessionResponse.status == 2) {
+          await _resumePendingOtp();
+        } else if (getIntFromSettingBox(hiveAppMode) == AppMode.driver) {
+          callDriverRunningServiceApi();
+        } else {
+          callPassengerRunningServiceApi();
+        }
+        return;
+      }
+
+      unawaited(AppTelemetry.instance.bindUserContext());
+      AppTelemetry.instance.logAuthEvent('session_validated');
+
+      if (getIntFromSettingBox(hiveAppMode) == AppMode.driver) {
+        callDriverRunningServiceApi();
+      } else {
+        callPassengerRunningServiceApi();
+      }
+    } catch (e) {
+      debugPrint('$tag validateSessionAndContinue: $e');
+      if (getIntFromSettingBox(hiveAppMode) == AppMode.driver) {
+        callDriverRunningServiceApi();
+      } else {
+        callPassengerRunningServiceApi();
+      }
     }
   }
 

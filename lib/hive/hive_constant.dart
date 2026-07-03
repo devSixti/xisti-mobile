@@ -87,4 +87,7 @@ const String hiveIsRegister = "isRegister";
 const String hiveEmergencyContact = "emergencyContact";
 const String hiveEmergencyCountryCode = "emergencyCountryCode";
 const String hiveReferralCode = "referralCode";
+const String hiveAppleUserIdentifier = "appleUserIdentifier";
+const String hiveAppleCachedFullName = "appleCachedFullName";
+const String hiveAppleCachedEmail = "appleCachedEmail";
 
