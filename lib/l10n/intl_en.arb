@@ -561,6 +561,7 @@
   "vehicleMoto": "Motorcycle",
   "vehicleCarro": "Car",
   "vehicleBicicleta": "Bicycle",
+  "vehicleCarga": "Hauling",
   "vehicleTrip": "Trip",
   "whereToBuy": "Where to buy",
   "whereToDeliver": "Where to deliver",
