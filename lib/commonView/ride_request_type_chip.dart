@@ -31,45 +31,67 @@ class RideRequestTypeChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final label = _resolveLabel();
-    if (label == null) return const SizedBox.shrink();
-    final showTaxi = isTaxi == 1 &&
-        XistiVehicleCatalog.taxiEligibleVariant(vehicleVariant);
+    final chips = _resolveChips();
+    if (chips.isEmpty) return const SizedBox.shrink();
     return Wrap(
       spacing: 6.w,
       runSpacing: 4.h,
       children: [
-        _chip(context, label: label.$1, icon: label.$2, accent: label.$3),
-        if (showTaxi)
-          _chip(
-            context,
-            label: languages.taxiYellowTag,
-            icon: Icons.local_taxi_outlined,
-            accent: AppThemeColors.brandGreen,
-          ),
+        for (final chip in chips)
+          _chip(context, label: chip.$1, icon: chip.$2, accent: chip.$3),
       ],
     );
   }
 
-  (String, IconData, Color)? _resolveLabel() {
+  List<(String, IconData, Color)> _resolveChips() {
+    final chips = <(String, IconData, Color)>[];
+    final modeChip = _serviceModeChip();
+    if (modeChip != null) chips.add(modeChip);
+
+    final vehicle = _vehicleChip();
+    if (vehicle != null) chips.add(vehicle);
+
+    final showTaxi = isTaxi == 1 && XistiVehicleCatalog.taxiEligibleVariant(vehicleVariant);
+    if (showTaxi) {
+      chips.add((languages.taxiYellowTag, Icons.local_taxi_outlined, AppThemeColors.brandGreen));
+    }
+    return chips;
+  }
+
+  (String, IconData, Color)? _serviceModeChip() {
     if (isEncomienda == 1 || serviceMode == ServiceModeKind.encomiendas) {
       return (languages.chipErrand, Icons.local_shipping_outlined, const Color(0xFF00838F));
     }
-    if (serviceMode == ServiceModeKind.expreso) {
-      return (languages.chipShare, Icons.bolt_outlined, const Color(0xFF6A1B9A));
+    if (ServiceModeKind.isExpresoMode(serviceMode)) {
+      return (languages.chipShare, Icons.people_outline, const Color(0xFF6A1B9A));
     }
-    if (ServiceModeKind.isDeliveryRideRequest(
-      serviceId: serviceId,
-      isDelivery: isDelivery,
-    ) ||
+    if (ServiceModeKind.isAcarreosMode(serviceMode)) {
+      return (languages.chipHauling, Icons.local_shipping_outlined, const Color(0xFF455A64));
+    }
+    if (ServiceModeKind.isDeliveryRideRequest(serviceId: serviceId, isDelivery: isDelivery) ||
+        serviceMode == ServiceModeKind.delivery) {
+      return (languages.chipDelivery, Icons.inventory_2_outlined, const Color(0xFFE65100));
+    }
+    if (serviceMode == ServiceModeKind.transport || serviceId != null) {
+      return (languages.serviceModeTrips, Icons.directions_car_outlined, const Color(0xFF2E7D32));
+    }
+    return null;
+  }
+
+  (String, IconData, Color)? _vehicleChip() {
+    if (isEncomienda == 1 || serviceMode == ServiceModeKind.encomiendas) return null;
+    if (serviceMode == ServiceModeKind.expreso) return null;
+
+    if (ServiceModeKind.isDeliveryRideRequest(serviceId: serviceId, isDelivery: isDelivery) ||
         serviceMode == ServiceModeKind.delivery) {
       final name = XistiVehicleCatalog.labelFor(
         serviceId: serviceId,
         variant: vehicleVariant,
         fallbackServiceName: serviceName,
       );
-      return (name, Icons.local_shipping_outlined, const Color(0xFFE65100));
+      return (name, Icons.two_wheeler_outlined, const Color(0xFF6A1B9A));
     }
+
     final transportLabel = XistiVehicleCatalog.labelFor(
       serviceId: serviceId,
       variant: vehicleVariant,
@@ -83,8 +105,8 @@ class RideRequestTypeChip extends StatelessWidget {
       case ServiceType.courier:
         return (languages.vehicleBicicleta, Icons.pedal_bike_outlined, const Color(0xFFE65100));
       default:
-        if (serviceMode == ServiceModeKind.transport) {
-          return (transportLabel, CustomIcons.car, const Color(0xFF2E7D32));
+        if (serviceMode == ServiceModeKind.transport && transportLabel.isNotEmpty) {
+          return (transportLabel, CustomIcons.car, const Color(0xFF1565C0));
         }
         return null;
     }

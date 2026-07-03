@@ -27,14 +27,61 @@ class _SharedRideCreateSheetState extends State<SharedRideCreateSheet> {
   final _seatsTEC = TextEditingController(text: '3');
   final _fareTEC = TextEditingController();
   bool _loading = false;
+  Map<String, dynamic>? _fareEstimate;
+
+  @override
+  void initState() {
+    super.initState();
+    for (final c in [_originTEC, _destinationTEC, _seatsTEC]) {
+      c.addListener(_scheduleFareEstimate);
+    }
+  }
 
   @override
   void dispose() {
+    for (final c in [_originTEC, _destinationTEC, _seatsTEC]) {
+      c.removeListener(_scheduleFareEstimate);
+    }
     _originTEC.dispose();
     _destinationTEC.dispose();
     _seatsTEC.dispose();
     _fareTEC.dispose();
     super.dispose();
+  }
+
+  void _scheduleFareEstimate() {
+    if (!mounted) return;
+    final origin = _originTEC.text.trim();
+    final destination = _destinationTEC.text.trim();
+    final seats = int.tryParse(_seatsTEC.text.trim()) ?? 0;
+    if (origin.length < 3 || destination.length < 3 || seats < 1) {
+      setState(() => _fareEstimate = null);
+      return;
+    }
+    Future.delayed(const Duration(milliseconds: 450), () {
+      if (!mounted) return;
+      if (_originTEC.text.trim() != origin || _destinationTEC.text.trim() != destination) return;
+      _loadFareEstimate(origin, destination, seats);
+    });
+  }
+
+  Future<void> _loadFareEstimate(String origin, String destination, int seats) async {
+    try {
+      final raw = await _repo.sharedRideFareEstimate(
+        originTown: origin,
+        destinationTown: destination,
+        seatsTotal: seats,
+        isWeekend: _tripDate != null &&
+            (_tripDate!.weekday == DateTime.saturday || _tripDate!.weekday == DateTime.sunday),
+      );
+      if (!mounted || (raw['status'] ?? 0) != 1) return;
+      final estimate = Map<String, dynamic>.from(raw['estimate'] as Map? ?? {});
+      setState(() => _fareEstimate = estimate);
+      final recommended = (estimate['recommended_fare_per_person'] as num?)?.toDouble();
+      if (recommended != null && recommended > 0 && _fareTEC.text.trim().isEmpty) {
+        _fareTEC.text = recommended.toStringAsFixed(0);
+      }
+    } catch (_) {}
   }
 
   Future<void> _submit() async {
@@ -87,6 +134,50 @@ class _SharedRideCreateSheetState extends State<SharedRideCreateSheet> {
     }
   }
 
+  Widget _fareHint(BuildContext context) {
+    final estimate = _fareEstimate;
+    if (estimate == null) return const SizedBox.shrink();
+    final accent = XistiUiTokens.accentForMode(ServiceModeKind.expreso);
+    final km = (estimate['distance_km'] as num?)?.toDouble() ?? 0;
+    final tolls = (estimate['tolls_estimate'] as num?)?.toDouble() ?? 0;
+    final min = (estimate['min_fare_per_person'] as num?)?.toDouble() ?? 0;
+    final rec = (estimate['recommended_fare_per_person'] as num?)?.toDouble() ?? 0;
+    final max = (estimate['max_fare_per_person'] as num?)?.toDouble() ?? 0;
+
+    return Container(
+      margin: EdgeInsetsDirectional.only(
+        start: commonHorizontalPadding,
+        end: commonHorizontalPadding,
+        bottom: 10.h,
+      ),
+      padding: EdgeInsets.all(12.w),
+      decoration: BoxDecoration(
+        color: accent.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(12.r),
+        border: Border.all(color: accent.withValues(alpha: 0.35)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Tarifa sugerida por persona',
+            style: bodyText(context: context, fontWeight: FontWeight.w700, fontSize: textSize13px),
+          ),
+          SizedBox(height: 6.h),
+          Text(
+            '~${km.toStringAsFixed(0)} km · peajes est. ${getAmountWithCurrency(tolls)}',
+            style: bodyText(context: context, fontSize: textSize12px, textColor: getCurrentTheme(context).colorTextLight),
+          ),
+          SizedBox(height: 4.h),
+          Text(
+            'Rango: ${getAmountWithCurrency(min)} – ${getAmountWithCurrency(max)} · sugerido ${getAmountWithCurrency(rec)}',
+            style: bodyText(context: context, fontSize: textSize12px, fontWeight: FontWeight.w600),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final accent = XistiUiTokens.accentForMode(ServiceModeKind.expreso);
@@ -119,8 +210,12 @@ class _SharedRideCreateSheetState extends State<SharedRideCreateSheet> {
             destinationController: _destinationTEC,
             fareController: _fareTEC,
             tripDate: _tripDate,
-            onDateChanged: (d) => setState(() => _tripDate = d),
+            onDateChanged: (d) {
+              setState(() => _tripDate = d);
+              _scheduleFareEstimate();
+            },
           ),
+          _fareHint(context),
           Padding(
             padding: EdgeInsetsDirectional.symmetric(horizontal: commonHorizontalPadding),
             child: TextField(

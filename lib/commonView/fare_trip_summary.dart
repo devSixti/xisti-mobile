@@ -11,6 +11,8 @@ class FareTripSummary extends StatelessWidget {
   final String distanceLabel;
   final String durationLabel;
   final Color accent;
+  final String? serviceCategoryLabel;
+  final String? vehicleTypeLabel;
 
   const FareTripSummary({
     super.key,
@@ -20,6 +22,8 @@ class FareTripSummary extends StatelessWidget {
     required this.distanceLabel,
     required this.durationLabel,
     this.accent = const Color(0xFF80FF00),
+    this.serviceCategoryLabel,
+    this.vehicleTypeLabel,
   });
 
   @override
@@ -36,6 +40,19 @@ class FareTripSummary extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          if ((serviceCategoryLabel ?? '').isNotEmpty || (vehicleTypeLabel ?? '').isNotEmpty) ...[
+            Wrap(
+              spacing: 8.w,
+              runSpacing: 4.h,
+              children: [
+                if ((serviceCategoryLabel ?? '').isNotEmpty)
+                  _tag(context, serviceCategoryLabel!, accent),
+                if ((vehicleTypeLabel ?? '').isNotEmpty)
+                  _tag(context, vehicleTypeLabel!, accent.withValues(alpha: 0.85)),
+              ],
+            ),
+            SizedBox(height: 8.h),
+          ],
           _bullet(context, languages.distanceKm(distanceLabel)),
           _bullet(context, '${languages.minutes}: $durationLabel min'),
           _bullet(context, '${languages.recommendedFare}: ${getAmountWithCurrency(recommendedFare)}'),
@@ -60,6 +77,21 @@ class FareTripSummary extends StatelessWidget {
           Text('• ', style: bodyText(context: context, fontWeight: FontWeight.w700)),
           Expanded(child: Text(text, style: bodyText(context: context, fontWeight: FontWeight.w500, fontSize: textSize14px))),
         ],
+      ),
+    );
+  }
+
+  Widget _tag(BuildContext context, String text, Color color) {
+    return Container(
+      padding: EdgeInsetsDirectional.symmetric(horizontal: 8.w, vertical: 4.h),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(8.r),
+        border: Border.all(color: color.withValues(alpha: 0.35)),
+      ),
+      child: Text(
+        text,
+        style: bodyText(context: context, fontSize: textSize12px, fontWeight: FontWeight.w700, textColor: color),
       ),
     );
   }

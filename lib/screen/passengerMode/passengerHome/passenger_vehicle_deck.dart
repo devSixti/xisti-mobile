@@ -193,25 +193,26 @@ class _PassengerVehicleDeckState extends State<PassengerVehicleDeck> {
               },
             ),
           ),
-          Padding(
-            padding: EdgeInsetsDirectional.symmetric(horizontal: commonHorizontalPadding),
-            child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 200),
-              child: Text(
-                active.serviceName ?? '-',
-                key: ValueKey(active.serviceName),
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: bodyText(
-                  context: context,
-                  textColor: accent,
-                  fontWeight: FontWeight.w700,
-                  fontSize: textSize14px,
+          if (!textOnly)
+            Padding(
+              padding: EdgeInsetsDirectional.symmetric(horizontal: commonHorizontalPadding),
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 200),
+                child: Text(
+                  active.serviceName ?? '-',
+                  key: ValueKey(active.serviceName),
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: bodyText(
+                    context: context,
+                    textColor: accent,
+                    fontWeight: FontWeight.w700,
+                    fontSize: textSize14px,
+                  ),
                 ),
               ),
             ),
-          ),
           SizedBox(height: 6.h),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,

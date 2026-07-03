@@ -28,10 +28,23 @@ abstract final class XistiVehicleCatalog {
       deliveryThemedVariants.contains(variant);
 
   static String iconAsset(String variant, {bool delivery = false}) {
-    if (delivery && isDeliveryThemedVariant(variant)) {
-      return '$_iconDeliveryBase/$variant.png';
+    final assetVariant = _displayIconVariant(variant);
+    if (delivery && isDeliveryThemedVariant(assetVariant)) {
+      return '$_iconDeliveryBase/$assetVariant.png';
     }
-    return '$_iconBase/$variant.png';
+    return '$_iconBase/$assetVariant.png';
+  }
+
+  /// Económico ↔ eléctrico icon swap (product branding).
+  static String _displayIconVariant(String variant) {
+    switch (variant) {
+      case carroEconomico:
+        return carroEco;
+      case carroEco:
+        return carroEconomico;
+      default:
+        return variant;
+    }
   }
 
   static String deliveryIconAsset(String variant) => iconAsset(variant, delivery: true);

@@ -58,12 +58,13 @@ class ServiceModeSelector extends StatelessWidget {
           ),
           child: Padding(
             padding: EdgeInsets.all(4.w),
-            child: Row(
-              children: [
-                for (var i = 0; i < visible.length; i++) ...[
-                  if (i > 0) SizedBox(width: 4.w),
-                  Expanded(
-                    child: _SlimModePill(
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  for (var i = 0; i < visible.length; i++) ...[
+                    if (i > 0) SizedBox(width: 6.w),
+                    _SlimModePill(
                       context: context,
                       title: _titleFor(visible[i]),
                       mode: visible[i].mode,
@@ -71,9 +72,9 @@ class ServiceModeSelector extends StatelessWidget {
                       selected: selectedMode == visible[i].mode,
                       onTap: () => onModeSelected(visible[i].mode),
                     ),
-                  ),
+                  ],
                 ],
-              ],
+              ),
             ),
           ),
         ),
@@ -160,26 +161,26 @@ class _SlimModePill extends StatelessWidget {
                   boxShadow: XistiUiTokens.neonGlow(accent, alpha: 0.22),
                 )
               : null,
-          padding: EdgeInsets.symmetric(vertical: 10.h, horizontal: 4.w),
+          padding: EdgeInsets.symmetric(vertical: 10.h, horizontal: 12.w),
+          constraints: BoxConstraints(minWidth: 76.w),
           child: Row(
+            mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               if (icon != null) ...[
                 Icon(icon, size: 18.sp, color: selected ? XistiBrand.dark : theme.colorIconCommon),
                 SizedBox(width: 6.w),
               ],
-              Flexible(
-                child: Text(
-                  title,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.center,
-                  style: bodyText(
-                    context: context,
-                    fontSize: textSize13px,
-                    fontWeight: FontWeight.w700,
-                    textColor: selected ? XistiBrand.dark : theme.colorTextCommon,
-                  ),
+              Text(
+                title,
+                maxLines: 1,
+                softWrap: false,
+                textAlign: TextAlign.center,
+                style: bodyText(
+                  context: context,
+                  fontSize: textSize12px,
+                  fontWeight: FontWeight.w700,
+                  textColor: selected ? XistiBrand.dark : theme.colorTextCommon,
                 ),
               ),
             ],

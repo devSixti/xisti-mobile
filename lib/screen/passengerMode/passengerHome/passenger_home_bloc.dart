@@ -114,6 +114,7 @@ class PassengerHomeBloc extends Bloc {
   final selectedAcarreoVariantSubject = BehaviorSubject<String?>();
   final selectedSharedRideKindSubject =
       BehaviorSubject<String>.seeded(SharedRideKind.defaultKind);
+  final selectedSharedRideVehicleSubject = BehaviorSubject<String?>();
   final sharedRideTripDateSubject = BehaviorSubject<DateTime?>();
   final acarreoEstimatedDateSubject = BehaviorSubject<DateTime?>();
   final sharedRideSearchSubject = BehaviorSubject<ApiResponse<Map<String, dynamic>>>();
@@ -754,6 +755,10 @@ class PassengerHomeBloc extends Bloc {
     selectedSharedRideKindSubject.add(kind);
   }
 
+  void selectSharedRideVehicle(String? variant) {
+    selectedSharedRideVehicleSubject.add(variant);
+  }
+
   Future<void> callSharedRideSearch() async {
     final origin = sharedRideOriginTEC.text.trim();
     final destination = sharedRideDestinationTEC.text.trim();
@@ -779,6 +784,7 @@ class PassengerHomeBloc extends Bloc {
         originTown: origin,
         destinationTown: destination,
         tripDate: dateStr,
+        vehicleVariant: selectedSharedRideVehicleSubject.valueOrNull,
       );
       final status = int.tryParse('${raw['status']}') ?? 0;
       final message = raw['message']?.toString() ?? '';
@@ -1471,6 +1477,7 @@ class PassengerHomeBloc extends Bloc {
     selectedDeliveryVehicleServiceId.close();
     selectedAcarreoVariantSubject.close();
     selectedSharedRideKindSubject.close();
+    selectedSharedRideVehicleSubject.close();
     sharedRideTripDateSubject.close();
     acarreoEstimatedDateSubject.close();
     sharedRideSearchSubject.close();

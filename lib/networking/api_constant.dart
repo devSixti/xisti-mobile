@@ -154,6 +154,7 @@ class ApiConst {
   static const endPointSharedRideSearch = "shared-ride-search";
   static const endPointSharedRideJoin = "shared-ride-join";
   static const endPointSharedRideMyOffers = "shared-ride-my-offers";
+  static const endPointSharedRideFareEstimate = "shared-ride-fare-estimate";
   static const endPointFindDriver = "driver-bid-list";
   static const endPointUpdatePrice = "update-price";
   static const endPointAcceptRide = "accept-ride";
@@ -286,6 +287,7 @@ class ApiParam {
   static const paramTripDate = "trip_date";
   static const paramSeatsTotal = "seats_total";
   static const paramFarePerPerson = "fare_per_person";
+  static const paramIsWeekend = "is_weekend";
   static const paramOfferId = "offer_id";
   static const paramSearchId = "search_id";
   static const paramDeliveryDirection = "delivery_direction";

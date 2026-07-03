@@ -16,6 +16,7 @@ class SharedRideFields extends StatelessWidget {
   final TextEditingController? fareController;
   final DateTime? tripDate;
   final ValueChanged<DateTime> onDateChanged;
+  final bool showContributionNotice;
 
   const SharedRideFields({
     super.key,
@@ -25,6 +26,7 @@ class SharedRideFields extends StatelessWidget {
     this.fareController,
     required this.tripDate,
     required this.onDateChanged,
+    this.showContributionNotice = false,
   });
 
   @override
@@ -106,11 +108,13 @@ class SharedRideFields extends StatelessWidget {
               ),
             ),
           ),
-          SizedBox(height: 8.h),
-          Text(
-            languages.sharedRideContributionNotice,
-            style: bodyText(context: context, fontSize: textSize12px, textColor: theme.colorTextLight),
-          ),
+          if (showContributionNotice) ...[
+            SizedBox(height: 8.h),
+            Text(
+              languages.sharedRideContributionNotice,
+              style: bodyText(context: context, fontSize: textSize12px, textColor: theme.colorTextLight),
+            ),
+          ],
         ],
       ),
     );

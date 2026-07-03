@@ -229,6 +229,22 @@ Future<void> manageLoginResponse(
       return;
     }
 
+    // Returning Google/Facebook/Apple users with a completed profile go straight in.
+    if (response.isRegister == 1 && phoneVerified && isSocialLoginType(loginType)) {
+      await markSessionAuthenticated();
+      putDataInSettingBox(hiveAppMode, response.activeMode ?? AppMode.passenger);
+      unawaited(SessionRestoreService.enableBiometricLoginIfAvailable());
+      changeSubscribeTopic();
+      await getGoogleMapKeyForApiCall();
+      if (!context.mounted) return;
+      if (response.activeMode == AppMode.driver) {
+        openScreenWithClearPrevious(context, const DriverHome(isFromLogin: true));
+      } else {
+        openScreenWithClearPrevious(context, const PassengerHome(isFromLogin: true));
+      }
+      return;
+    }
+
     if (response.isRegister == 1) {
       if (!phoneVerified) {
         await routeToPhoneOtp();

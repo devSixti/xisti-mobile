@@ -303,7 +303,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get deliveryLegalNotice =>
-      'Los envíos corresponden a entregas gestionadas entre usuarios mediante la plataforma. La app facilita la conexión y no presta servicios de transporte de pasajeros ni de carga.';
+      'Envíos de paquetes entre usuarios; elige el medio que coincida con tu envío.';
 
   @override
   String get agreeAndContinue => 'Aceptar y continuar';

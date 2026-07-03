@@ -43,8 +43,9 @@ class ModeServiceHint extends StatelessWidget {
           Expanded(
             child: Text(
               hint,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
+              overflow: TextOverflow.fade,
+              softWrap: false,
               style: bodyText(
                 context: context,
                 fontSize: textSize10px,

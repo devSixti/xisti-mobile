@@ -74,7 +74,7 @@ class LoginPojo {
     userId = json["user_id"];
     userVerified = json["user_verified"];
     userName = json["user_name"];
-    accessToken = json["access_token"];
+    accessToken = json["access_token"]?.toString();
     isRegister = json["is_register"];
     email = json["email"];
     loginType = json["login_type"];

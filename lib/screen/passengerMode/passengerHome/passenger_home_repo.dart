@@ -128,19 +128,21 @@ class PassengerHomeRepo {
     required String originTown,
     required String destinationTown,
     required String tripDate,
+    String? vehicleVariant,
   }) async {
+    final body = <String, dynamic>{
+      ApiParam.paramUserId: getIntFromUserInfoBox(hiveUserId),
+      ApiParam.paramAccessToken: getStringFromSettingBox(hiveAccessToken),
+      ApiParam.paramTripKind: tripKind,
+      ApiParam.paramOriginTown: originTown,
+      ApiParam.paramDestinationTown: destinationTown,
+      ApiParam.paramTripDate: tripDate,
+    };
+    if (vehicleVariant != null && vehicleVariant.trim().isNotEmpty) {
+      body['vehicle_variant'] = vehicleVariant.trim();
+    }
     return Map<String, dynamic>.from(
-      await _apiBaseHelper.post(
-        ApiConst.endPointSharedRideSearch,
-        body: {
-          ApiParam.paramUserId: getIntFromUserInfoBox(hiveUserId),
-          ApiParam.paramAccessToken: getStringFromSettingBox(hiveAccessToken),
-          ApiParam.paramTripKind: tripKind,
-          ApiParam.paramOriginTown: originTown,
-          ApiParam.paramDestinationTown: destinationTown,
-          ApiParam.paramTripDate: tripDate,
-        },
-      ),
+      await _apiBaseHelper.post(ApiConst.endPointSharedRideSearch, body: body),
     );
   }
 
@@ -178,6 +180,29 @@ class PassengerHomeRepo {
           ApiParam.paramTripDate: tripDate,
           ApiParam.paramSeatsTotal: seatsTotal,
           ApiParam.paramFarePerPerson: farePerPerson,
+        },
+      ),
+    );
+  }
+
+  Future<Map<String, dynamic>> sharedRideFareEstimate({
+    required String originTown,
+    required String destinationTown,
+    required int seatsTotal,
+    bool isWeekend = false,
+  }) async {
+    final tripDate = DateTime.now();
+    final isWeekendDay = tripDate.weekday == DateTime.saturday || tripDate.weekday == DateTime.sunday;
+    return Map<String, dynamic>.from(
+      await _apiBaseHelper.post(
+        ApiConst.endPointSharedRideFareEstimate,
+        body: {
+          ApiParam.paramUserId: getIntFromUserInfoBox(hiveUserId),
+          ApiParam.paramAccessToken: getStringFromSettingBox(hiveAccessToken),
+          ApiParam.paramOriginTown: originTown,
+          ApiParam.paramDestinationTown: destinationTown,
+          ApiParam.paramSeatsTotal: seatsTotal,
+          ApiParam.paramIsWeekend: isWeekend || isWeekendDay ? 1 : 0,
         },
       ),
     );

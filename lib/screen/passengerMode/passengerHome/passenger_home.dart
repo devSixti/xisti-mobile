@@ -27,6 +27,7 @@ import 'delivery_quick_fields.dart';
 import 'delivery_direction_selector.dart';
 import 'shared_ride_kind_selector.dart';
 import 'shared_ride_fields.dart';
+import 'shared_ride_vehicle_selector.dart';
 import 'acarreo_quick_fields.dart';
 import 'mode_service_hint.dart';
 import 'service_mode_context_strip.dart';
@@ -227,6 +228,7 @@ class _PassengerHomeState extends State<PassengerHome> {
       serviceModeContextStrip(),
       modeServiceHint(),
       sharedRideKindSelector(),
+      sharedRideVehicleSelector(),
       deliveryDirectionSelector(),
       Padding(
         padding: EdgeInsetsDirectional.only(top: 4.h, bottom: 8.h),
@@ -276,6 +278,22 @@ class _PassengerHomeState extends State<PassengerHome> {
   bool _isSharedRidesMode(String? mode) => ServiceModeKind.isSharedRideMode(mode);
 
   bool _isAcarreosMode(String? mode) => ServiceModeKind.isAcarreosMode(mode);
+
+  Widget sharedRideVehicleSelector() => StreamBuilder<String>(
+    stream: _bloc?.selectedServiceModeSubject,
+    builder: (context, snap) {
+      if (!_isSharedRidesMode(snap.data)) return const SizedBox.shrink();
+      return StreamBuilder<String?>(
+        stream: _bloc?.selectedSharedRideVehicleSubject,
+        builder: (context, variantSnap) {
+          return SharedRideVehicleSelector(
+            selectedVariant: variantSnap.data,
+            onChanged: _bloc!.selectSharedRideVehicle,
+          );
+        },
+      );
+    },
+  );
 
   Widget sharedRideKindSelector() => StreamBuilder<String>(
     stream: _bloc?.selectedServiceModeSubject,
