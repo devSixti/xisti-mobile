@@ -144,6 +144,8 @@
   "recommendedFare": "Recommended fare",
   "minFare": "Min. fare",
   "maxFare": "Max. fare",
+  "distanceApprox": "Approx. distance",
+  "estimatedTime": "Estimated time",
   "fareEstimateDisclaimer": "Estimate based on route, time and vehicle fare.",
   "recipientName": "Recipient's Name",
   "recipientNumber": "Recipient's Number",

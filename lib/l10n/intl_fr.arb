@@ -136,6 +136,8 @@
   "recommendedFare": "Tarif recommandé",
   "minFare": "Tarif minimum",
   "maxFare": "Tarif maximum",
+  "distanceApprox": "Distance approx",
+  "estimatedTime": "Temps estimé",
   "recipientName": "Nom du destinataire",
   "recipientNumber": "Numéro du destinataire",
   "parcelEstimatedPrice": "Valeur estimée du colis",

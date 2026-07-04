@@ -138,6 +138,8 @@
   "recommendedFare": "Tarifa recomendada",
   "minFare": "Tarifa mín.",
   "maxFare": "Tarifa máx.",
+  "distanceApprox": "Distância aprox",
+  "estimatedTime": "Tempo estimado",
   "recipientName": "Nome do Destinatário",
   "recipientNumber": "Número do Destinatário",
   "parcelEstimatedPrice": "Valor Estimado do Pacote",
