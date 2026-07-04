@@ -104,10 +104,6 @@ class DriverRideRequestDetailPanel extends StatelessWidget {
                   _metricsRow(context),
                   SizedBox(height: 14.h),
                   _farePaymentCard(context, paymentLabel),
-                  if (isDelivery) ...[
-                    SizedBox(height: 14.h),
-                    const DeliveryRequestBadge(expanded: true),
-                  ],
                   if (ride.scheduleDate.isNotEmpty && ride.rideType == 1) ...[
                     SizedBox(height: 12.h),
                     _infoTile(

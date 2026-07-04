@@ -14,6 +14,8 @@ class PassengerBoxTextField extends StatelessWidget {
   final int maxLines;
   final List<TextInputFormatter>? inputFormatters;
   final ValueChanged<String>? onChanged;
+  final VoidCallback? onTap;
+  final bool readOnly;
 
   const PassengerBoxTextField({
     super.key,
@@ -25,6 +27,8 @@ class PassengerBoxTextField extends StatelessWidget {
     this.maxLines = 1,
     this.inputFormatters,
     this.onChanged,
+    this.onTap,
+    this.readOnly = false,
   });
 
   @override
@@ -68,6 +72,8 @@ class PassengerBoxTextField extends StatelessWidget {
                   keyboardType: keyboardType,
                   maxLines: maxLines,
                   minLines: 1,
+                  readOnly: readOnly || onTap != null,
+                  onTap: onTap,
                   inputFormatters: inputFormatters,
                   onChanged: onChanged,
                   style: bodyText(

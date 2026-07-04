@@ -200,10 +200,6 @@ class _SharedRideCreateSheetState extends State<SharedRideCreateSheet> {
               style: bodyText(context: context, fontSize: textSize12px),
             ),
           ),
-          SharedRideKindSelector(
-            selectedKind: _kind,
-            onKindChanged: (k) => setState(() => _kind = k),
-          ),
           SharedRideFields(
             tripKind: _kind,
             originController: _originTEC,

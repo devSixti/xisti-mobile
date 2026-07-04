@@ -163,20 +163,6 @@ class _AcceptRequestBottomSheetState extends State<AcceptRequestBottomSheet> {
                             ],
                           ),
                         ),
-                        if (ServiceModeKind.isDeliveryRideRequest(
-                          serviceId: widget.rideListItem.serviceId,
-                          isDelivery: widget.rideListItem.isDelivery,
-                          itemDescription: widget.rideListItem.itemDescription,
-                          recipientName: widget.rideListItem.recipientName,
-                        ))
-                          Padding(
-                            padding: EdgeInsetsDirectional.only(
-                              start: commonHorizontalPadding,
-                              end: commonHorizontalPadding,
-                              bottom: 10.h,
-                            ),
-                            child: const DeliveryRequestBadge(expanded: true),
-                          ),
                         _googleMapWidget(),
                         _addressListWidget(),
                         if (widget.rideListItem.scheduleDate.isNotEmpty && widget.rideListItem.rideType == 1) ...[

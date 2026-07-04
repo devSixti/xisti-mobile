@@ -13,7 +13,7 @@ class DeliveryRequestBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = getCurrentTheme(context);
-    final accent = const Color(0xFFE65100);
+    final accent = XistiBrand.purple;
 
     if (expanded) {
       return Container(

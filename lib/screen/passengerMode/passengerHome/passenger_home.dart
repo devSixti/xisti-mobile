@@ -277,37 +277,7 @@ class _PassengerHomeState extends State<PassengerHome> {
 
   bool _isAcarreosMode(String? mode) => ServiceModeKind.isAcarreosMode(mode);
 
-  Widget sharedRideKindSelector() => StreamBuilder<String>(
-    stream: _bloc?.selectedServiceModeSubject,
-    builder: (context, snap) {
-      if (!_isSharedRidesMode(snap.data)) return const SizedBox.shrink();
-      return StreamBuilder<String>(
-        stream: _bloc?.selectedSharedRideKindSubject,
-        builder: (context, kindSnap) {
-          return Padding(
-            padding: EdgeInsetsDirectional.only(
-              start: commonHorizontalPadding,
-              end: commonHorizontalPadding,
-              bottom: 6.h,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                XistiSectionLabel(
-                  label: 'Tipo de ruta',
-                  accent: XistiUiTokens.accentForMode(snap.data),
-                ),
-                SharedRideKindSelector(
-                  selectedKind: kindSnap.data ?? SharedRideKind.defaultKind,
-                  onKindChanged: _bloc!.selectSharedRideKind,
-                ),
-              ],
-            ),
-          );
-        },
-      );
-    },
-  );
+  Widget sharedRideKindSelector() => const SizedBox.shrink();
 
   Widget deliveryDirectionSelector() => StreamBuilder<String>(
     stream: _bloc?.selectedServiceModeSubject,

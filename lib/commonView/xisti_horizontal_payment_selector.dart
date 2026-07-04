@@ -30,7 +30,7 @@ class XistiHorizontalPaymentSelector<T> extends StatelessWidget {
     if (options.isEmpty) return const SizedBox.shrink();
 
     return SizedBox(
-      height: 52.h,
+      height: 40.h,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         itemCount: options.length,
@@ -43,7 +43,7 @@ class XistiHorizontalPaymentSelector<T> extends StatelessWidget {
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 220),
               curve: Curves.easeOutCubic,
-              padding: EdgeInsetsDirectional.symmetric(horizontal: 12.w, vertical: 8.h),
+              padding: EdgeInsetsDirectional.symmetric(horizontal: 12.w, vertical: 4.h),
               decoration: XistiUiTokens.glassCard(
                 background: theme.colorScaffoldBg,
                 borderColor: theme.colorDarkBorder,

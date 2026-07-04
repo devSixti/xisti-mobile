@@ -6,6 +6,7 @@ import '../../../utils/service_mode_util.dart';
 import '../../../utils/shared_ride_kind.dart';
 import '../../../utils/utils.dart';
 import '../../../utils/xisti_ui_tokens.dart';
+import '../../common/selectLocation/select_location.dart';
 import 'passenger_field_box.dart';
 import 'xisti_section_label.dart';
 
@@ -28,6 +29,16 @@ class SharedRideFields extends StatelessWidget {
     required this.onDateChanged,
     this.showContributionNotice = false,
   });
+
+  Future<void> _pickLocation(BuildContext context, TextEditingController controller) async {
+    final result = await Navigator.push<Map<String, dynamic>>(
+      context,
+      MaterialPageRoute(builder: (_) => const SelectLocation(showFilledLocation: false)),
+    );
+    if (result != null && result['address'] != null) {
+      controller.text = result['address'].toString();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -68,6 +79,7 @@ class SharedRideFields extends StatelessWidget {
                     label: originLabel,
                     hint: originLabel,
                     icon: Icons.trip_origin,
+                    onTap: () => _pickLocation(context, originController),
                   ),
                   SizedBox(height: 12.h),
                   PassengerBoxTextField(
@@ -76,6 +88,7 @@ class SharedRideFields extends StatelessWidget {
                     label: destinationLabel,
                     hint: destinationLabel,
                     icon: Icons.flag_outlined,
+                    onTap: () => _pickLocation(context, destinationController),
                   ),
                   SizedBox(height: 12.h),
                   PassengerBoxDateField(

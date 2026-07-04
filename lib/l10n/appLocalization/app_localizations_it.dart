@@ -55,6 +55,12 @@ class AppLocalizationsIt extends AppLocalizations {
   String get minutes => 'Minuti';
 
   @override
+  String get distanceApprox => 'Distanza appross';
+
+  @override
+  String get estimatedTime => 'Tempo stimato';
+
+  @override
   String get seconds => 'secondi';
 
   @override

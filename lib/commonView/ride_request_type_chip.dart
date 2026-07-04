@@ -7,6 +7,7 @@ import '../main.dart';
 import '../utils/service_mode_util.dart';
 import '../utils/utils.dart';
 import '../utils/xisti_vehicle_catalog.dart';
+import '../utils/xisti_ui_tokens.dart';
 
 /// Compact service labels on driver request previews (list, sheet, push UI).
 class RideRequestTypeChip extends StatelessWidget {
@@ -60,17 +61,17 @@ class RideRequestTypeChip extends StatelessWidget {
 
   (String, IconData, Color)? _serviceModeChip() {
     if (isEncomienda == 1 || serviceMode == ServiceModeKind.encomiendas) {
-      return (languages.chipErrand, Icons.local_shipping_outlined, const Color(0xFF00838F));
+      return (languages.chipErrand, Icons.local_shipping_outlined, XistiBrand.purpleMedium);
     }
     if (ServiceModeKind.isExpresoMode(serviceMode)) {
       return (languages.chipShare, Icons.people_outline, const Color(0xFF6A1B9A));
     }
     if (ServiceModeKind.isAcarreosMode(serviceMode)) {
-      return (languages.chipHauling, Icons.local_shipping_outlined, const Color(0xFF455A64));
+      return (languages.chipHauling, Icons.local_shipping_outlined, XistiBrand.purpleDeep);
     }
     if (ServiceModeKind.isDeliveryRideRequest(serviceId: serviceId, isDelivery: isDelivery) ||
         serviceMode == ServiceModeKind.delivery) {
-      return (languages.chipDelivery, Icons.inventory_2_outlined, const Color(0xFFE65100));
+      return (languages.chipDelivery, Icons.inventory_2_outlined, XistiBrand.purple);
     }
     if (serviceMode == ServiceModeKind.transport || serviceId != null) {
       return (languages.serviceModeTrips, Icons.directions_car_outlined, const Color(0xFF2E7D32));
@@ -103,7 +104,7 @@ class RideRequestTypeChip extends StatelessWidget {
       case ServiceType.bike:
         return (transportLabel, Icons.two_wheeler_outlined, const Color(0xFF2E7D32));
       case ServiceType.courier:
-        return (languages.vehicleBicicleta, Icons.pedal_bike_outlined, const Color(0xFFE65100));
+        return (languages.vehicleBicicleta, Icons.pedal_bike_outlined, XistiBrand.purpleMedium);
       default:
         if (serviceMode == ServiceModeKind.transport && transportLabel.isNotEmpty) {
           return (transportLabel, CustomIcons.car, const Color(0xFF1565C0));
@@ -119,7 +120,7 @@ class RideRequestTypeChip extends StatelessWidget {
     required Color accent,
   }) {
     return Container(
-      padding: EdgeInsetsDirectional.symmetric(horizontal: 8.w, vertical: 4.h),
+      padding: EdgeInsetsDirectional.symmetric(horizontal: 6.w, vertical: 3.h),
       decoration: BoxDecoration(
         color: accent.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(8.r),
@@ -128,15 +129,19 @@ class RideRequestTypeChip extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, color: accent, size: 13.sp),
-          SizedBox(width: 4.w),
-          Text(
-            label,
-            style: bodyText(
-              context: context,
-              fontSize: textSize12px,
-              fontWeight: FontWeight.w700,
-              textColor: accent,
+          Icon(icon, color: accent, size: 11.sp),
+          SizedBox(width: 3.w),
+          Flexible(
+            child: Text(
+              label,
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
+              style: bodyText(
+                context: context,
+                fontSize: textSize10px,
+                fontWeight: FontWeight.w700,
+                textColor: accent,
+              ),
             ),
           ),
         ],

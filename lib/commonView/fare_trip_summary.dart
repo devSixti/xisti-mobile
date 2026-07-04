@@ -26,6 +26,16 @@ class FareTripSummary extends StatelessWidget {
     this.vehicleTypeLabel,
   });
 
+  String _formattedDuration() {
+    final raw = int.tryParse(durationLabel) ?? 0;
+    if (raw > 60) {
+      final h = raw ~/ 60;
+      final m = raw % 60;
+      return m > 0 ? '$h h $m min' : '$h h';
+    }
+    return '$raw min';
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = getCurrentTheme(context);
@@ -53,11 +63,9 @@ class FareTripSummary extends StatelessWidget {
             ),
             SizedBox(height: 8.h),
           ],
-          _bullet(context, languages.distanceKm(distanceLabel)),
-          _bullet(context, '${languages.minutes}: $durationLabel min'),
+          _bullet(context, '${languages.distanceApprox}: $distanceLabel km'),
+          _bullet(context, '${languages.estimatedTime}: ${_formattedDuration()}'),
           _bullet(context, '${languages.recommendedFare}: ${getAmountWithCurrency(recommendedFare)}'),
-          _bullet(context, '${languages.minFare}: ${getAmountWithCurrency(minFare)}'),
-          _bullet(context, '${languages.maxFare}: ${getAmountWithCurrency(maxFare)}'),
           SizedBox(height: 4.h),
           Text(
             languages.fareEstimateDisclaimer,

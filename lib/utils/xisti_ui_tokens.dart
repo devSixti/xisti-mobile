@@ -35,8 +35,8 @@ abstract final class XistiBrand {
   /// Dark scaffold / cards (alias for [dark]).
   static const Color darkSurface = dark;
 
-  static const Color legalOrange = Color(0xFFE65100);
-  static const Color legalOrangeBg = Color(0xFFFFF3E0);
+  static const Color legalOrange = Color(0xFF681FFF);
+  static const Color legalOrangeBg = Color(0xFFEDE7F6);
 }
 
 /// Global visual tokens for the XISTI multiservice experience.
@@ -96,13 +96,13 @@ abstract final class XistiUiTokens {
       case ServiceModeKind.encomiendas:
         return XistiBrand.purple;
       case ServiceModeKind.expreso:
-        return XistiBrand.green;
+        return XistiBrand.greenMid;
       case ServiceModeKind.acarreos:
       case ServiceModeKind.carga:
         return XistiBrand.purple;
       case ServiceModeKind.transport:
       default:
-        return XistiBrand.green;
+        return XistiBrand.greenMid;
     }
   }
 
@@ -152,7 +152,7 @@ abstract final class XistiUiTokens {
     double radius = 0,
   }) {
     final r = radius > 0 ? radius : cardRadius;
-    final accentColor = accent ?? XistiBrand.green;
+    final accentColor = accent ?? XistiBrand.greenMid;
     return BoxDecoration(
       color: background.withValues(alpha: selected ? 0.22 : 0.12),
       borderRadius: BorderRadius.circular(r),

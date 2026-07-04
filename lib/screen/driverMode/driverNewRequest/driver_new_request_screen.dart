@@ -172,14 +172,6 @@ class _DriverNewRequestScreenState extends State<DriverNewRequestScreen> with Wi
                                 itemDescription: newRequestPojo.itemDescription,
                                 recipientName: newRequestPojo.recipientName,
                               ))
-                                Padding(
-                                  padding: EdgeInsetsDirectional.only(
-                                    start: commonHorizontalPadding,
-                                    end: commonHorizontalPadding,
-                                    bottom: 10.h,
-                                  ),
-                                  child: const DeliveryRequestBadge(expanded: true),
-                                ),
                               _addressListWidget(addressList: newRequestPojo.addressList),
                               if (newRequestPojo.scheduleDate.isNotEmpty && newRequestPojo.rideType == 1) ...[
                                 Padding(

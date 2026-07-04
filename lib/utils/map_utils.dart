@@ -58,6 +58,7 @@ void setMapFitToTourUsingLatLng({required List<double> latList, required List<do
 }
 
 void focusInMap(GoogleMapController googleMapController, double latitude, double longitude, bool isZoom) {
+  if (latitude.abs() < 0.01 && longitude.abs() < 0.01) return;
   isZoom
       ? googleMapController.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(target: LatLng(latitude, longitude), zoom: defaultMapZoom)))
       : googleMapController.getZoomLevel().then((value) {
