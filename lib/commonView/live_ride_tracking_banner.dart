@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../utils/utils.dart';
+import '../utils/ride_trip_copy_util.dart';
 import 'statusView/passenger_ride_status_view.dart';
 
 /// Modern live-trip header: pulsing badge, status copy, and ETA when available.
@@ -9,12 +10,18 @@ class LiveRideTrackingBanner extends StatelessWidget {
   final int rideStatus;
   final Stream<dynamic>? etaStream;
   final String? etaFallback;
+  final int? serviceId;
+  final String? itemDescription;
+  final String? recipientName;
 
   const LiveRideTrackingBanner({
     super.key,
     required this.rideStatus,
     this.etaStream,
     this.etaFallback,
+    this.serviceId,
+    this.itemDescription,
+    this.recipientName,
   });
 
   @override
@@ -124,12 +131,24 @@ class LiveRideTrackingBanner extends StatelessWidget {
       return languages.yourDriverIsOnWay;
     }
     if (rideStatus <= passengerArrive) {
-      return languages.driverIsAtPickup;
+      return RideTripCopy.driverAtPickupMessage(
+        serviceId: serviceId,
+        itemDescription: itemDescription,
+        recipientName: recipientName,
+      );
     }
     if (rideStatus < passengerDrop) {
-      return languages.driverHeadingDestination;
+      return RideTripCopy.headingToDestinationMessage(
+        serviceId: serviceId,
+        itemDescription: itemDescription,
+        recipientName: recipientName,
+      );
     }
-    return languages.reachYourDestination;
+    return RideTripCopy.reachedDestinationMessage(
+      serviceId: serviceId,
+      itemDescription: itemDescription,
+      recipientName: recipientName,
+    );
   }
 
   IconData _iconForStatus() {

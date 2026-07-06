@@ -622,6 +622,15 @@ class AppLocalizationsPt extends AppLocalizations {
   String get reachYourDestination => 'Chegou ao destino';
 
   @override
+  String get cargoAtPickup => 'O motorista chegou ao ponto de coleta da sua carga';
+
+  @override
+  String get cargoHeadingDestination => 'Sua carga está a caminho do destino';
+
+  @override
+  String get cargoReachedDestination => 'Sua carga chegou ao destino';
+
+  @override
   String get call => 'Ligar';
 
   @override

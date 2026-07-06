@@ -2,12 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../utils/utils.dart';
+import '../utils/ride_trip_copy_util.dart';
 import 'statusView/passenger_ride_status_view.dart';
 
 class RideStatusMsg extends StatelessWidget {
   final int rideStatus;
+  final int? serviceId;
+  final String? itemDescription;
+  final String? recipientName;
 
-  const RideStatusMsg({super.key, required this.rideStatus});
+  const RideStatusMsg({
+    super.key,
+    required this.rideStatus,
+    this.serviceId,
+    this.itemDescription,
+    this.recipientName,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -44,11 +54,23 @@ class RideStatusMsg extends StatelessWidget {
     if (status < passengerArrive) {
       return languages.yourDriverIsOnWay;
     } else if (status <= passengerArrive) {
-      return languages.driverIsAtPickup;
+      return RideTripCopy.driverAtPickupMessage(
+        serviceId: serviceId,
+        itemDescription: itemDescription,
+        recipientName: recipientName,
+      );
     } else if (status < passengerDrop) {
-      return languages.driverHeadingDestination;
+      return RideTripCopy.headingToDestinationMessage(
+        serviceId: serviceId,
+        itemDescription: itemDescription,
+        recipientName: recipientName,
+      );
     } else {
-      return languages.reachYourDestination;
+      return RideTripCopy.reachedDestinationMessage(
+        serviceId: serviceId,
+        itemDescription: itemDescription,
+        recipientName: recipientName,
+      );
     }
   }
 

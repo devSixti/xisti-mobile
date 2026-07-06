@@ -1244,6 +1244,24 @@ abstract class AppLocalizations {
   /// **'Reached your destination'**
   String get reachYourDestination;
 
+  /// No description provided for @cargoAtPickup.
+  ///
+  /// In en, this message translates to:
+  /// **'The driver arrived at your cargo pickup point'**
+  String get cargoAtPickup;
+
+  /// No description provided for @cargoHeadingDestination.
+  ///
+  /// In en, this message translates to:
+  /// **'Your cargo is heading to the destination'**
+  String get cargoHeadingDestination;
+
+  /// No description provided for @cargoReachedDestination.
+  ///
+  /// In en, this message translates to:
+  /// **'Your cargo reached the destination'**
+  String get cargoReachedDestination;
+
   /// No description provided for @call.
   ///
   /// In en, this message translates to:

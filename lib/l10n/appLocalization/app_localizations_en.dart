@@ -617,6 +617,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reachYourDestination => 'Reached your destination';
 
   @override
+  String get cargoAtPickup => 'The driver arrived at your cargo pickup point';
+
+  @override
+  String get cargoHeadingDestination => 'Your cargo is heading to the destination';
+
+  @override
+  String get cargoReachedDestination => 'Your cargo reached the destination';
+
+  @override
   String get call => 'Call';
 
   @override

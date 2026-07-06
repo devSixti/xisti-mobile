@@ -499,7 +499,7 @@ class DriverRunningRideBloc extends Bloc {
         rideStatusApi = DriverRideStatus.driverDrop;
         break;
       case DriverRideStatus.driverDrop:
-        if (_rideDetails.paymentType == 1) {
+        if (_isCashLikePayment) {
           rideStatusApi = DriverRideStatus.driverPayment;
         } else {
           rideStatusApi = DriverRideStatus.driverRating;
@@ -513,6 +513,13 @@ class DriverRunningRideBloc extends Bloc {
         break;
     }
     return rideStatusApi;
+  }
+
+  bool get _isCashLikePayment {
+    final destination = _rideDetails.destinationPaymentMethod.trim().toLowerCase();
+    return _rideDetails.paymentType == PaymentType.cash
+        || destination == 'cash'
+        || destination.isEmpty && _rideDetails.recipientName.trim().isNotEmpty;
   }
 
   /// Firebase functions
