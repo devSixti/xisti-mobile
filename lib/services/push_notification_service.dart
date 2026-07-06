@@ -56,6 +56,8 @@ class PushNotificationService {
     'High Importance Notifications', // title
     description: 'This channel is used for important notifications.', // description
     importance: Importance.max,
+    playSound: true,
+    enableVibration: true,
   );
 
   AndroidNotificationChannel rideAlertChannel = const AndroidNotificationChannel(
@@ -244,24 +246,25 @@ class PushNotificationService {
     bool fullScreenIntent = false,
   }) async {
     await flutterLocalNotificationsPlugin.show(
-      id: notificationId ?? notificationData.hashCode,
+      id: notificationId ?? notificationIdForData(notificationData),
       title: title,
       body: message,
       notificationDetails: NotificationDetails(
-        android: AndroidNotificationDetails(
-          androidNotificationChannel.id,
-          androidNotificationChannel.name,
-          channelDescription: androidNotificationChannel.description,
-          icon: 'ic_notification',
+        android: buildAndroidNotificationDetails(
+          config: NotificationDisplayConfig(
+            channel: androidNotificationChannel,
+            fullScreenIntent: fullScreenIntent,
+            soundIOS: soundIOS,
+          ),
           color: AppThemeColors().themeMode == 1 ? AppThemeColors.light().colorPrimary : AppThemeColors.dark().colorPrimary,
-          importance: importance ?? Importance.max,
-          priority: priority ?? Priority.max,
-          playSound: true,
-          enableVibration: true,
-          fullScreenIntent: fullScreenIntent,
-          sound: androidNotificationChannel.sound,
         ),
-        iOS: DarwinNotificationDetails(presentAlert: true, presentBadge: true, presentSound: true, sound: soundIOS),
+        iOS: DarwinNotificationDetails(
+          presentAlert: true,
+          presentBadge: true,
+          presentSound: true,
+          sound: soundIOS,
+          interruptionLevel: fullScreenIntent ? InterruptionLevel.timeSensitive : InterruptionLevel.active,
+        ),
       ),
       payload: jsonEncode(notificationData),
     );
@@ -540,71 +543,73 @@ class PushNotificationService {
   /// Background FCM: show heads-up + payload for tap (v1.0.1 compat).
   @pragma('vm:entry-point')
   static Future<void> displayBackgroundNotification(Map<String, dynamic> rawNotificationData) async {
-    final notificationData = normalizeNotificationDataMap(rawNotificationData);
     WidgetsFlutterBinding.ensureInitialized();
+    final notificationData = normalizeNotificationDataMap(rawNotificationData);
+    final title = (notificationData[NotificationConstant.title] ?? notificationData['body'] ?? 'XISTI').toString();
+    final body = (notificationData[NotificationConstant.message] ?? notificationData['body'] ?? '').toString();
+    if (title.trim().isEmpty && body.trim().isEmpty) {
+      return;
+    }
+
     final plugin = FlutterLocalNotificationsPlugin();
     const androidInit = AndroidInitializationSettings('@drawable/ic_notification');
     const iosInit = DarwinInitializationSettings(requestSoundPermission: true, requestBadgePermission: true, requestAlertPermission: true);
     await plugin.initialize(settings: const InitializationSettings(android: androidInit, iOS: iosInit));
     final androidPlugin = plugin.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
-    const newRequestChannel = AndroidNotificationChannel(
-      'new_request_channel',
-      'New Request Notifications',
-      description: 'Driver new ride requests',
-      importance: Importance.max,
-      playSound: true,
-      enableVibration: true,
-      sound: RawResourceAndroidNotificationSound('new_request'),
+    final type = int.tryParse((notificationData[NotificationConstant.notificationType] ?? -1).toString()) ?? -1;
+    final config = resolveNotificationDisplayConfig(type);
+    await androidPlugin?.createNotificationChannel(config.channel);
+    await androidPlugin?.createNotificationChannel(
+      const AndroidNotificationChannel(
+        'high_importance_channel',
+        'High Importance Notifications',
+        description: 'Account and ride alerts',
+        importance: Importance.max,
+        playSound: true,
+        enableVibration: true,
+      ),
     );
-    const highChannel = AndroidNotificationChannel(
-      'high_importance_channel',
-      'High Importance Notifications',
-      description: 'Ride and account alerts',
-      importance: Importance.max,
-      playSound: true,
-      enableVibration: true,
+    await androidPlugin?.createNotificationChannel(
+      const AndroidNotificationChannel(
+        'ride_alert_channel',
+        'Ride Alerts',
+        description: 'High priority ride notifications for drivers and passengers.',
+        importance: Importance.max,
+        playSound: true,
+        enableVibration: true,
+        sound: RawResourceAndroidNotificationSound('new_request'),
+      ),
     );
-    const rideAlertChannel = AndroidNotificationChannel(
-      'ride_alert_channel',
-      'Ride Alerts',
-      description: 'High priority ride notifications for drivers and passengers.',
-      importance: Importance.max,
-      playSound: true,
-      enableVibration: true,
-      sound: RawResourceAndroidNotificationSound('new_request'),
+    await androidPlugin?.createNotificationChannel(
+      const AndroidNotificationChannel(
+        'new_request_channel',
+        'New Request Notifications',
+        description: 'Driver new ride requests',
+        importance: Importance.max,
+        playSound: true,
+        enableVibration: true,
+        sound: RawResourceAndroidNotificationSound('new_request'),
+      ),
     );
-    await androidPlugin?.createNotificationChannel(newRequestChannel);
-    await androidPlugin?.createNotificationChannel(highChannel);
-    await androidPlugin?.createNotificationChannel(rideAlertChannel);
-    final title = (notificationData['title'] ?? notificationData['body'] ?? 'XISTI').toString();
-    final body = (notificationData['message'] ?? notificationData['body'] ?? '').toString();
-    final type = int.tryParse((notificationData['notification_type'] ?? -1).toString()) ?? -1;
-    final isRideAlert = const {1, 6, 7, 8, 14}.contains(type);
-    final soundIos = isRideAlert ? 'new_request.wav' : null;
-    final androidChannel = type == 7 ? newRequestChannel : (isRideAlert ? rideAlertChannel : highChannel);
+    final notificationId = notificationIdForData(notificationData);
     await plugin.show(
-      id: notificationIdForData(notificationData),
+      id: notificationId,
       title: title,
       body: body,
       notificationDetails: NotificationDetails(
-        android: AndroidNotificationDetails(
-          androidChannel.id,
-          androidChannel.name,
-          channelDescription: androidChannel.description,
-          importance: Importance.max,
-          priority: Priority.max,
-          icon: 'ic_notification',
-          playSound: true,
-          enableVibration: true,
-          fullScreenIntent: isRideAlert,
-          sound: androidChannel.sound,
+        android: buildAndroidNotificationDetails(config: config, color: null),
+        iOS: DarwinNotificationDetails(
+          presentAlert: true,
+          presentBadge: true,
+          presentSound: true,
+          sound: config.soundIOS,
+          interruptionLevel: config.fullScreenIntent ? InterruptionLevel.timeSensitive : InterruptionLevel.active,
         ),
-        iOS: DarwinNotificationDetails(presentAlert: true, presentBadge: true, presentSound: true, sound: soundIos),
       ),
       payload: jsonEncode(notificationData),
     );
     if (shouldVibrateForNotificationData(notificationData)) {
-      await triggerRideAlertFeedback(playSound: isRideAlert);
+      await triggerRideAlertFeedback(playSound: config.playFeedbackSound || isRideAlertNotificationType(type));
     }
   }
 }

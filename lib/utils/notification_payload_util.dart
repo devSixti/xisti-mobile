@@ -1,4 +1,5 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 import '../services/push_notification_service.dart';
@@ -106,6 +107,27 @@ NotificationDisplayConfig resolveNotificationDisplayConfig(int notificationType)
         playFeedbackSound: isRideAlertNotificationType(notificationType),
       );
   }
+}
+
+AndroidNotificationDetails buildAndroidNotificationDetails({
+  required NotificationDisplayConfig config,
+  Color? color,
+}) {
+  return AndroidNotificationDetails(
+    config.channel.id,
+    config.channel.name,
+    channelDescription: config.channel.description,
+    icon: 'ic_notification',
+    color: color,
+    importance: Importance.max,
+    priority: Priority.max,
+    playSound: true,
+    enableVibration: true,
+    fullScreenIntent: config.fullScreenIntent,
+    sound: config.channel.sound,
+    visibility: NotificationVisibility.public,
+    category: config.fullScreenIntent ? AndroidNotificationCategory.call : AndroidNotificationCategory.message,
+  );
 }
 
 bool isDriverFareChangeNotification(Map<String, dynamic> data, int notificationType) {
