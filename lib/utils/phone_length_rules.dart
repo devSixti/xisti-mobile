@@ -26,7 +26,7 @@ class PhoneLengthRule {
 
 const PhoneLengthRule _defaultRule = PhoneLengthRule(min: 6, max: 15);
 
-const Map<String, PhoneLengthRule> _rulesByIso = {
+final Map<String, PhoneLengthRule> _rulesByIso = {
   'AC': PhoneLengthRule(min: 5, max: 5, exact: true),
   'AD': PhoneLengthRule(min: 6, max: 9),
   'AE': PhoneLengthRule(min: 8, max: 9),
@@ -274,7 +274,7 @@ const Map<String, PhoneLengthRule> _rulesByIso = {
   'ZW': PhoneLengthRule(min: 5, max: 10),
 };
 
-const Map<String, PhoneLengthRule> _rulesByDialCode = {
+final Map<String, PhoneLengthRule> _rulesByDialCode = {
   '1': PhoneLengthRule(min: 10, max: 10, exact: true),
   '7': PhoneLengthRule(min: 10, max: 10, exact: true),
   '20': PhoneLengthRule(min: 8, max: 10),

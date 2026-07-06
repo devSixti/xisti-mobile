@@ -107,12 +107,14 @@ class OtpVerifyBloc extends Bloc {
     }
 
     try {
+      final fullName = fullNameFromSignupHive();
       final response = LoginPojo.fromJson(
         await _signUpRepo.signUp(
-          getStringFromUserInfoBox(hivePendingSignupFullName),
-          getStringFromUserInfoBox(hivePendingSignupEmail),
-          getStringFromUserInfoBox(hivePendingSignupReferral),
-          multipartFile,
+          firstName: fullName.split(' ').first,
+          lastName: fullName.split(' ').skip(1).join(' '),
+          email: getStringFromUserInfoBox(hivePendingSignupEmail),
+          referralCode: getStringFromUserInfoBox(hivePendingSignupReferral),
+          profileImage: multipartFile,
         ),
       );
       final message = getApiMsg(response.message, response.messageCode);
