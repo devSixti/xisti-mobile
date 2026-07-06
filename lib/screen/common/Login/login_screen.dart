@@ -55,6 +55,15 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
+  Widget _authHero({required Widget child}) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsetsDirectional.all(20.w),
+      decoration: XistiAuthTokens.heroBanner(),
+      child: child,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return ScaffoldWithSafeArea(
@@ -64,61 +73,96 @@ class _LoginScreenState extends State<LoginScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // backButtonCustom(
-              //   context: context,
-              //   onBackPress: () {
-              //     Navigator.pop(context);
-              //   },
-              // ),
               SizedBox(height: 30.h),
-              Text(languages.welcomeTo, style: bodyText(context: context, fontWeight: FontWeight.w600, fontSize: textSize32px)),
-              Text(languages.appName, style: bodyText(context: context, fontWeight: FontWeight.w600, fontSize: textSize32px)),
-              SizedBox(height: 5.h),
-              Text(languages.loginYourAccount, style: bodyText(context: context, fontSize: textSize14px)),
-              SizedBox(height: 30.h),
-              Form(
-                key: _bloc?.formKey,
-                child: TextFormFieldCustom(
-                  setError: true,
-                  keyboardType: TextInputType.phone,
-                  controller: _bloc?.mobileController,
-                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                  hint: languages.contactNumber,
-                  prefix: CustomCountryCodePicker(
-                    showDropDownButton: true,
-                    flagWidth: 35.w,
-                    padding: const EdgeInsets.all(0),
-                    onChanged: (countryCode) {
-                      _bloc?.countryCodeController.sink.add(countryCode);
-                    },
-                    onInit: (countryCode) {
-                      _bloc?.countryCodeController.sink.add(countryCode!);
-                    },
-                    initialSelection: defaultCountryCode.dialCode,
-                    builder: (countryCode) {
-                      return Row(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Padding(
-                            padding: EdgeInsetsDirectional.only(start: 15.w, end: 10.w, top: 10.h, bottom: 10.h),
-                            child: Icon(CustomIcons.call, color: getCurrentTheme(context).colorIconCommon, size: 24.sp),
-                          ),
-                          Text(countryCode?.dialCode ?? "", style: bodyText(context: context, fontWeight: FontWeight.w500)),
-                          Padding(padding: EdgeInsetsDirectional.only(start: 5.w), child: Icon(Icons.arrow_drop_down, color: Colors.grey, size: 25.sp)),
-                        ],
-                      );
-                    },
-                  ),
-                  textAlignVertical: TextAlignVertical.center,
-                  validator: (value) {
-                    _bloc?.buttonHide();
-                    return colombiaMobileNumberValidate(
-                      value,
-                      dialCode: _bloc?.countryCodeController.valueOrNull?.dialCode,
-                    );
-                  },
+              _authHero(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      languages.welcomeTo,
+                      style: bodyText(
+                        context: context,
+                        fontWeight: FontWeight.w600,
+                        fontSize: textSize32px,
+                        textColor: XistiAuthTokens.onGradientText,
+                      ),
+                    ),
+                    Text(
+                      languages.appName,
+                      style: bodyText(
+                        context: context,
+                        fontWeight: FontWeight.w600,
+                        fontSize: textSize32px,
+                        textColor: XistiAuthTokens.onGradientText,
+                      ),
+                    ),
+                    SizedBox(height: 5.h),
+                    Text(
+                      languages.loginYourAccount,
+                      style: bodyText(
+                        context: context,
+                        fontSize: textSize14px,
+                        textColor: XistiAuthTokens.onGradientText.withValues(alpha: 0.9),
+                      ),
+                    ),
+                  ],
                 ),
+              ),
+              SizedBox(height: 30.h),
+              StreamBuilder(
+                stream: _bloc?.countryCodeController.stream,
+                initialData: _bloc?.countryCodeController.valueOrNull,
+                builder: (context, countrySnapshot) {
+                  final country = countrySnapshot.data;
+                  return Form(
+                    key: _bloc?.formKey,
+                    child: TextFormFieldCustom(
+                      setError: true,
+                      keyboardType: TextInputType.phone,
+                      controller: _bloc?.mobileController,
+                      inputFormatters: phoneInputFormatters(
+                        dialCode: country?.dialCode,
+                        isoCode: country?.code,
+                      ),
+                      hint: languages.contactNumber,
+                      prefix: CustomCountryCodePicker(
+                        showDropDownButton: true,
+                        flagWidth: 35.w,
+                        padding: const EdgeInsets.all(0),
+                        onChanged: (countryCode) {
+                          _bloc?.countryCodeController.sink.add(countryCode);
+                        },
+                        onInit: (countryCode) {
+                          _bloc?.countryCodeController.sink.add(countryCode!);
+                        },
+                        initialSelection: defaultCountryCode.dialCode,
+                        builder: (countryCode) {
+                          return Row(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Padding(
+                                padding: EdgeInsetsDirectional.only(start: 15.w, end: 10.w, top: 10.h, bottom: 10.h),
+                                child: Icon(CustomIcons.call, color: XistiBrand.purple, size: 24.sp),
+                              ),
+                              Text(countryCode?.dialCode ?? "", style: bodyText(context: context, fontWeight: FontWeight.w500)),
+                              Padding(padding: EdgeInsetsDirectional.only(start: 5.w), child: Icon(Icons.arrow_drop_down, color: XistiBrand.lavenderMuted, size: 25.sp)),
+                            ],
+                          );
+                        },
+                      ),
+                      textAlignVertical: TextAlignVertical.center,
+                      validator: (value) {
+                        _bloc?.buttonHide();
+                        return colombiaMobileNumberValidate(
+                          value,
+                          dialCode: country?.dialCode,
+                          isoCode: country?.code,
+                        );
+                      },
+                    ),
+                  );
+                },
               ),
               StreamBuilder<bool>(
                 stream: _bloc?.submitValid,
@@ -134,8 +178,8 @@ class _LoginScreenState extends State<LoginScreen> {
                         (isLoading || !isEnable)
                             ? null
                             : () {
-                              _bloc?.manageEmailLogin();
-                            },
+                                _bloc?.manageEmailLogin();
+                              },
                         setProgress: isLoading,
                         minWidth: double.maxFinite,
                         margin: EdgeInsetsDirectional.only(top: 30.h),
@@ -155,55 +199,55 @@ class _LoginScreenState extends State<LoginScreen> {
                           (getIntFromSettingBox(hiveIsAppleAllow) == 1 && Platform.isIOS));
                   return showSocialLogin
                       ? Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Padding(
-                            padding: EdgeInsetsDirectional.only(top: 30.h),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.max,
-                              children: [
-                                Expanded(child: Divider(color: getCurrentTheme(context).colorLoginLine, thickness: 1.h, indent: 40.w)),
-                                Flexible(
-                                  flex: 0,
-                                  child: Padding(
-                                    padding: EdgeInsetsDirectional.only(start: 15.w, end: 15.w),
-                                    child: Text(
-                                      languages.orLoginWith,
-                                      style: bodyText(context: context, fontSize: textSize14px, fontWeight: FontWeight.w400),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Padding(
+                              padding: EdgeInsetsDirectional.only(top: 30.h),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.max,
+                                children: [
+                                  Expanded(child: Divider(color: XistiBrand.lavenderMuted, thickness: 1.h, indent: 40.w)),
+                                  Flexible(
+                                    flex: 0,
+                                    child: Padding(
+                                      padding: EdgeInsetsDirectional.only(start: 15.w, end: 15.w),
+                                      child: Text(
+                                        languages.orLoginWith,
+                                        style: bodyText(context: context, fontSize: textSize14px, fontWeight: FontWeight.w400),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
                                     ),
                                   ),
-                                ),
-                                Expanded(child: Divider(color: getCurrentTheme(context).colorLoginLine, thickness: 1.h, endIndent: 40.w)),
-                              ],
+                                  Expanded(child: Divider(color: XistiBrand.lavenderMuted, thickness: 1.h, endIndent: 40.w)),
+                                ],
+                              ),
                             ),
-                          ),
-                          Padding(
-                            padding: EdgeInsetsDirectional.only(top: 35.h),
-                            child: SocialLogin(
-                              function: ({required email, required id, required loginType, required name}) {
-                                _bloc?.login(loginType, email, name, id);
-                              },
-                              onBioMetricLoginOrFetchSimNumber: ({required isBioMetricLogin, simContactNumber, simCountryCode, simCode}) {
-                                _bloc?.bioMetricLoginOrFetchSimNumber(
-                                  isBioMetricLogin: isBioMetricLogin,
-                                  simContactNumber: simContactNumber,
-                                  simCountryCode: simCountryCode,
-                                  code: simCode,
-                                );
-                              },
-                              loading: isLoading,
-                              showGoogle: getIntFromSettingBox(hiveIsGoogleAllow) == 1,
-                              showFacebook: getIntFromSettingBox(hiveIsFaceBookAllow) == 1,
-                              showApple: getIntFromSettingBox(hiveIsAppleAllow) == 1,
-                              showFingerPrint: getIntFromSettingBox(hiveIsFingerAllow) == 1,
+                            Padding(
+                              padding: EdgeInsetsDirectional.only(top: 35.h),
+                              child: SocialLogin(
+                                function: ({required email, required id, required loginType, required name}) {
+                                  _bloc?.login(loginType, email, name, id);
+                                },
+                                onBioMetricLoginOrFetchSimNumber: ({required isBioMetricLogin, simContactNumber, simCountryCode, simCode}) {
+                                  _bloc?.bioMetricLoginOrFetchSimNumber(
+                                    isBioMetricLogin: isBioMetricLogin,
+                                    simContactNumber: simContactNumber,
+                                    simCountryCode: simCountryCode,
+                                    code: simCode,
+                                  );
+                                },
+                                loading: isLoading,
+                                showGoogle: getIntFromSettingBox(hiveIsGoogleAllow) == 1,
+                                showFacebook: getIntFromSettingBox(hiveIsFaceBookAllow) == 1,
+                                showApple: getIntFromSettingBox(hiveIsAppleAllow) == 1,
+                                showFingerPrint: getIntFromSettingBox(hiveIsFingerAllow) == 1,
+                              ),
                             ),
-                          ),
-                        ],
-                      )
+                          ],
+                        )
                       : Container();
                 },
               ),

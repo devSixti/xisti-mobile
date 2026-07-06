@@ -121,30 +121,18 @@ class _WalletHomeState extends State<WalletHome> with WidgetsBindingObserver, Si
       constraints: BoxConstraints.expand(height: 151.h, width: double.maxFinite),
       padding: EdgeInsetsDirectional.all(15.sp),
       margin: EdgeInsetsDirectional.symmetric(horizontal: commonHorizontalPadding),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(25.r),
-        gradient: LinearGradient(
-          begin: AlignmentDirectional.topStart,
-          end: AlignmentDirectional.bottomEnd,
-          colors: [
-            getCurrentTheme(context).colorPrimary,
-            getCurrentTheme(context).colorPrimary,
-            getCurrentTheme(context).colorPrimary,
-            getCurrentTheme(context).colorWalletBgGradient1,
-            getCurrentTheme(context).colorWalletBgGradient2,
-            getCurrentTheme(context).colorWalletBgGradient1,
-            getCurrentTheme(context).colorPrimary,
-          ],
-        ),
-      ),
+      decoration: XistiAuthTokens.walletBalanceCard(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
             height: 40,
             width: 40,
-            decoration: BoxDecoration(borderRadius: BorderRadius.circular(15.r), color: getCurrentTheme(context).colorScaffoldBg),
-            child: Icon(CustomIcons.wallet, color: getCurrentTheme(context).colorIconCommon, size: 20.sp),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(15.r),
+              color: XistiAuthTokens.walletIconBg.withValues(alpha: 0.95),
+            ),
+            child: Icon(CustomIcons.wallet, color: XistiBrand.purple, size: 20.sp),
           ),
 
           SizedBox(height: 10.h),
@@ -152,7 +140,7 @@ class _WalletHomeState extends State<WalletHome> with WidgetsBindingObserver, Si
             languages.currentBalance,
             overflow: TextOverflow.ellipsis,
             textAlign: TextAlign.center,
-            style: bodyText(context: context, fontSize: textSize14px, textColor: getCurrentTheme(context).colorTextFieldBg),
+            style: bodyText(context: context, fontSize: textSize14px, textColor: XistiAuthTokens.onGradientText.withValues(alpha: 0.9)),
           ),
 
           SizedBox(height: 5.h),
@@ -165,7 +153,7 @@ class _WalletHomeState extends State<WalletHome> with WidgetsBindingObserver, Si
                   return snapLoading.data?.status == Status.loading
                       ? Padding(
                           padding: EdgeInsetsDirectional.only(top: 10.h, start: 5.w),
-                          child: CommonCircularProgressIndicator(strokeWidth: 3.sp, size: 20.sp, color: getCurrentTheme(context).colorTextFieldBg),
+                          child: CommonCircularProgressIndicator(strokeWidth: 3.sp, size: 20.sp, color: XistiAuthTokens.onGradientText),
                         )
                       : Text(
                           getAmountWithCurrency(snap.data ?? 0),
@@ -174,7 +162,7 @@ class _WalletHomeState extends State<WalletHome> with WidgetsBindingObserver, Si
                           textAlign: TextAlign.center,
                           style: bodyText(
                             context: context,
-                            textColor: getCurrentTheme(context).colorTextFieldBg,
+                            textColor: XistiAuthTokens.onGradientText,
                             fontSize: textSize28px,
                             fontWeight: FontWeight.w700,
                           ),
@@ -299,12 +287,16 @@ class _WalletHomeState extends State<WalletHome> with WidgetsBindingObserver, Si
       margin: EdgeInsetsDirectional.symmetric(vertical: 0.5.sp),
       padding: EdgeInsetsDirectional.symmetric(vertical: 10.h, horizontal: 10.w),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(15.r),
-        color: isSelected ? getCurrentTheme(context).colorPrimary : Colors.transparent,
-        border: Border.all(color: isSelected ? Colors.transparent : getCurrentTheme(context).colorTextFieldBorder, width: 0.5.sp),
+        borderRadius: BorderRadius.circular(XistiAuthTokens.optionRadius),
+        gradient: isSelected ? XistiAuthTokens.optionSelectedGradient : null,
+        color: isSelected ? null : XistiBrand.lavenderGrey.withValues(alpha: 0.35),
+        border: Border.all(
+          color: isSelected ? Colors.transparent : XistiBrand.purple.withValues(alpha: 0.35),
+          width: 0.5.sp,
+        ),
       ),
       child: isLoading
-          ? CommonCircularProgressIndicator(strokeWidth: 3.sp, size: 20.sp, color: getCurrentTheme(context).colorPrimary)
+          ? CommonCircularProgressIndicator(strokeWidth: 3.sp, size: 20.sp, color: XistiBrand.purple)
           : AutoSizeText(
               text,
               maxLines: 1,
@@ -314,7 +306,7 @@ class _WalletHomeState extends State<WalletHome> with WidgetsBindingObserver, Si
                 context: context,
                 fontSize: textSize14px,
                 fontWeight: FontWeight.w600,
-                textColor: isSelected ? getCurrentTheme(context).colorWhite : getCurrentTheme(context).colorTextCommon,
+                textColor: isSelected ? XistiAuthTokens.onGradientText : getCurrentTheme(context).colorTextCommon,
               ),
             ),
     );
@@ -337,23 +329,26 @@ class _WalletHomeState extends State<WalletHome> with WidgetsBindingObserver, Si
   Widget transactionTypeTabView() {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.transparent,
-        borderRadius: BorderRadius.circular(15.sp),
-        border: Border.all(color: getCurrentTheme(context).colorDarkBorder, width: 0.5.sp),
+        color: XistiBrand.lavenderGrey.withValues(alpha: 0.25),
+        borderRadius: BorderRadius.circular(XistiAuthTokens.optionRadius),
+        border: Border.all(color: XistiBrand.purple.withValues(alpha: 0.25), width: 0.5.sp),
       ),
       child: TabBar(
         controller: tabController,
         splashFactory: NoSplash.splashFactory,
         indicatorSize: TabBarIndicatorSize.tab,
         dividerColor: Colors.transparent,
-        indicatorColor: getCurrentTheme(context).colorPrimary,
+        indicatorColor: Colors.transparent,
         labelPadding: EdgeInsetsDirectional.symmetric(vertical: 15.h),
         indicatorPadding: EdgeInsetsDirectional.all(5.h),
-        indicator: BoxDecoration(borderRadius: BorderRadius.circular(15.r), color: getCurrentTheme(context).colorPrimary),
-        labelColor: getCurrentTheme(context).colorTextFieldBg,
+        indicator: BoxDecoration(
+          borderRadius: BorderRadius.circular(XistiAuthTokens.optionRadius),
+          gradient: XistiAuthTokens.optionSelectedGradient,
+        ),
+        labelColor: XistiAuthTokens.onGradientText,
         unselectedLabelColor: getCurrentTheme(context).colorTextCommon,
-        labelStyle: bodyText(context: context, textColor: getCurrentTheme(context).colorTextFieldBg, fontWeight: FontWeight.w500),
-        unselectedLabelStyle: bodyText(context: context, textColor: getCurrentTheme(context).colorWhite, fontWeight: FontWeight.w500),
+        labelStyle: bodyText(context: context, textColor: XistiAuthTokens.onGradientText, fontWeight: FontWeight.w600),
+        unselectedLabelStyle: bodyText(context: context, textColor: getCurrentTheme(context).colorTextCommon, fontWeight: FontWeight.w500),
         onTap: (value) {},
         tabs: [
           Text(languages.all, textAlign: TextAlign.start),

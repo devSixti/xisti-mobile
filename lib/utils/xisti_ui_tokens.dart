@@ -173,3 +173,59 @@ abstract final class XistiUiTokens {
 
 /// Backward-compatible alias used by home layout files.
 typedef XistiHomeUiTokens = XistiUiTokens;
+
+/// Auth and wallet screens — purple/green gradient (distinct from ZIMO yellow).
+abstract final class XistiAuthTokens {
+  static double get heroRadius => 24.r;
+  static double get walletRadius => 25.r;
+  static double get optionRadius => 15.r;
+
+  static const List<Color> heroGradientColors = [
+    XistiBrand.purpleDeep,
+    XistiBrand.purple,
+    XistiBrand.greenMid,
+  ];
+
+  static const List<Color> walletGradientColors = [
+    XistiBrand.purpleDeep,
+    XistiBrand.purple,
+    XistiBrand.purpleMedium,
+    XistiBrand.greenMid,
+    XistiBrand.green,
+  ];
+
+  static LinearGradient get heroGradient => const LinearGradient(
+        begin: AlignmentDirectional.topStart,
+        end: AlignmentDirectional.bottomEnd,
+        colors: heroGradientColors,
+      );
+
+  static LinearGradient get walletGradient => const LinearGradient(
+        begin: AlignmentDirectional.topStart,
+        end: AlignmentDirectional.bottomEnd,
+        colors: walletGradientColors,
+      );
+
+  static LinearGradient get optionSelectedGradient => const LinearGradient(
+        begin: AlignmentDirectional.centerStart,
+        end: AlignmentDirectional.centerEnd,
+        colors: [XistiBrand.purple, XistiBrand.greenMid],
+      );
+
+  static BoxDecoration heroBanner({double radius = 0}) => BoxDecoration(
+        borderRadius: BorderRadius.circular(radius > 0 ? radius : heroRadius),
+        gradient: heroGradient,
+        boxShadow: XistiUiTokens.neonGlow(XistiBrand.purple, alpha: 0.22),
+      );
+
+  static BoxDecoration walletBalanceCard() => BoxDecoration(
+        borderRadius: BorderRadius.circular(walletRadius),
+        gradient: walletGradient,
+        boxShadow: XistiUiTokens.neonGlow(XistiBrand.purple, alpha: 0.28),
+      );
+
+  static Color get checkboxActive => XistiBrand.purple;
+  static Color get accent => XistiBrand.greenMid;
+  static Color get onGradientText => XistiBrand.white;
+  static Color get walletIconBg => XistiBrand.white;
+}

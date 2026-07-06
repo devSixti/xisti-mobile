@@ -28,6 +28,7 @@ import 'api_message_localizer.dart';
 import 'app_mobile_settings.dart';
 import 'currency_display_util.dart';
 import 'mobile_auth_header.dart' as mobile_auth;
+import 'phone_length_rules.dart';
 import 'phone_util.dart';
 import '../constant/dimensions.dart';
 import '../hive/hive_helper.dart';
@@ -61,6 +62,13 @@ export 'map_utils.dart';
 export 'style_util.dart';
 export 'time_util.dart';
 export 'xisti_ui_tokens.dart';
+
+List<TextInputFormatter> phoneInputFormatters({String? dialCode, String? isoCode}) {
+  return [
+    FilteringTextInputFormatter.digitsOnly,
+    LengthLimitingTextInputFormatter(phoneMaxInputLength(dialCode, isoCode: isoCode)),
+  ];
+}
 
 void openScreen(BuildContext context, Widget screen) {
   Navigator.of(context, rootNavigator: true).push(MaterialPageRoute(builder: (context) => screen));
@@ -174,6 +182,32 @@ bool isSocialLoginType([String? loginType]) {
 bool requiresPhoneOtpOnSignup() {
   final loginType = getStringFromUserInfoBox(hiveLoginType);
   return loginType != LoginType.email && loginType != LoginType.biometric;
+}
+
+/// Phone field is locked (pre-filled from OTP) for phone signup; editable/optional for social/email.
+bool signupPhoneFieldLocked() {
+  final loginType = getStringFromUserInfoBox(hiveLoginType);
+  if (loginType.isEmpty) {
+    return true;
+  }
+  return !isSocialLoginType(loginType) && loginType != LoginType.email;
+}
+
+bool signupRequiresPhone() => signupPhoneFieldLocked();
+
+bool signupRequiresEmail() =>
+    isSocialLoginType() || getStringFromUserInfoBox(hiveLoginType) == LoginType.email;
+
+void splitFullNameIntoFields(String fullName, TextEditingController firstName, TextEditingController lastName) {
+  final trimmed = fullName.trim();
+  if (trimmed.isEmpty) {
+    return;
+  }
+  final parts = trimmed.split(RegExp(r'\s+'));
+  firstName.text = parts.first;
+  if (parts.length > 1) {
+    lastName.text = parts.sublist(1).join(' ');
+  }
 }
 
 bool isAppleLoginType([String? loginType]) {

@@ -27,10 +27,19 @@ class SignUpBloc extends Bloc {
 
   SignUpBloc(this.context) {
     _onFieldChanged = () => buttonHide();
-    fullNameController.addListener(_onFieldChanged);
+    firstNameController.addListener(_onFieldChanged);
+    lastNameController.addListener(_onFieldChanged);
     emailController.addListener(_onFieldChanged);
     mobileController.addListener(_onFieldChanged);
     referralCodeController.addListener(_onFieldChanged);
+    emergencyContactNameController.addListener(_onFieldChanged);
+    emergencyContactController.addListener(_onFieldChanged);
+    countryCodeController.listen((_) => buttonHide());
+    emergencyCountryCodeController.listen((_) => buttonHide());
+    imgFileController.listen((_) => buttonHide());
+    acceptTermsController.listen((_) => buttonHide());
+    acceptDataProcessingController.listen((_) => buttonHide());
+    acceptPlatformController.listen((_) => buttonHide());
     final dialCode = normalizeDialCode(getStringFromUserInfoBox(hiveCountryCode));
     final localMobile = normalizeLocalMobile(
       getStringFromUserInfoBox(hiveContactNumber),
@@ -39,23 +48,13 @@ class SignUpBloc extends Bloc {
     if (localMobile.isNotEmpty) {
       mobileController.text = localMobile;
     }
-    final pendingName = getStringFromUserInfoBox(hivePendingSignupFullName);
+    final pendingName = fullNameFromSignupHive();
     if (pendingName.isNotEmpty) {
-      fullNameController.text = pendingName;
-    } else {
-      final storedName = getStringFromUserInfoBox(hiveUserName);
-      if (storedName.isNotEmpty) {
-        fullNameController.text = storedName;
-      }
+      splitFullNameIntoFields(pendingName, firstNameController, lastNameController);
     }
-    final pendingEmail = getStringFromUserInfoBox(hivePendingSignupEmail);
+    final pendingEmail = emailFromSignupHive();
     if (pendingEmail.isNotEmpty) {
       emailController.text = pendingEmail;
-    } else {
-      final storedEmail = getStringFromUserInfoBox(hiveEmail);
-      if (storedEmail.isNotEmpty) {
-        emailController.text = storedEmail;
-      }
     }
     final pendingReferral = getStringFromUserInfoBox(hivePendingSignupReferral);
     if (pendingReferral.isNotEmpty) {
@@ -75,26 +74,47 @@ class SignUpBloc extends Bloc {
         flagUri: 'assets/flags/${(defaultCountryCode.code ?? 'CO').toLowerCase()}.png',
       ),
     );
+    emergencyCountryCodeController.sink.add(
+      CountryCode(
+        dialCode: dialCode,
+        code: defaultCountryCode.code,
+        flagUri: 'assets/flags/${(defaultCountryCode.code ?? 'CO').toLowerCase()}.png',
+      ),
+    );
     buttonHide();
+    WidgetsBinding.instance.addPostFrameCallback((_) => buttonHide());
   }
+
+  final firstNameController = TextEditingController();
+  final lastNameController = TextEditingController();
+  final emailController = TextEditingController();
+  final referralCodeController = TextEditingController();
+  final mobileController = TextEditingController();
+  final emergencyContactNameController = TextEditingController();
+  final emergencyContactController = TextEditingController();
+  final formKey = GlobalKey<FormState>();
+  final acceptTermsController = BehaviorSubject<bool>();
+  final acceptDataProcessingController = BehaviorSubject<bool>();
+  final acceptPlatformController = BehaviorSubject<bool>();
+  final countryCodeController = BehaviorSubject<CountryCode>();
+  final emergencyCountryCodeController = BehaviorSubject<CountryCode>();
+  final submitValid = BehaviorSubject<bool>();
+  final subject = BehaviorSubject<ApiResponse<LoginPojo>>();
+  final imgFileController = BehaviorSubject<File?>();
+
+  bool get isPhoneEditable => !signupPhoneFieldLocked();
 
   bool get hideNameField => signupHidesNameField();
 
   bool get hideEmailField => signupHidesEmailField();
 
-  final fullNameController = TextEditingController();
-  final emailController = TextEditingController();
-  final referralCodeController = TextEditingController();
-  final mobileController = TextEditingController();
-  final formKey = GlobalKey<FormState>();
-  final acceptTermsController = BehaviorSubject<bool>();
-  final acceptPlatformController = BehaviorSubject<bool>();
-  final countryCodeController = BehaviorSubject<CountryCode>();
-  final submitValid = BehaviorSubject<bool>();
-  final subject = BehaviorSubject<ApiResponse<LoginPojo>>();
-  final imgFileController = BehaviorSubject<File?>();
+  bool get nameFieldReadOnly => signupNameFieldReadOnly();
 
-  bool get isPhoneEditable => requiresPhoneOtpOnSignup();
+  bool get emailFieldReadOnly => signupEmailFieldReadOnly();
+
+  bool get requiresPhone => signupRequiresPhone();
+
+  bool get requiresEmail => signupRequiresEmail();
 
   void addProfileImage() {
     openScreenWithResult(
@@ -121,12 +141,30 @@ class SignUpBloc extends Bloc {
 
       subject.sink.add(ApiResponse.loading());
       try {
+        final dialCode = normalizeDialCode(countryCodeController.valueOrNull?.dialCode);
+        final localMobile = isPhoneEditable && mobileController.text.trim().isNotEmpty
+            ? normalizeLocalMobile(mobileController.text.trim(), dialCode: dialCode, isoCode: countryCodeController.valueOrNull?.code)
+            : getStringFromUserInfoBox(hiveContactNumber);
         var response = LoginPojo.fromJson(
           await _signUpRepo.signUp(
-            hideNameField ? fullNameFromSignupHive() : fullNameController.text.trim(),
-            hideEmailField ? emailFromSignupHive() : emailController.text.trim(),
-            referralCodeController.text.trim(),
-            multipartFile,
+            firstName: hideNameField ? fullNameFromSignupHive().split(' ').first : firstNameController.text.trim(),
+            lastName: hideNameField
+                ? fullNameFromSignupHive().split(' ').skip(1).join(' ')
+                : lastNameController.text.trim(),
+            email: hideEmailField ? emailFromSignupHive() : emailController.text.trim(),
+            referralCode: referralCodeController.text.trim(),
+            profileImage: multipartFile,
+            contactNumber: localMobile,
+            countryCode: dialCode,
+            emergencyContactName: emergencyContactNameController.text.trim(),
+            emergencyContact: emergencyContactController.text.trim().isNotEmpty
+                ? normalizeLocalMobile(
+                    emergencyContactController.text.trim(),
+                    dialCode: emergencyCountryCodeController.valueOrNull?.dialCode,
+                    isoCode: emergencyCountryCodeController.valueOrNull?.code,
+                  )
+                : '',
+            emergencyCountryCode: normalizeDialCode(emergencyCountryCodeController.valueOrNull?.dialCode),
           ),
         );
         final message = getApiMsg(response.message, response.messageCode);
@@ -150,7 +188,9 @@ class SignUpBloc extends Bloc {
     putDataInSettingBox(hivePendingSignupAfterOtp, true);
     putDataInUserInfoBox(
       hivePendingSignupFullName,
-      hideNameField ? fullNameFromSignupHive() : fullNameController.text.trim(),
+      hideNameField
+          ? fullNameFromSignupHive()
+          : '${firstNameController.text.trim()} ${lastNameController.text.trim()}'.trim(),
     );
     putDataInUserInfoBox(
       hivePendingSignupEmail,
@@ -190,7 +230,7 @@ class SignUpBloc extends Bloc {
   }
 
   bool _needsPhoneOtpBeforeRegister() {
-    if (!requiresPhoneOtpOnSignup()) {
+    if (!requiresPhone) {
       return false;
     }
     if (!isUserVerified()) {
@@ -208,10 +248,6 @@ class SignUpBloc extends Bloc {
 
   void submit() {
     FocusManager.instance.primaryFocus?.unfocus();
-    if (imgFileController.valueOrNull == null) {
-      openSimpleSnackbar(context, languages.pleaseAddProfileImage);
-      return;
-    }
     if (formKey.currentState!.validate()) {
       if (_needsPhoneOtpBeforeRegister()) {
         sendPhoneOtpAndOpenVerify();
@@ -226,12 +262,28 @@ class SignUpBloc extends Bloc {
     final enabled = isSignupSubmitEnabled(
       hideNameField: hideNameField,
       hideEmailField: hideEmailField,
-      isPhoneEditable: isPhoneEditable,
-      nameError: registerFullNameValidate(fullNameController.text, languages.enterValidFullName),
-      mobileError: isPhoneEditable ? mobileNumberValidateForDialCode(mobileController.text, dialCode: dialCode) : '',
-      emailError: emailValidate(emailController.text),
-      hasProfileImage: imgFileController.valueOrNull != null,
+      requiresPhone: requiresPhone,
+      requiresEmail: requiresEmail,
+      firstNameError: hideNameField ? '' : registerFirstNameValidate(firstNameController.text, languages.enterValidFullName),
+      lastNameError: hideNameField ? '' : registerLastNameValidate(lastNameController.text, languages.enterValidFullName),
+      mobileError: requiresPhone
+          ? mobileNumberValidateForDialCode(
+              mobileController.text,
+              dialCode: dialCode,
+              isoCode: countryCodeController.valueOrNull?.code,
+            )
+          : (mobileController.text.trim().isEmpty
+              ? ''
+              : mobileNumberValidateForDialCode(
+                  mobileController.text,
+                  dialCode: dialCode,
+                  isoCode: countryCodeController.valueOrNull?.code,
+                )),
+      emailError: requiresEmail && !hideEmailField
+          ? emailValidate(emailController.text)
+          : emailValidateOptional(emailController.text),
       acceptTerms: acceptTermsController.hasValue && acceptTermsController.value,
+      acceptDataProcessing: acceptDataProcessingController.hasValue && acceptDataProcessingController.value,
       acceptPlatform: acceptPlatformController.hasValue && acceptPlatformController.value,
     );
     submitValid.add(enabled);
@@ -239,18 +291,26 @@ class SignUpBloc extends Bloc {
 
   @override
   void dispose() {
-    fullNameController.removeListener(_onFieldChanged);
+    firstNameController.removeListener(_onFieldChanged);
+    lastNameController.removeListener(_onFieldChanged);
     emailController.removeListener(_onFieldChanged);
     mobileController.removeListener(_onFieldChanged);
     referralCodeController.removeListener(_onFieldChanged);
+    emergencyContactNameController.removeListener(_onFieldChanged);
+    emergencyContactController.removeListener(_onFieldChanged);
     countryCodeController.close();
+    emergencyCountryCodeController.close();
     submitValid.close();
     acceptTermsController.close();
+    acceptDataProcessingController.close();
     acceptPlatformController.close();
     imgFileController.close();
-    fullNameController.clear();
-    referralCodeController.clear();
-    emailController.clear();
-    mobileController.clear();
+    firstNameController.dispose();
+    lastNameController.dispose();
+    referralCodeController.dispose();
+    emailController.dispose();
+    mobileController.dispose();
+    emergencyContactNameController.dispose();
+    emergencyContactController.dispose();
   }
 }

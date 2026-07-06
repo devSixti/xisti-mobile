@@ -2,16 +2,25 @@
 bool isSignupSubmitEnabled({
   required bool hideNameField,
   required bool hideEmailField,
-  required bool isPhoneEditable,
-  required String nameError,
+  required bool requiresPhone,
+  required bool requiresEmail,
+  required String firstNameError,
+  required String lastNameError,
   required String mobileError,
   required String emailError,
-  required bool hasProfileImage,
   required bool acceptTerms,
+  required bool acceptDataProcessing,
   required bool acceptPlatform,
 }) {
-  final nameOk = hideNameField || nameError.isEmpty;
-  final mobileOk = !isPhoneEditable || mobileError.isEmpty;
-  final emailOk = hideEmailField || emailError.isEmpty;
-  return nameOk && mobileOk && emailOk && hasProfileImage && acceptTerms && acceptPlatform;
+  final firstNameOk = hideNameField || firstNameError.isEmpty;
+  final lastNameOk = hideNameField || lastNameError.isEmpty;
+  final mobileOk = !requiresPhone || mobileError.isEmpty;
+  final emailOk = !requiresEmail || hideEmailField || emailError.isEmpty;
+  return firstNameOk &&
+      lastNameOk &&
+      mobileOk &&
+      emailOk &&
+      acceptTerms &&
+      acceptDataProcessing &&
+      acceptPlatform;
 }

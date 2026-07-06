@@ -224,6 +224,8 @@ class ApiParam {
 
   //SignUp
   static const paramFullName = 'full_name';
+  static const paramFirstName = 'first_name';
+  static const paramLastName = 'last_name';
   static const paramEmail = 'email';
   static const paramGender = 'gender';
   static const paramPassword = 'password';

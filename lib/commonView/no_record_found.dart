@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../appThemeManager/app_theme_colors.dart';
 import '../utils/utils.dart';
-import 'xisti_brand_placeholder.dart';
 
 class NoRecordFound extends StatelessWidget {
   final String? image;
@@ -16,8 +14,8 @@ class NoRecordFound extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final dimension = size ?? 200.sp;
-    final useBrandPlaceholder = (image ?? '').isEmpty || (image ?? '').contains('empty_ride_history');
+    final imagePath = (image ?? '').isNotEmpty ? image! : 'empty_ride_history.png';
+    final illustrationHeight = size ?? 250.h;
 
     return Center(
       child: SingleChildScrollView(
@@ -25,16 +23,18 @@ class NoRecordFound extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (useBrandPlaceholder)
-              xistiDocumentEmptyIllustration(context, size: dimension / 1.sp)
-            else
-              Image.asset(
-                setImagesBasedOnTheme(context, image ?? 'empty_ride_history.png'),
-                width: dimension,
-                height: dimension,
-                color: AppThemeColors.brandGreen.withValues(alpha: 0.92),
-                colorBlendMode: BlendMode.srcIn,
+            Padding(
+              padding: EdgeInsetsDirectional.only(
+                start: commonHorizontalPadding,
+                end: commonHorizontalPadding,
               ),
+              child: Image.asset(
+                setImagesBasedOnTheme(context, imagePath),
+                width: double.infinity,
+                height: illustrationHeight,
+                fit: BoxFit.fitHeight,
+              ),
+            ),
             ?widget,
             if (title != null)
               Padding(

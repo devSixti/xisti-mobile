@@ -1,4 +1,5 @@
 import '../hive/hive_helper.dart';
+import 'phone_length_rules.dart';
 import 'phone_util.dart';
 import 'utils.dart';
 
@@ -27,6 +28,24 @@ String fullNameValidate(String value) {
   return "";
 }
 
+String registerFirstNameValidate(String value, String invalidMsg) {
+  if (value.trim().isEmpty) {
+    return languages.enterYourName;
+  } else if (!RegExp(r'^[A-Za-z ]+$').hasMatch(value)) {
+    return invalidMsg;
+  }
+  return "";
+}
+
+String registerLastNameValidate(String value, String invalidMsg) {
+  if (value.trim().isEmpty) {
+    return languages.enterYourName;
+  } else if (!RegExp(r'^[A-Za-z ]+$').hasMatch(value)) {
+    return invalidMsg;
+  }
+  return "";
+}
+
 String registerFullNameValidate(String value,String invalidMsg) {
   if (value.trim().isEmpty) {
     return languages.enterYourName;
@@ -43,25 +62,20 @@ String mobileNumberValidate(String value) {
   return "";
 }
 
-String mobileNumberValidateForDialCode(String value, {String? dialCode}) {
+String mobileNumberValidateForDialCode(String value, {String? dialCode, String? isoCode}) {
   if (value.trim().isEmpty) {
     return languages.enterContactNumber;
   }
-  final digits = normalizeLocalMobile(value, dialCode: dialCode);
-  if (isColombiaDialCode(dialCode)) {
-    if (digits.length != 10) {
-      return languages.invalidMobileNumberCo;
-    }
-    return "";
-  }
-  if (digits.length < 6 || digits.length > 15) {
+  final digits = normalizeLocalMobile(value, dialCode: dialCode, isoCode: isoCode);
+  final rule = phoneLengthRuleForDialCode(dialCode, isoCode: isoCode);
+  if (!rule.isValidLength(digits.length) || !rule.matchesPattern(digits)) {
     return languages.invalidMobileNumberCo;
   }
   return "";
 }
 
-String colombiaMobileNumberValidate(String value, {String? dialCode}) {
-  return mobileNumberValidateForDialCode(value, dialCode: dialCode ?? '+57');
+String colombiaMobileNumberValidate(String value, {String? dialCode, String? isoCode}) {
+  return mobileNumberValidateForDialCode(value, dialCode: dialCode ?? '+57', isoCode: isoCode);
 }
 
 String _normalizePlate(String value) {

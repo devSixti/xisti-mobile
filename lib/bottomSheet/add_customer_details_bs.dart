@@ -106,7 +106,7 @@ class _AddCustomerDetailsBSState extends State<AddCustomerDetailsBS> {
       controller: contactNoTEC,
       setError: true,
       keyboardType: TextInputType.phone,
-      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+      inputFormatters: phoneInputFormatters(),
       hint: languages.contactNumber,
       prefix: CustomCountryCodePicker(
         showDropDownButton: true,

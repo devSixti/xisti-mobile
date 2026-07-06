@@ -229,7 +229,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
       controller: _bloc?.contactNoTEC,
       setError: true,
       keyboardType: TextInputType.phone,
-      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+      inputFormatters: phoneInputFormatters(
+        dialCode: _bloc?.contactCountryCodeController.valueOrNull?.dialCode,
+        isoCode: _bloc?.contactCountryCodeController.valueOrNull?.code,
+      ),
       hint: languages.contactNumber,
       prefix: CustomCountryCodePicker(
         showDropDownButton: true,
@@ -290,8 +293,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
       controller: _bloc?.emergencyContactNoTEC,
       setError: true,
       keyboardType: TextInputType.phone,
-      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-      hint: languages.emergencyContact,
+      inputFormatters: phoneInputFormatters(
+        dialCode: _bloc?.emergencyContactCountryCodeController.valueOrNull?.dialCode,
+        isoCode: _bloc?.emergencyContactCountryCodeController.valueOrNull?.code,
+      ),
       prefix: CustomCountryCodePicker(
         showDropDownButton: true,
         flagWidth: 35.w,

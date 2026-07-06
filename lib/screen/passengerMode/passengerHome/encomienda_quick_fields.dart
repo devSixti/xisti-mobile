@@ -60,7 +60,7 @@ class EncomiendaQuickFields extends StatelessWidget {
                     controller: priceCapController,
                     hint: languages.priceCapHint,
                     keyboardType: TextInputType.number,
-                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                    inputFormatters: phoneInputFormatters(),
                     setError: false,
                     prefix: Padding(
                       padding: EdgeInsetsDirectional.only(start: 12.w),

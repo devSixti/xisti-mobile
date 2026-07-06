@@ -326,7 +326,7 @@ class _OfferFareAndBookSheetState extends State<OfferFareAndBookSheet> {
       child: TextFormFieldCustom(
         controller: _bloc?.estimatedPriceController,
         keyboardType: const TextInputType.numberWithOptions(decimal: false, signed: false),
-        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+        inputFormatters: phoneInputFormatters(),
         hint: languages.priceCapHint,
         setError: true,
         validator: (value) => validateEmptyField(value, languages.indicatePriceCap),
@@ -342,7 +342,7 @@ class _OfferFareAndBookSheetState extends State<OfferFareAndBookSheet> {
         setError: true,
         keyboardType: TextInputType.phone,
         controller: _bloc?.recipientNumberController,
-        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+        inputFormatters: phoneInputFormatters(),
         hint: widget.isDeliveryReceive ? languages.phoneAtPickup : languages.contactNumber,
         prefix: CustomCountryCodePicker(
           showDropDownButton: true,
