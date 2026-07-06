@@ -21,6 +21,15 @@ void main() {
       expect(signupPhoneFieldLocked(loginType: LoginType.google), isFalse);
     });
 
+    test('google signup shows oauth name and email fields', () {
+      expect(signupHidesNameField(LoginType.google), isFalse);
+      expect(signupHidesEmailField(LoginType.google), isFalse);
+    });
+
+    test('apple signup hides name field', () {
+      expect(signupHidesNameField(LoginType.apple), isTrue);
+    });
+
     test('empty login type is treated as phone signup', () {
       expect(isPhoneOtpSignup(''), isTrue);
       expect(signupRequiresEmail(''), isFalse);

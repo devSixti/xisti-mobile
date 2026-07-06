@@ -312,6 +312,9 @@ class _SignupScreenState extends State<SignupScreen> {
                                 if (_bloc?.hideNameField ?? false) {
                                   return '';
                                 }
+                                if ((_bloc?.nameFieldReadOnly ?? false) && (value ?? '').trim().isEmpty) {
+                                  return '';
+                                }
                                 return registerLastNameValidate(value, languages.enterValidFullName);
                               },
                               commonPrefixIcon: CustomIcons.name,

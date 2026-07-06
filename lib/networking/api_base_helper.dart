@@ -41,7 +41,7 @@ class ApiBaseHelper {
           if ((getStringFromSettingBox(hiveAuthKey)).isNotEmpty) {
             options.headers[ApiParam.headerAuth] = getStringFromSettingBox(hiveAuthKey);
           }
-          if (getIntFromUserInfoBox(hiveIsRegister) != 1) {
+          if (getIntFromUserInfoBox(hiveIsRegister) != 1 && !isSocialLoginType(getStringFromUserInfoBox(hiveLoginType))) {
             options.headers[ApiParam.headerSignupPhoneOtp] = ApiParam.headerSignupPhoneOtpValue;
           }
           return handler.next(options);

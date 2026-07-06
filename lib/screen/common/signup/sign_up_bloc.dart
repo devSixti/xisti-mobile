@@ -265,7 +265,11 @@ class SignUpBloc extends Bloc {
       requiresPhone: requiresPhone,
       requiresEmail: requiresEmail,
       firstNameError: hideNameField ? '' : registerFirstNameValidate(firstNameController.text, languages.enterValidFullName),
-      lastNameError: hideNameField ? '' : registerLastNameValidate(lastNameController.text, languages.enterValidFullName),
+      lastNameError: hideNameField
+          ? ''
+          : (nameFieldReadOnly && lastNameController.text.trim().isEmpty
+              ? ''
+              : registerLastNameValidate(lastNameController.text, languages.enterValidFullName)),
       mobileError: requiresPhone
           ? mobileNumberValidateForDialCode(
               mobileController.text,

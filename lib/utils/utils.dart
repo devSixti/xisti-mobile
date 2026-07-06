@@ -221,36 +221,38 @@ bool isValidSocialProvidedName(String? name) {
   return trimmed.isNotEmpty && trimmed != '-' && trimmed.toUpperCase() != 'N/A';
 }
 
-bool signupHidesNameField() {
-  if (!isSocialLoginType()) {
+bool signupHidesNameField([String? loginType]) {
+  if (!isSocialLoginType(loginType)) {
     return false;
   }
-  if (isAppleLoginType()) {
-    return true;
-  }
-  return isValidSocialProvidedName(getStringFromUserInfoBox(hivePendingSignupFullName)) ||
-      isValidSocialProvidedName(getStringFromUserInfoBox(hiveUserName));
+  // Sign in with Apple: never ask for name manually (HIG / App Store guideline 4).
+  return isAppleLoginType(loginType);
 }
 
-bool signupHidesEmailField() {
-  if (!isSocialLoginType()) {
+bool signupHidesEmailField([String? loginType]) {
+  if (!isSocialLoginType(loginType)) {
+    return false;
+  }
+  if (!isAppleLoginType(loginType)) {
     return false;
   }
   final email = getStringFromUserInfoBox(hivePendingSignupEmail).trim().isNotEmpty
       ? getStringFromUserInfoBox(hivePendingSignupEmail).trim()
       : getStringFromUserInfoBox(hiveEmail).trim();
-  if (email.isEmpty && isAppleLoginType()) {
+  if (email.isEmpty) {
     return getStringFromUserInfoBox(hiveAppleCachedEmail).trim().isNotEmpty;
   }
   return email.isNotEmpty;
 }
 
 bool signupNameFieldReadOnly() {
-  return isSocialLoginType() && !isAppleLoginType() && !signupHidesNameField() && isValidSocialProvidedName(fullNameFromSignupHive());
+  return isSocialLoginType() &&
+      !isAppleLoginType() &&
+      isValidSocialProvidedName(fullNameFromSignupHive());
 }
 
 bool signupEmailFieldReadOnly() {
-  return isSocialLoginType() && !isAppleLoginType() && !signupHidesEmailField();
+  return isSocialLoginType() && !isAppleLoginType() && emailFromSignupHive().trim().isNotEmpty;
 }
 
 String fullNameFromSignupHive() {
