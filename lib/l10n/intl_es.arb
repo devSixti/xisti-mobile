@@ -86,6 +86,8 @@
   "byRegisterYouAgree": "He leído y acepto los",
   "termsCondition": "Términos y Condiciones",
   "privacyPolicy": "Política de Privacidad y Tratamiento de Datos Personales",
+  "dataProcessingPolicy": "Política de Tratamiento de Datos Personales",
+  "dataProcessingAuthorizationPrefix": "Autorizo el tratamiento de mis datos personales conforme a la",
   "platformConnectionNotice": "Entiendo que es una plataforma tecnológica que conecta usuarios con conductores independientes y no presta servicios de transporte ni opera vehículos.",
   "driverIndependentNotice": "Declaro que actúo como conductor independiente y que el uso de la plataforma no crea relación laboral, subordinación, representación comercial ni exclusividad.",
   "deliveryLegalNotice": "Envíos de paquetes entre usuarios; elige el medio que coincida con tu envío.",

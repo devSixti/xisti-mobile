@@ -210,7 +210,9 @@ class _SignupScreenState extends State<SignupScreen> {
                           child: TextFormFieldCustom(
                             controller: _bloc?.mobileController,
                             keyboardType: TextInputType.phone,
-                            hint: languages.contactNumber,
+                            hint: (_bloc?.requiresPhone ?? false)
+                                ? languages.contactNumber
+                                : '${languages.contactNumber} (opcional)',
                             readOnly: !(_bloc?.isPhoneEditable ?? false),
                             setError: _bloc?.isPhoneEditable ?? false,
                             inputFormatters: phoneInputFormatters(
@@ -222,6 +224,9 @@ class _SignupScreenState extends State<SignupScreen> {
                                 return '';
                               }
                               _bloc?.buttonHide();
+                              if (!(_bloc?.requiresPhone ?? false) && (value ?? '').trim().isEmpty) {
+                                return '';
+                              }
                               return colombiaMobileNumberValidate(
                                 value,
                                 dialCode: _bloc?.countryCodeController.valueOrNull?.dialCode,
@@ -322,7 +327,9 @@ class _SignupScreenState extends State<SignupScreen> {
                             child: TextFormFieldCustom(
                               controller: _bloc?.emailController,
                               keyboardType: TextInputType.emailAddress,
-                              hint: languages.email,
+                              hint: (_bloc?.requiresEmail ?? false)
+                                  ? languages.email
+                                  : '${languages.email} (opcional)',
                               setError: !(_bloc?.emailFieldReadOnly ?? false),
                               readOnly: _bloc?.emailFieldReadOnly ?? false,
                               validator: (value) {
@@ -464,11 +471,11 @@ class _SignupScreenState extends State<SignupScreen> {
                               Expanded(
                                 child: RichText(
                                   text: TextSpan(
-                                    text: 'Autorizo el tratamiento de mis datos personales conforme a la',
+                                    text: languages.dataProcessingAuthorizationPrefix,
                                     style: bodyText(context: context, fontWeight: FontWeight.w300, fontSize: textSize14px),
                                     children: [
                                       TextSpan(
-                                        text: ' ${languages.privacyPolicy}',
+                                        text: ' ${languages.dataProcessingPolicy}',
                                         style: bodyText(context: context, fontWeight: FontWeight.w600, fontSize: textSize14px).copyWith(decoration: TextDecoration.underline),
                                         recognizer: TapGestureRecognizer()
                                           ..onTap = () async {

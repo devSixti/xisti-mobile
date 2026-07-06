@@ -294,6 +294,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get privacyPolicy => 'Privacy and Personal Data Processing Policy';
 
   @override
+  String get dataProcessingPolicy => 'Personal Data Processing Policy';
+
+  @override
+  String get dataProcessingAuthorizationPrefix =>
+      'I authorize processing of my personal data according to the';
+
+  @override
   String get platformConnectionNotice =>
       'I understand that this is a technology platform connecting users with independent drivers, and does not provide transportation services or operate vehicles.';
 

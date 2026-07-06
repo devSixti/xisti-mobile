@@ -86,6 +86,8 @@
   "byRegisterYouAgree": "I have read and accept the",
   "termsCondition": "Terms and Conditions",
   "privacyPolicy": "Privacy and Personal Data Processing Policy",
+  "dataProcessingPolicy": "Personal Data Processing Policy",
+  "dataProcessingAuthorizationPrefix": "I authorize processing of my personal data according to the",
   "platformConnectionNotice": "I understand that this is a technology platform connecting users with independent drivers, and does not provide transportation services or operate vehicles.",
   "driverIndependentNotice": "I declare that I act as an independent driver and that using the platform does not create any employment, subordination, commercial representation, or exclusivity relationship.",
   "deliveryLegalNotice": "Deliveries are package handoffs managed between users through the platform. The app only facilitates the connection and does not provide passenger or freight transport services.",

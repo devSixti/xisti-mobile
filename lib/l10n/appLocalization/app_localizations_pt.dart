@@ -298,6 +298,13 @@ class AppLocalizationsPt extends AppLocalizations {
       'Política de Privacidade e Tratamento de Dados Pessoais';
 
   @override
+  String get dataProcessingPolicy => 'Política de Tratamento de Dados Pessoais';
+
+  @override
+  String get dataProcessingAuthorizationPrefix =>
+      'Autorizo o tratamento dos meus dados pessoais conforme a';
+
+  @override
   String get platformConnectionNotice =>
       'Entendo que é uma plataforma tecnológica que conecta usuários a motoristas independentes e não presta serviços de transporte nem opera veículos.';
 

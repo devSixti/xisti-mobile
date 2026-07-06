@@ -184,19 +184,21 @@ bool requiresPhoneOtpOnSignup() {
   return loginType != LoginType.email && loginType != LoginType.biometric;
 }
 
-/// Phone field is locked (pre-filled from OTP) for phone signup; editable/optional for social/email.
-bool signupPhoneFieldLocked() {
-  final loginType = getStringFromUserInfoBox(hiveLoginType);
-  if (loginType.isEmpty) {
-    return true;
+/// Phone OTP users are stored as login_type [LoginType.email] on the backend (legacy).
+bool isPhoneOtpSignup([String? loginType]) => !isSocialLoginType(loginType);
+
+/// Phone field is locked (pre-filled from OTP) for phone signup; editable/optional for social.
+bool signupPhoneFieldLocked({String? loginType, String? contactNumber}) {
+  if (isSocialLoginType(loginType)) {
+    return false;
   }
-  return !isSocialLoginType(loginType) && loginType != LoginType.email;
+  final storedPhone = (contactNumber ?? getStringFromUserInfoBox(hiveContactNumber)).trim();
+  return storedPhone.isNotEmpty;
 }
 
-bool signupRequiresPhone() => signupPhoneFieldLocked();
+bool signupRequiresPhone([String? loginType]) => isPhoneOtpSignup(loginType);
 
-bool signupRequiresEmail() =>
-    isSocialLoginType() || getStringFromUserInfoBox(hiveLoginType) == LoginType.email;
+bool signupRequiresEmail([String? loginType]) => isSocialLoginType(loginType);
 
 void splitFullNameIntoFields(String fullName, TextEditingController firstName, TextEditingController lastName) {
   final trimmed = fullName.trim();

@@ -467,6 +467,8 @@
   "invalidMobileNumberCo": "Digite um celular válido com 10 dígitos",
   "invalidVehiclePlate": "Digite uma placa válida (5 a 8 caracteres alfanuméricos)",
   "privacyPolicy": "Política de Privacidade e Tratamento de Dados Pessoais",
+  "dataProcessingPolicy": "Política de Tratamento de Dados Pessoais",
+  "dataProcessingAuthorizationPrefix": "Autorizo o tratamento dos meus dados pessoais conforme a",
   "platformConnectionNotice": "Entendo que é uma plataforma tecnológica que conecta usuários a motoristas independentes e não presta serviços de transporte nem opera veículos.",
   "driverIndependentNotice": "Declaro que atuo como motorista independente e que o uso da plataforma não cria vínculo empregatício, subordinação, representação comercial ou exclusividade.",
   "deliveryLegalNotice": "As entregas são repasses de pacotes gerenciados entre usuários pela plataforma. O app apenas facilita a conexão e não presta transporte de passageiros ou carga.",

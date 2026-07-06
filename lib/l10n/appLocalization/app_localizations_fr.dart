@@ -299,6 +299,13 @@ class AppLocalizationsFr extends AppLocalizations {
       'Politique de confidentialité et de traitement des données personnelles';
 
   @override
+  String get dataProcessingPolicy => 'Politique de traitement des données personnelles';
+
+  @override
+  String get dataProcessingAuthorizationPrefix =>
+      'J\'autorise le traitement de mes données personnelles conformément à la';
+
+  @override
   String get platformConnectionNotice =>
       'Je comprends qu\'il s\'agit d\'une plateforme technologique reliant les utilisateurs à des conducteurs indépendants, sans fournir de services de transport ni exploiter de véhicules.';
 

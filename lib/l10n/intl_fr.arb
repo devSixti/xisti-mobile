@@ -467,6 +467,8 @@
   "resendOtpWhatsappSuccessMsg": "Code OTP renvoyé via WhatsApp.",
   "otpSentViaWhatsappHint": "Nous pouvons aussi envoyer votre code via WhatsApp.",
   "privacyPolicy": "Politique de confidentialité et de traitement des données personnelles",
+  "dataProcessingPolicy": "Politique de traitement des données personnelles",
+  "dataProcessingAuthorizationPrefix": "J'autorise le traitement de mes données personnelles conformément à la",
   "platformConnectionNotice": "Je comprends qu'il s'agit d'une plateforme technologique reliant les utilisateurs à des conducteurs indépendants, sans fournir de services de transport ni exploiter de véhicules.",
   "driverIndependentNotice": "Je déclare agir en tant que conducteur indépendant et que l'utilisation de la plateforme ne crée aucune relation d'emploi, de subordination, de représentation commerciale ou d'exclusivité.",
   "deliveryLegalNotice": "Les livraisons sont des remises de colis gérées entre utilisateurs via la plateforme. L'application facilite uniquement la mise en relation et ne fournit pas de transport de passagers ou de fret.",

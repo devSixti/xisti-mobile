@@ -467,6 +467,8 @@
   "resendOtpWhatsappSuccessMsg": "OTP reinviato tramite WhatsApp.",
   "otpSentViaWhatsappHint": "Possiamo inviare il codice anche tramite WhatsApp.",
   "privacyPolicy": "Informativa sulla privacy e sul trattamento dei dati personali",
+  "dataProcessingPolicy": "Politica di Trattamento dei Dati Personali",
+  "dataProcessingAuthorizationPrefix": "Autorizzo il trattamento dei miei dati personali conformemente alla",
   "platformConnectionNotice": "Comprendo che si tratta di una piattaforma tecnologica che collega utenti e conducenti indipendenti, senza fornire servizi di trasporto né gestire veicoli.",
   "driverIndependentNotice": "Dichiaro di agire come conducente indipendente e che l'uso della piattaforma non crea alcun rapporto di lavoro, subordinazione, rappresentanza commerciale o esclusività.",
   "deliveryLegalNotice": "Le consegne sono passaggi di pacchi gestiti tra utenti tramite la piattaforma. L'app facilita solo il collegamento e non fornisce servizi di trasporto passeggeri o merci.",

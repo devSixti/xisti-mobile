@@ -300,6 +300,13 @@ class AppLocalizationsIt extends AppLocalizations {
       'Informativa sulla privacy e sul trattamento dei dati personali';
 
   @override
+  String get dataProcessingPolicy => 'Politica di Trattamento dei Dati Personali';
+
+  @override
+  String get dataProcessingAuthorizationPrefix =>
+      'Autorizzo il trattamento dei miei dati personali conformemente alla';
+
+  @override
   String get platformConnectionNotice =>
       'Comprendo che si tratta di una piattaforma tecnologica che collega utenti e conducenti indipendenti, senza fornire servizi di trasporto né gestire veicoli.';
 

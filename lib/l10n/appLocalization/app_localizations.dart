@@ -638,6 +638,18 @@ abstract class AppLocalizations {
   /// **'Privacy and Personal Data Processing Policy'**
   String get privacyPolicy;
 
+  /// No description provided for @dataProcessingPolicy.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal Data Processing Policy'**
+  String get dataProcessingPolicy;
+
+  /// No description provided for @dataProcessingAuthorizationPrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'I authorize processing of my personal data according to the'**
+  String get dataProcessingAuthorizationPrefix;
+
   /// No description provided for @platformConnectionNotice.
   ///
   /// In en, this message translates to:
