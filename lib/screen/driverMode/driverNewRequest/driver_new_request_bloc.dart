@@ -4,6 +4,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import '../../../blocs/bloc.dart';
 import '../../../utils/get_route_utils.dart';
+import '../../../utils/map_utils.dart';
 import '../../../utils/shared_pref_util.dart';
 import '../../../utils/utils.dart';
 import '../driverHome/driver_home.dart';
@@ -136,15 +137,24 @@ class DriverNewRequestBloc extends Bloc {
   }
 
   Future<void> mapApiCall(NewRequestPojo requestPojo) async {
+    if (requestPojo.addressList.isEmpty) return;
+    final pickupLat = getDoubleFromDynamic(requestPojo.addressList.first.addressLat.toString());
+    final pickupLng = getDoubleFromDynamic(requestPojo.addressList.first.addressLong.toString());
+    final destinationLat = getDoubleFromDynamic(requestPojo.addressList.last.addressLat.toString());
+    final destinationLng = getDoubleFromDynamic(requestPojo.addressList.last.addressLong.toString());
+    final pickupValid = isValidMapCoordinate(pickupLat, pickupLng);
+    final destinationValid = isValidMapCoordinate(destinationLat, destinationLng);
+
+    if (googleMapController != null && pickupValid) {
+      focusInMap(googleMapController!, pickupLat, pickupLng, true);
+    }
+    if (!pickupValid || !destinationValid) {
+      return;
+    }
+
     await GetRoutesUtils().getRoutes(
-      LatLng(
-        getDoubleFromDynamic(requestPojo.addressList.first.addressLat.toString()),
-        getDoubleFromDynamic(requestPojo.addressList.first.addressLong.toString()),
-      ),
-      LatLng(
-        getDoubleFromDynamic(requestPojo.addressList.last.addressLat.toString()),
-        getDoubleFromDynamic(requestPojo.addressList.last.addressLong.toString()),
-      ),
+      LatLng(pickupLat, pickupLng),
+      LatLng(destinationLat, destinationLng),
       [],
       (polyLines, duration, distance) async {
         if (!context.mounted) return;
@@ -169,32 +179,35 @@ class DriverNewRequestBloc extends Bloc {
   }
 
   Future<void> setMarkers(NewRequestPojo requestPojo) async {
+    if (requestPojo.addressList.isEmpty) return;
     List<Marker> markerList = [];
     BitmapDescriptor pickUpMarkerIcon = await getBitmapDescriptorFromAssetBytes(path: setImagesBasedOnTheme(context, "ic_pin_pickup_location.png"));
     if (!context.mounted) return;
     BitmapDescriptor destinationMarkerIcon = await getBitmapDescriptorFromAssetBytes(path: setImagesBasedOnTheme(context, "ic_pin_destination_location.png"));
-    markerList.add(
-      Marker(
-        markerId: const MarkerId("pickup"),
-        position: LatLng(
-          getDoubleFromDynamic(requestPojo.addressList.first.addressLat.toString()),
-          getDoubleFromDynamic(requestPojo.addressList.first.addressLong.toString()),
+    final pickupLat = getDoubleFromDynamic(requestPojo.addressList.first.addressLat.toString());
+    final pickupLng = getDoubleFromDynamic(requestPojo.addressList.first.addressLong.toString());
+    final destinationLat = getDoubleFromDynamic(requestPojo.addressList.last.addressLat.toString());
+    final destinationLng = getDoubleFromDynamic(requestPojo.addressList.last.addressLong.toString());
+    if (isValidMapCoordinate(pickupLat, pickupLng)) {
+      markerList.add(
+        Marker(
+          markerId: const MarkerId("pickup"),
+          position: LatLng(pickupLat, pickupLng),
+          icon: pickUpMarkerIcon,
+          infoWindow: InfoWindow(title: languages.pickUpLocation),
         ),
-        icon: pickUpMarkerIcon,
-        infoWindow: InfoWindow(title: languages.pickUpLocation),
-      ),
-    );
-    markerList.add(
-      Marker(
-        markerId: const MarkerId("destination"),
-        position: LatLng(
-          getDoubleFromDynamic(requestPojo.addressList.last.addressLat.toString()),
-          getDoubleFromDynamic(requestPojo.addressList.last.addressLong.toString()),
+      );
+    }
+    if (isValidMapCoordinate(destinationLat, destinationLng)) {
+      markerList.add(
+        Marker(
+          markerId: const MarkerId("destination"),
+          position: LatLng(destinationLat, destinationLng),
+          icon: destinationMarkerIcon,
+          infoWindow: InfoWindow(title: languages.dropLocation),
         ),
-        icon: destinationMarkerIcon,
-        infoWindow: InfoWindow(title: languages.dropLocation),
-      ),
-    );
+      );
+    }
     markersListSubject.sink.add(markerList);
   }
 

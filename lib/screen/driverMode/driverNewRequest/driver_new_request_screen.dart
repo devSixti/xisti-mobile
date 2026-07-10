@@ -403,7 +403,9 @@ class _DriverNewRequestScreenState extends State<DriverNewRequestScreen> with Wi
                       Padding(
                         padding: EdgeInsetsDirectional.only(end: 2.w),
                         child: Text(
-                          getAmountWithCurrency(newRequestPojo.offeredPrice),
+                          getDoubleFromDynamic(newRequestPojo.offeredPrice) > 0
+                              ? getAmountWithCurrency(newRequestPojo.offeredPrice)
+                              : '--',
                           style: bodyText(context: context, fontWeight: FontWeight.w600, textColor: getCurrentTheme(context).colorPrimary),
                         ),
                       ),

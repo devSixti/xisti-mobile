@@ -25,19 +25,32 @@ Future<Uint8List> getBytesFromAsset(String path, int width) async {
   return (await fi.image.toByteData(format: ui.ImageByteFormat.png))!.buffer.asUint8List();
 }
 
+bool isValidMapCoordinate(double latitude, double longitude) {
+  return latitude.abs() >= 0.01 && longitude.abs() >= 0.01;
+}
+
 void setMapFitToTour({required Set<Polyline> polyline, required GoogleMapController controller, double? padding}) {
   try {
-    double minLat = polyline.first.points.first.latitude;
-    double minLong = polyline.first.points.first.longitude;
-    double maxLat = polyline.first.points.first.latitude;
-    double maxLong = polyline.first.points.first.longitude;
+    if (polyline.isEmpty) {
+      return;
+    }
+    double? minLat;
+    double? minLong;
+    double? maxLat;
+    double? maxLong;
     for (var poly in polyline) {
       for (var point in poly.points) {
-        if (point.latitude < minLat) minLat = point.latitude;
-        if (point.latitude > maxLat) maxLat = point.latitude;
-        if (point.longitude < minLong) minLong = point.longitude;
-        if (point.longitude > maxLong) maxLong = point.longitude;
+        if (!isValidMapCoordinate(point.latitude, point.longitude)) {
+          continue;
+        }
+        minLat = minLat == null ? point.latitude : min(minLat, point.latitude);
+        maxLat = maxLat == null ? point.latitude : max(maxLat, point.latitude);
+        minLong = minLong == null ? point.longitude : min(minLong, point.longitude);
+        maxLong = maxLong == null ? point.longitude : max(maxLong, point.longitude);
       }
+    }
+    if (minLat == null || minLong == null || maxLat == null || maxLong == null) {
+      return;
     }
     controller.moveCamera(
       CameraUpdate.newLatLngBounds(LatLngBounds(southwest: LatLng(minLat, minLong), northeast: LatLng(maxLat, maxLong)), padding ?? 100.sp),
@@ -48,10 +61,24 @@ void setMapFitToTour({required Set<Polyline> polyline, required GoogleMapControl
 }
 
 void setMapFitToTourUsingLatLng({required List<double> latList, required List<double> longList, required GoogleMapController controller, double? padding}) {
-  double topMost = longList.reduce(max);
-  double leftMost = latList.reduce(min);
-  double rightMost = latList.reduce(max);
-  double bottomMost = longList.reduce(min);
+  if (latList.isEmpty || longList.isEmpty || latList.length != longList.length) {
+    return;
+  }
+  final validLats = <double>[];
+  final validLongs = <double>[];
+  for (var i = 0; i < latList.length; i++) {
+    if (isValidMapCoordinate(latList[i], longList[i])) {
+      validLats.add(latList[i]);
+      validLongs.add(longList[i]);
+    }
+  }
+  if (validLats.isEmpty || validLongs.isEmpty) {
+    return;
+  }
+  double topMost = validLongs.reduce(max);
+  double leftMost = validLats.reduce(min);
+  double rightMost = validLats.reduce(max);
+  double bottomMost = validLongs.reduce(min);
   controller.moveCamera(
     CameraUpdate.newLatLngBounds(LatLngBounds(northeast: LatLng(rightMost, topMost), southwest: LatLng(leftMost, bottomMost)), padding ?? 12.sp),
   );

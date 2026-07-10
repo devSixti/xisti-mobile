@@ -559,7 +559,7 @@ class PassengerRunningRideBloc extends Bloc {
           positiveButtonTxt: languages.ok,
           onPositivePress: () {
             finishChat();
-            openScreenWithClearPrevious(context, PassengerRideDetail(rideId: rideId));
+            openScreenWithClearPrevious(context, const PassengerHome());
           },
         );
       },

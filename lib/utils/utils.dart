@@ -619,6 +619,30 @@ void showProfileImageRequiredSheet(BuildContext context) {
   });
 }
 
+void showContactPhoneRequiredSheet(BuildContext context, {String? message}) {
+  showModalBottomSheet(
+    context: context,
+    enableDrag: false,
+    isDismissible: true,
+    backgroundColor: Colors.transparent,
+    builder: (context) {
+      return CommonBottomSheet(
+        title: languages.contactNumber,
+        message: message ?? 'Agrega tu número de teléfono en el perfil para solicitar recibir un envío.',
+        positiveButtonTxt: languages.ok,
+        negativeButtonTxt: languages.cancel,
+        onNegativePress: () {
+          if (Navigator.canPop(context)) Navigator.pop(context);
+        },
+        onPositivePress: () {
+          if (Navigator.canPop(context)) Navigator.pop(context);
+          openScreenWithResult(context, const ProfileScreen());
+        },
+      );
+    },
+  );
+}
+
 double getDoubleFromDynamic(dynamic value) {
   if (value == null) return 0;
   if (value is num) return value.toDouble();

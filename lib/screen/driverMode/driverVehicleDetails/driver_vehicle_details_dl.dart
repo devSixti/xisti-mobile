@@ -195,6 +195,8 @@ class VehicleDetailsPojo {
     String? vehicleImage,
     int? childSafetySeat,
     int? handyCapSeat,
+    int? alsoTransportPassengers,
+    int? isTaxi,
     String? technicalInspectionExpiry,
   }) {
     _status = status;
@@ -210,6 +212,8 @@ class VehicleDetailsPojo {
     _vehicleImage = vehicleImage;
     _childSafetySeat = childSafetySeat;
     _handyCapSeat = handyCapSeat;
+    _alsoTransportPassengers = alsoTransportPassengers;
+    _isTaxi = isTaxi;
     _technicalInspectionExpiry = technicalInspectionExpiry;
   }
 
@@ -230,6 +234,8 @@ class VehicleDetailsPojo {
     _vehicleImageRear = json['vehicle_image_rear'];
     _childSafetySeat = json['child_safety_seat'];
     _handyCapSeat = json['handy_cap_seat'];
+    _alsoTransportPassengers = json['also_transport_passengers'];
+    _isTaxi = json['is_taxi'];
     _technicalInspectionExpiry = json['technical_inspection_expiry']?.toString();
     _deliveryVariant = json['delivery_variant']?.toString() ?? '';
   }
@@ -250,6 +256,8 @@ class VehicleDetailsPojo {
   String? _vehicleImageRear;
   int? _childSafetySeat;
   int? _handyCapSeat;
+  int? _alsoTransportPassengers;
+  int? _isTaxi;
   String? _technicalInspectionExpiry;
   String? _deliveryVariant;
 
@@ -284,6 +292,10 @@ class VehicleDetailsPojo {
   int get childSafetySeat => _childSafetySeat ?? 0;
 
   int get handyCapSeat => _handyCapSeat ?? 0;
+
+  int get alsoTransportPassengers => _alsoTransportPassengers ?? 0;
+
+  int get isTaxi => _isTaxi ?? 0;
 
   String get technicalInspectionExpiry => _technicalInspectionExpiry ?? '';
 

@@ -76,9 +76,15 @@ class ProfileBloc extends Bloc {
 
   void buttonHide() {
     String fullName = fullNameValidate(fullNameTEC.text);
-    String email = emailValidate(emailTEC.text);
+    String email = signupRequiresEmail()
+        ? emailValidate(emailTEC.text)
+        : emailValidateOptional(emailTEC.text);
     final contactDial = normalizeDialCode(contactCountryCodeController.valueOrNull?.dialCode ?? defaultCountryCode.dialCode);
-    String mobile = mobileNumberValidateForDialCode(contactNoTEC.text, dialCode: contactDial);
+    String mobile = signupRequiresPhone()
+        ? mobileNumberValidateForDialCode(contactNoTEC.text, dialCode: contactDial)
+        : (contactNoTEC.text.trim().isEmpty
+            ? ''
+            : mobileNumberValidateForDialCode(contactNoTEC.text, dialCode: contactDial));
 
     if (fullName.isEmpty && email.isEmpty && mobile.isEmpty) {
       submitValidController.add(true);

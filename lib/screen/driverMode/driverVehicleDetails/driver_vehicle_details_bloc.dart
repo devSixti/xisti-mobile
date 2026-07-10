@@ -307,6 +307,8 @@ class DriverVehicleDetailsBloc extends Bloc {
 
     childSafetyController.sink.add(vehicleDetailsPojo.childSafetySeat == 1);
     handyCapAccessibilityController.sink.add(vehicleDetailsPojo.handyCapSeat == 1);
+    alsoTransportPassengersController.sink.add(vehicleDetailsPojo.alsoTransportPassengers == 1);
+    isTaxiController.sink.add(vehicleDetailsPojo.isTaxi == 1);
   }
 
   void setSelectedVehicleType(VehicleTypeList? vehicleTypeList) {

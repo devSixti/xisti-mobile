@@ -922,6 +922,10 @@ class PassengerHomeBloc extends Bloc {
       showProfileImageRequiredSheet(context);
       return;
     }
+    if (isDeliveryMode && isDeliveryReceive && getStringFromUserInfoBox(hiveContactNumber).trim().isEmpty) {
+      showContactPhoneRequiredSheet(context);
+      return;
+    }
     if ((subjectSelectedServiceData.valueOrNull?.serviceId ?? 0) <= 0) {
       openSimpleSnackbar(context, languages.selectVehicle);
       return;

@@ -219,7 +219,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       setError: true,
       validator: (value) {
         _bloc?.buttonHide();
-        return emailValidate(value);
+        return signupRequiresEmail() ? emailValidate(value) : emailValidateOptional(value ?? '');
       },
     );
   }
@@ -267,6 +267,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
       textAlignVertical: TextAlignVertical.center,
       validator: (value) {
         _bloc?.buttonHide();
+        if (!signupRequiresPhone() && (value ?? '').trim().isEmpty) {
+          return '';
+        }
         return colombiaMobileNumberValidate(
           value,
           dialCode: _bloc?.contactCountryCodeController.valueOrNull?.dialCode,
