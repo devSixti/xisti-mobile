@@ -1128,10 +1128,10 @@ class PassengerHomeBloc extends Bloc {
 
   Future<void> _updateCityZonesForCoordinates(double lat, double lng) async {
     if (_regionPromptInFlight) return;
-    final preview = XistiRegionService.resolve(lat, lng);
+    final preview = await XistiRegionService.resolveAsync(lat, lng);
     _applyRegionToUi(preview);
 
-    final prompt = XistiRegionService.promptForCoordinates(lat, lng);
+    final prompt = await XistiRegionService.promptForCoordinatesAsync(lat, lng);
     if (prompt == null) {
       _applyRegionToUi(XistiRegionService.activeRegion());
       return;

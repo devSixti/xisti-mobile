@@ -121,6 +121,11 @@ Future<void> setMapStyle({required BuildContext context, Function(String changed
   } else {
     style = await rootBundle.loadString('assets/mapStyle/map_style.json');
   }
+  // Empty / "[]" is not a useful custom style and can leave the map blank on some devices.
+  final trimmed = style.trim();
+  if (trimmed.isEmpty || trimmed == '[]') {
+    style = "";
+  }
   callback?.call(style);
   // mapStyle.sink.add(style);
 }

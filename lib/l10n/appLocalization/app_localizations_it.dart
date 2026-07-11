@@ -55,12 +55,6 @@ class AppLocalizationsIt extends AppLocalizations {
   String get minutes => 'Minuti';
 
   @override
-  String get distanceApprox => 'Distanza appross';
-
-  @override
-  String get estimatedTime => 'Tempo stimato';
-
-  @override
   String get seconds => 'secondi';
 
   @override
@@ -300,7 +294,8 @@ class AppLocalizationsIt extends AppLocalizations {
       'Informativa sulla privacy e sul trattamento dei dati personali';
 
   @override
-  String get dataProcessingPolicy => 'Politica di Trattamento dei Dati Personali';
+  String get dataProcessingPolicy =>
+      'Politica di Trattamento dei Dati Personali';
 
   @override
   String get dataProcessingAuthorizationPrefix =>
@@ -490,6 +485,12 @@ class AppLocalizationsIt extends AppLocalizations {
   String get maxFare => 'Tariffa max.';
 
   @override
+  String get distanceApprox => 'Distanza appross';
+
+  @override
+  String get estimatedTime => 'Tempo stimato';
+
+  @override
   String get fareEstimateDisclaimer =>
       'Stima in base a percorso, tempo e tariffa del veicolo.';
 
@@ -631,13 +632,16 @@ class AppLocalizationsIt extends AppLocalizations {
   String get reachYourDestination => 'Raggiunta la destinazione';
 
   @override
-  String get cargoAtPickup => 'Il conducente è arrivato al punto di ritiro del carico';
+  String get cargoAtPickup =>
+      'Il conducente è arrivato al punto di ritiro del carico';
 
   @override
-  String get cargoHeadingDestination => 'Il tuo carico sta andando verso la destinazione';
+  String get cargoHeadingDestination =>
+      'Il tuo carico sta andando verso la destinazione';
 
   @override
-  String get cargoReachedDestination => 'Il tuo carico è arrivato a destinazione';
+  String get cargoReachedDestination =>
+      'Il tuo carico è arrivato a destinazione';
 
   @override
   String get call => 'Chiama';

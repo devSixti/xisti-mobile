@@ -5,6 +5,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../../../blocs/bloc.dart';
 import '../../../utils/get_route_utils.dart';
 import '../../../utils/map_utils.dart';
+import '../../../utils/route_metrics_util.dart';
 import '../../../utils/shared_pref_util.dart';
 import '../../../utils/utils.dart';
 import '../driverHome/driver_home.dart';
@@ -133,36 +134,64 @@ class DriverNewRequestBloc extends Bloc {
 
   Future<void> onMapCreated(GoogleMapController value) async {
     googleMapController = value;
+    // Bottom-sheet GoogleMap often paints blank until a post-layout camera move.
+    await Future<void>.delayed(const Duration(milliseconds: 350));
+    if (googleMapController == null) return;
     callGetRideApi();
   }
 
   Future<void> mapApiCall(NewRequestPojo requestPojo) async {
     if (requestPojo.addressList.isEmpty) return;
-    final pickupLat = getDoubleFromDynamic(requestPojo.addressList.first.addressLat.toString());
-    final pickupLng = getDoubleFromDynamic(requestPojo.addressList.first.addressLong.toString());
-    final destinationLat = getDoubleFromDynamic(requestPojo.addressList.last.addressLat.toString());
-    final destinationLng = getDoubleFromDynamic(requestPojo.addressList.last.addressLong.toString());
+    final pickupLat = parseMapCoordinate(requestPojo.addressList.first.addressLat);
+    final pickupLng = parseMapCoordinate(requestPojo.addressList.first.addressLong);
+    final destinationLat = parseMapCoordinate(requestPojo.addressList.last.addressLat);
+    final destinationLng = parseMapCoordinate(requestPojo.addressList.last.addressLong);
     final pickupValid = isValidMapCoordinate(pickupLat, pickupLng);
     final destinationValid = isValidMapCoordinate(destinationLat, destinationLng);
 
-    if (googleMapController != null && pickupValid) {
-      focusInMap(googleMapController!, pickupLat, pickupLng, true);
-    }
     if (!pickupValid || !destinationValid) {
+      if (googleMapController != null && pickupValid) {
+        focusInMap(googleMapController!, pickupLat, pickupLng, true);
+      }
       return;
     }
 
+    final pickup = LatLng(pickupLat, pickupLng);
+    final destination = LatLng(destinationLat, destinationLng);
+    final fallbackMeters = haversineDistanceMeters(pickup, destination);
+    distanceSubject.sink.add(routeDistanceKmFromMeters(fallbackMeters));
+    etaSubject.sink.add((estimateDurationSecondsFromMeters(fallbackMeters) / 60).round());
+    if (googleMapController != null) {
+      setMapFitToTourUsingLatLng(
+        latList: [pickupLat, destinationLat],
+        longList: [pickupLng, destinationLng],
+        controller: googleMapController!,
+        padding: 30.sp,
+      );
+    }
+
     await GetRoutesUtils().getRoutes(
-      LatLng(pickupLat, pickupLng),
-      LatLng(destinationLat, destinationLng),
+      pickup,
+      destination,
       [],
       (polyLines, duration, distance) async {
         if (!context.mounted) return;
-        distanceSubject.sink.add(getDoubleFromDynamic((distance / 1000).toStringAsFixed(2)));
-        etaSubject.sink.add((duration / 60).round());
+        final meters = distance > 0 ? distance : fallbackMeters;
+        final seconds = duration > 0 ? duration : estimateDurationSecondsFromMeters(meters);
+        distanceSubject.sink.add(routeDistanceKmFromMeters(meters));
+        etaSubject.sink.add((seconds / 60).round());
         polyLinesSubject.sink.add(polyLines);
-        if (googleMapController != null) {
+        if (googleMapController == null) return;
+        final hasRoutePoints = polyLines.values.any((line) => line.points.isNotEmpty);
+        if (hasRoutePoints) {
           setMapFitToTour(polyline: Set<Polyline>.of(polyLines.values), controller: googleMapController!, padding: 30.sp);
+        } else {
+          setMapFitToTourUsingLatLng(
+            latList: [pickupLat, destinationLat],
+            longList: [pickupLng, destinationLng],
+            controller: googleMapController!,
+            padding: 30.sp,
+          );
         }
       },
     );
@@ -184,10 +213,10 @@ class DriverNewRequestBloc extends Bloc {
     BitmapDescriptor pickUpMarkerIcon = await getBitmapDescriptorFromAssetBytes(path: setImagesBasedOnTheme(context, "ic_pin_pickup_location.png"));
     if (!context.mounted) return;
     BitmapDescriptor destinationMarkerIcon = await getBitmapDescriptorFromAssetBytes(path: setImagesBasedOnTheme(context, "ic_pin_destination_location.png"));
-    final pickupLat = getDoubleFromDynamic(requestPojo.addressList.first.addressLat.toString());
-    final pickupLng = getDoubleFromDynamic(requestPojo.addressList.first.addressLong.toString());
-    final destinationLat = getDoubleFromDynamic(requestPojo.addressList.last.addressLat.toString());
-    final destinationLng = getDoubleFromDynamic(requestPojo.addressList.last.addressLong.toString());
+    final pickupLat = parseMapCoordinate(requestPojo.addressList.first.addressLat);
+    final pickupLng = parseMapCoordinate(requestPojo.addressList.first.addressLong);
+    final destinationLat = parseMapCoordinate(requestPojo.addressList.last.addressLat);
+    final destinationLng = parseMapCoordinate(requestPojo.addressList.last.addressLong);
     if (isValidMapCoordinate(pickupLat, pickupLng)) {
       markerList.add(
         Marker(

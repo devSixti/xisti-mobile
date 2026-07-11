@@ -180,23 +180,30 @@ class AcceptRequestBottomSheetBloc extends Bloc {
   }
 
   Future<void> mapApiCall() async {
+    final pickupLat = parseMapCoordinate(rideListItem.addressList.first.addressLat);
+    final pickupLng = parseMapCoordinate(rideListItem.addressList.first.addressLong);
+    final destinationLat = parseMapCoordinate(rideListItem.addressList.last.addressLat);
+    final destinationLng = parseMapCoordinate(rideListItem.addressList.last.addressLong);
     await GetRoutesUtils().getRoutes(
-      LatLng(
-        getDoubleFromDynamic(rideListItem.addressList.first.addressLat.toString()),
-        getDoubleFromDynamic(rideListItem.addressList.first.addressLong.toString()),
-      ),
-      LatLng(
-        getDoubleFromDynamic(rideListItem.addressList.last.addressLat.toString()),
-        getDoubleFromDynamic(rideListItem.addressList.last.addressLong.toString()),
-      ),
+      LatLng(pickupLat, pickupLng),
+      LatLng(destinationLat, destinationLng),
       [],
       (polyLines, duration, distance) async {
         if (!context.mounted) return;
         distanceSubject.sink.add(getDoubleFromDynamic((distance / 1000).toStringAsFixed(2)));
         etaSubject.sink.add((duration / 60).round());
         polyLinesSubject.sink.add(polyLines);
-        if (googleMapController != null) {
+        if (googleMapController == null) return;
+        final hasRoutePoints = polyLines.values.any((line) => line.points.isNotEmpty);
+        if (hasRoutePoints) {
           setMapFitToTour(polyline: Set<Polyline>.of(polyLines.values), controller: googleMapController!, padding: 30.sp);
+        } else {
+          setMapFitToTourUsingLatLng(
+            latList: [pickupLat, destinationLat],
+            longList: [pickupLng, destinationLng],
+            controller: googleMapController!,
+            padding: 30.sp,
+          );
         }
       },
     );
@@ -221,8 +228,8 @@ class AcceptRequestBottomSheetBloc extends Bloc {
       Marker(
         markerId: const MarkerId("pickup"),
         position: LatLng(
-          getDoubleFromDynamic(rideListItem.addressList.first.addressLat.toString()),
-          getDoubleFromDynamic(rideListItem.addressList.first.addressLong.toString()),
+          parseMapCoordinate(rideListItem.addressList.first.addressLat),
+          parseMapCoordinate(rideListItem.addressList.first.addressLong),
         ),
         icon: pickUpMarkerIcon,
         infoWindow: InfoWindow(title: languages.pickUpLocation),
@@ -232,8 +239,8 @@ class AcceptRequestBottomSheetBloc extends Bloc {
       Marker(
         markerId: const MarkerId("destination"),
         position: LatLng(
-          getDoubleFromDynamic(rideListItem.addressList.last.addressLat.toString()),
-          getDoubleFromDynamic(rideListItem.addressList.last.addressLong.toString()),
+          parseMapCoordinate(rideListItem.addressList.last.addressLat),
+          parseMapCoordinate(rideListItem.addressList.last.addressLong),
         ),
         icon: destinationMarkerIcon,
         infoWindow: InfoWindow(title: languages.dropLocation),

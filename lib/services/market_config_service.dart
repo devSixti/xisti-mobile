@@ -78,6 +78,7 @@ abstract final class MarketConfigService {
       country: country,
       city: region.city,
       isInsideCityBounds: region.isInsideCityBounds,
+      isGeocodeDerived: region.isGeocodeDerived,
     );
   }
 

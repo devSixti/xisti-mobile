@@ -919,13 +919,16 @@ double parseSafeDouble(String input) {
 
   if (isColombiaCurrencySelected()) {
     if (sanitized.contains(',')) {
+      // Colombian amount: 15.000,50 → 15000.50
       final parts = sanitized.split(',');
       final whole = parts.first.replaceAll('.', '');
       final fraction = parts.length > 1 ? parts[1] : '';
       sanitized = fraction.isEmpty ? whole : '$whole.$fraction';
-    } else {
+    } else if (RegExp(r'^-?\d{1,3}(\.\d{3}){2,}$').hasMatch(sanitized) || RegExp(r'^-?\d{1,3}\.000$').hasMatch(sanitized)) {
+      // Thousand groups only: 1.500.000 or 15.000 — do NOT treat 4.711 (coords) as thousands
       sanitized = sanitized.replaceAll('.', '');
     }
+    // else: keep '.' as decimal (API floats / lat-lng)
   } else {
     sanitized = sanitized.replaceAll(',', '.');
   }
@@ -939,6 +942,15 @@ double parseSafeDouble(String input) {
   } catch (_) {
     return 0;
   }
+}
+
+/// Parse lat/lng from API strings. Never apply currency thousand-separator rules.
+double parseMapCoordinate(dynamic value) {
+  if (value == null) return 0;
+  if (value is num) return value.toDouble();
+  final sanitized = value.toString().trim().toLowerCase();
+  if (sanitized.isEmpty || sanitized == 'null') return 0;
+  return double.tryParse(sanitized.replaceAll(',', '.')) ?? 0;
 }
 
 Future<void> checkAndSetGestureNavigation() async {

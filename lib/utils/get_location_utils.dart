@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 
-import '../constant/constant.dart';
+import '../services/xisti_region_service.dart';
 import 'utils.dart';
 
 class GetLocationUtils {
@@ -76,9 +76,10 @@ class GetLocationUtils {
     Function(Position locationData, String address) onLocationDataGetWithAddress,
     Function()? onPermissionReq,
   ) {
+    final fallback = XistiRegionService.fallbackLatLng();
     locationData = Position(
-      latitude: defaultLatLng.latitude,
-      longitude: defaultLatLng.longitude,
+      latitude: fallback.latitude,
+      longitude: fallback.longitude,
       timestamp: DateTime.now(),
       accuracy: 0,
       altitude: 0,

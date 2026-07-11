@@ -107,21 +107,86 @@ class ResolvedXistiRegion {
   final XistiCountryProfile country;
   final XistiMainCityProfile city;
   final bool isInsideCityBounds;
+  /// True when country/city came from reverse-geocode outside the bbox catalog.
+  final bool isGeocodeDerived;
 
   const ResolvedXistiRegion({
     required this.country,
     required this.city,
     required this.isInsideCityBounds,
+    this.isGeocodeDerived = false,
   });
 }
 
-/// Global catalog: Colombia + USA + Brazil + Argentina (brand manual markets).
+/// ISO defaults for reverse-geocode when outside the operational catalog.
+class XistiIsoMarketDefaults {
+  final String currencyCode;
+  final String currencySymbol;
+  final String dialCode;
+  final String language;
+  final double minFare;
+  final double fareStep;
+
+  const XistiIsoMarketDefaults({
+    required this.currencyCode,
+    required this.currencySymbol,
+    required this.dialCode,
+    required this.language,
+    required this.minFare,
+    required this.fareStep,
+  });
+}
+
+/// Global catalog: CO, US, BR, AR, MX, ES, CL, PE, EC (+ geocode fallback).
 abstract final class XistiRegionCatalog {
   static const String colombiaId = 'co';
   static const String usaId = 'us';
   static const String brazilId = 'br';
   static const String argentinaId = 'ar';
+  static const String mexicoId = 'mx';
+  static const String spainId = 'es';
+  static const String chileId = 'cl';
+  static const String peruId = 'pe';
+  static const String ecuadorId = 'ec';
   static const String medellinId = 'medellin';
+  static const String catalogVersion = '2026-07-11';
+
+  static const Map<String, XistiIsoMarketDefaults> isoDefaults = {
+    'CO': XistiIsoMarketDefaults(currencyCode: 'COP', currencySymbol: 'COL\$', dialCode: '+57', language: 'es', minFare: 5000, fareStep: 500),
+    'US': XistiIsoMarketDefaults(currencyCode: 'USD', currencySymbol: '\$', dialCode: '+1', language: 'en', minFare: 8, fareStep: 1),
+    'BR': XistiIsoMarketDefaults(currencyCode: 'BRL', currencySymbol: 'R\$', dialCode: '+55', language: 'pt', minFare: 12, fareStep: 2),
+    'AR': XistiIsoMarketDefaults(currencyCode: 'ARS', currencySymbol: 'AR\$', dialCode: '+54', language: 'es', minFare: 2500, fareStep: 500),
+    'MX': XistiIsoMarketDefaults(currencyCode: 'MXN', currencySymbol: 'MX\$', dialCode: '+52', language: 'es', minFare: 45, fareStep: 5),
+    'ES': XistiIsoMarketDefaults(currencyCode: 'EUR', currencySymbol: '€', dialCode: '+34', language: 'es', minFare: 6, fareStep: 1),
+    'CL': XistiIsoMarketDefaults(currencyCode: 'CLP', currencySymbol: 'CL\$', dialCode: '+56', language: 'es', minFare: 1500, fareStep: 100),
+    'PE': XistiIsoMarketDefaults(currencyCode: 'PEN', currencySymbol: 'S/', dialCode: '+51', language: 'es', minFare: 8, fareStep: 1),
+    'EC': XistiIsoMarketDefaults(currencyCode: 'USD', currencySymbol: '\$', dialCode: '+593', language: 'es', minFare: 3, fareStep: 0.5),
+    'GB': XistiIsoMarketDefaults(currencyCode: 'GBP', currencySymbol: '£', dialCode: '+44', language: 'en', minFare: 6, fareStep: 1),
+    'CA': XistiIsoMarketDefaults(currencyCode: 'CAD', currencySymbol: 'CA\$', dialCode: '+1', language: 'en', minFare: 8, fareStep: 1),
+    'DE': XistiIsoMarketDefaults(currencyCode: 'EUR', currencySymbol: '€', dialCode: '+49', language: 'en', minFare: 6, fareStep: 1),
+    'FR': XistiIsoMarketDefaults(currencyCode: 'EUR', currencySymbol: '€', dialCode: '+33', language: 'fr', minFare: 6, fareStep: 1),
+    'IT': XistiIsoMarketDefaults(currencyCode: 'EUR', currencySymbol: '€', dialCode: '+39', language: 'it', minFare: 6, fareStep: 1),
+    'PT': XistiIsoMarketDefaults(currencyCode: 'EUR', currencySymbol: '€', dialCode: '+351', language: 'pt', minFare: 5, fareStep: 1),
+    'UY': XistiIsoMarketDefaults(currencyCode: 'UYU', currencySymbol: 'UY\$', dialCode: '+598', language: 'es', minFare: 80, fareStep: 10),
+    'PY': XistiIsoMarketDefaults(currencyCode: 'PYG', currencySymbol: '₲', dialCode: '+595', language: 'es', minFare: 15000, fareStep: 1000),
+    'BO': XistiIsoMarketDefaults(currencyCode: 'BOB', currencySymbol: 'Bs', dialCode: '+591', language: 'es', minFare: 10, fareStep: 1),
+    'CR': XistiIsoMarketDefaults(currencyCode: 'CRC', currencySymbol: '₡', dialCode: '+506', language: 'es', minFare: 1500, fareStep: 100),
+    'PA': XistiIsoMarketDefaults(currencyCode: 'USD', currencySymbol: '\$', dialCode: '+507', language: 'es', minFare: 3, fareStep: 0.5),
+  };
+
+  static const XistiIsoMarketDefaults defaultIsoDefaults = XistiIsoMarketDefaults(
+    currencyCode: 'USD',
+    currencySymbol: '\$',
+    dialCode: '+1',
+    language: 'en',
+    minFare: 5,
+    fareStep: 1,
+  );
+
+  static XistiIsoMarketDefaults defaultsForIso(String? iso) {
+    if (iso == null || iso.isEmpty) return defaultIsoDefaults;
+    return isoDefaults[iso.toUpperCase()] ?? defaultIsoDefaults;
+  }
 
   static const List<XistiCountryProfile> countries = [
     XistiCountryProfile(
@@ -196,6 +261,96 @@ abstract final class XistiRegionCatalog {
       maxLng: -53.0,
       cities: _argentinaCities,
     ),
+    XistiCountryProfile(
+      id: mexicoId,
+      isoCode: 'MX',
+      displayName: 'México',
+      currencyCode: 'MXN',
+      currencySymbol: 'MX\$',
+      dialCode: '+52',
+      defaultLanguageCode: 'es',
+      minFare: 45,
+      fareNegotiationStep: 5,
+      centerLat: 23.6345,
+      centerLng: -102.5528,
+      minLat: 14.5,
+      maxLat: 32.7,
+      minLng: -118.5,
+      maxLng: -86.5,
+      cities: _mexicoCities,
+    ),
+    XistiCountryProfile(
+      id: spainId,
+      isoCode: 'ES',
+      displayName: 'España',
+      currencyCode: 'EUR',
+      currencySymbol: '€',
+      dialCode: '+34',
+      defaultLanguageCode: 'es',
+      minFare: 6,
+      fareNegotiationStep: 1,
+      centerLat: 40.4637,
+      centerLng: -3.7492,
+      minLat: 36.0,
+      maxLat: 43.8,
+      minLng: -9.5,
+      maxLng: 4.5,
+      cities: _spainCities,
+    ),
+    XistiCountryProfile(
+      id: chileId,
+      isoCode: 'CL',
+      displayName: 'Chile',
+      currencyCode: 'CLP',
+      currencySymbol: 'CL\$',
+      dialCode: '+56',
+      defaultLanguageCode: 'es',
+      minFare: 1500,
+      fareNegotiationStep: 100,
+      centerLat: -35.6751,
+      centerLng: -71.5430,
+      minLat: -56.0,
+      maxLat: -17.5,
+      minLng: -76.0,
+      maxLng: -66.0,
+      cities: _chileCities,
+    ),
+    XistiCountryProfile(
+      id: peruId,
+      isoCode: 'PE',
+      displayName: 'Perú',
+      currencyCode: 'PEN',
+      currencySymbol: 'S/',
+      dialCode: '+51',
+      defaultLanguageCode: 'es',
+      minFare: 8,
+      fareNegotiationStep: 1,
+      centerLat: -9.1900,
+      centerLng: -75.0152,
+      minLat: -18.5,
+      maxLat: 0.0,
+      minLng: -81.5,
+      maxLng: -68.5,
+      cities: _peruCities,
+    ),
+    XistiCountryProfile(
+      id: ecuadorId,
+      isoCode: 'EC',
+      displayName: 'Ecuador',
+      currencyCode: 'USD',
+      currencySymbol: '\$',
+      dialCode: '+593',
+      defaultLanguageCode: 'es',
+      minFare: 3,
+      fareNegotiationStep: 0.5,
+      centerLat: -1.8312,
+      centerLng: -78.1834,
+      minLat: -5.0,
+      maxLat: 1.7,
+      minLng: -81.5,
+      maxLng: -75.0,
+      cities: _ecuadorCities,
+    ),
   ];
 
   static List<XistiMainCityProfile> get allCities =>
@@ -227,11 +382,11 @@ abstract final class XistiRegionCatalog {
     return nearest;
   }
 
-  static XistiCountryProfile resolveCountry(double lat, double lng) =>
-      countryContaining(lat, lng) ?? nearestCountry(lat, lng);
-
-  static ResolvedXistiRegion resolveRegion(double lat, double lng) {
-    final country = resolveCountry(lat, lng);
+  /// Catalog-only resolve. Returns null when outside all country bboxes
+  /// (caller should reverse-geocode instead of snapping to nearest market).
+  static ResolvedXistiRegion? resolveRegionInCatalog(double lat, double lng) {
+    final country = countryContaining(lat, lng);
+    if (country == null) return null;
     final city = country.resolveCity(lat, lng);
     return ResolvedXistiRegion(
       country: country,
@@ -239,6 +394,91 @@ abstract final class XistiRegionCatalog {
       isInsideCityBounds: city.contains(lat, lng),
     );
   }
+
+  /// Legacy sync resolve: catalog hit, else nearest country (prefer
+  /// [resolveRegionInCatalog] + geocode fallback for worldwide accuracy).
+  static ResolvedXistiRegion resolveRegion(double lat, double lng) {
+    return resolveRegionInCatalog(lat, lng) ??
+        () {
+          final country = nearestCountry(lat, lng);
+          final city = country.resolveCity(lat, lng);
+          return ResolvedXistiRegion(
+            country: country,
+            city: city,
+            isInsideCityBounds: city.contains(lat, lng),
+          );
+        }();
+  }
+
+  /// Build a synthetic region from reverse-geocode ISO + locality.
+  static ResolvedXistiRegion regionFromGeocode({
+    required String isoCode,
+    required String countryName,
+    required String cityName,
+    required double lat,
+    required double lng,
+  }) {
+    final iso = isoCode.toUpperCase();
+    XistiCountryProfile? catalogCountry;
+    for (final c in countries) {
+      if (c.isoCode == iso) {
+        catalogCountry = c;
+        break;
+      }
+    }
+    if (catalogCountry != null) {
+      final city = catalogCountry.resolveCity(lat, lng);
+      return ResolvedXistiRegion(
+        country: catalogCountry,
+        city: city,
+        isInsideCityBounds: city.contains(lat, lng),
+        isGeocodeDerived: true,
+      );
+    }
+
+    final defaults = defaultsForIso(iso);
+    final countryId = 'geo_${iso.toLowerCase()}';
+    final cityId = 'geo_${iso.toLowerCase()}_${cityName.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]+'), '_')}';
+    final city = XistiMainCityProfile(
+      id: cityId.isEmpty ? 'geo_${iso.toLowerCase()}_city' : cityId,
+      countryId: countryId,
+      displayName: cityName.isNotEmpty ? cityName : countryName,
+      centerLat: lat,
+      centerLng: lng,
+      minLat: lat - 0.15,
+      maxLat: lat + 0.15,
+      minLng: lng - 0.15,
+      maxLng: lng + 0.15,
+      zones: const [],
+    );
+    final country = XistiCountryProfile(
+      id: countryId,
+      isoCode: iso,
+      displayName: countryName.isNotEmpty ? countryName : iso,
+      currencyCode: defaults.currencyCode,
+      currencySymbol: defaults.currencySymbol,
+      dialCode: defaults.dialCode,
+      defaultLanguageCode: defaults.language,
+      minFare: defaults.minFare,
+      fareNegotiationStep: defaults.fareStep,
+      centerLat: lat,
+      centerLng: lng,
+      minLat: lat - 5,
+      maxLat: lat + 5,
+      minLng: lng - 5,
+      maxLng: lng + 5,
+      cities: [city],
+    );
+    return ResolvedXistiRegion(
+      country: country,
+      city: city,
+      isInsideCityBounds: true,
+      isGeocodeDerived: true,
+    );
+  }
+
+  static XistiCountryProfile resolveCountry(double lat, double lng) =>
+      countryContaining(lat, lng) ?? nearestCountry(lat, lng);
 
   static XistiMainCityProfile? cityById(String? cityId) {
     if (cityId == null || cityId.isEmpty) return null;
@@ -511,7 +751,7 @@ abstract final class XistiRegionCatalog {
       ],
     ),
     XistiMainCityProfile(
-      id: 'rio',
+      id: 'rio_de_janeiro',
       countryId: brazilId,
       displayName: 'Río de Janeiro',
       centerLat: -22.9068,
@@ -571,7 +811,7 @@ abstract final class XistiRegionCatalog {
       ],
     ),
     XistiMainCityProfile(
-      id: 'cordoba_ar',
+      id: 'cordoba',
       countryId: argentinaId,
       displayName: 'Córdoba',
       centerLat: -31.4201,
@@ -607,6 +847,213 @@ abstract final class XistiRegionCatalog {
         XistiBarrioShortcut(label: 'Funes', lat: -32.9150, lng: -60.8100),
         XistiBarrioShortcut(label: 'ROS', lat: -32.9036, lng: -60.7854),
       ],
+    ),
+  ];
+
+  static const List<XistiMainCityProfile> _mexicoCities = [
+    XistiMainCityProfile(
+      id: 'mexico_city',
+      countryId: mexicoId,
+      displayName: 'Ciudad de México',
+      centerLat: 19.4326,
+      centerLng: -99.1332,
+      minLat: 19.20,
+      maxLat: 19.60,
+      minLng: -99.35,
+      maxLng: -98.95,
+      zones: const [],
+    ),
+    XistiMainCityProfile(
+      id: 'guadalajara',
+      countryId: mexicoId,
+      displayName: 'Guadalajara',
+      centerLat: 20.6597,
+      centerLng: -103.3496,
+      minLat: 20.55,
+      maxLat: 20.80,
+      minLng: -103.50,
+      maxLng: -103.20,
+      zones: const [],
+    ),
+    XistiMainCityProfile(
+      id: 'monterrey',
+      countryId: mexicoId,
+      displayName: 'Monterrey',
+      centerLat: 25.6866,
+      centerLng: -100.3161,
+      minLat: 25.55,
+      maxLat: 25.85,
+      minLng: -100.45,
+      maxLng: -100.15,
+      zones: const [],
+    ),
+    XistiMainCityProfile(
+      id: 'cancun',
+      countryId: mexicoId,
+      displayName: 'Cancún',
+      centerLat: 21.1619,
+      centerLng: -86.8515,
+      minLat: 21.05,
+      maxLat: 21.25,
+      minLng: -86.95,
+      maxLng: -86.75,
+      zones: const [],
+    ),
+  ];
+
+  static const List<XistiMainCityProfile> _spainCities = [
+    XistiMainCityProfile(
+      id: 'madrid',
+      countryId: spainId,
+      displayName: 'Madrid',
+      centerLat: 40.4168,
+      centerLng: -3.7038,
+      minLat: 40.30,
+      maxLat: 40.55,
+      minLng: -3.85,
+      maxLng: -3.55,
+      zones: const [],
+    ),
+    XistiMainCityProfile(
+      id: 'barcelona',
+      countryId: spainId,
+      displayName: 'Barcelona',
+      centerLat: 41.3874,
+      centerLng: 2.1686,
+      minLat: 41.30,
+      maxLat: 41.50,
+      minLng: 2.05,
+      maxLng: 2.30,
+      zones: const [],
+    ),
+    XistiMainCityProfile(
+      id: 'valencia',
+      countryId: spainId,
+      displayName: 'Valencia',
+      centerLat: 39.4699,
+      centerLng: -0.3763,
+      minLat: 39.40,
+      maxLat: 39.55,
+      minLng: -0.45,
+      maxLng: -0.28,
+      zones: const [],
+    ),
+  ];
+
+  static const List<XistiMainCityProfile> _chileCities = [
+    XistiMainCityProfile(
+      id: 'santiago',
+      countryId: chileId,
+      displayName: 'Santiago',
+      centerLat: -33.4489,
+      centerLng: -70.6693,
+      minLat: -33.60,
+      maxLat: -33.30,
+      minLng: -70.85,
+      maxLng: -70.50,
+      zones: const [],
+    ),
+    XistiMainCityProfile(
+      id: 'valparaiso',
+      countryId: chileId,
+      displayName: 'Valparaíso',
+      centerLat: -33.0472,
+      centerLng: -71.6127,
+      minLat: -33.12,
+      maxLat: -32.95,
+      minLng: -71.70,
+      maxLng: -71.50,
+      zones: const [],
+    ),
+    XistiMainCityProfile(
+      id: 'concepcion',
+      countryId: chileId,
+      displayName: 'Concepción',
+      centerLat: -36.8201,
+      centerLng: -73.0444,
+      minLat: -36.90,
+      maxLat: -36.75,
+      minLng: -73.15,
+      maxLng: -72.95,
+      zones: const [],
+    ),
+  ];
+
+  static const List<XistiMainCityProfile> _peruCities = [
+    XistiMainCityProfile(
+      id: 'lima',
+      countryId: peruId,
+      displayName: 'Lima',
+      centerLat: -12.0464,
+      centerLng: -77.0428,
+      minLat: -12.25,
+      maxLat: -11.90,
+      minLng: -77.15,
+      maxLng: -76.85,
+      zones: const [],
+    ),
+    XistiMainCityProfile(
+      id: 'arequipa',
+      countryId: peruId,
+      displayName: 'Arequipa',
+      centerLat: -16.4090,
+      centerLng: -71.5375,
+      minLat: -16.50,
+      maxLat: -16.30,
+      minLng: -71.65,
+      maxLng: -71.45,
+      zones: const [],
+    ),
+    XistiMainCityProfile(
+      id: 'cusco',
+      countryId: peruId,
+      displayName: 'Cusco',
+      centerLat: -13.5319,
+      centerLng: -71.9675,
+      minLat: -13.60,
+      maxLat: -13.45,
+      minLng: -72.05,
+      maxLng: -71.90,
+      zones: const [],
+    ),
+  ];
+
+  static const List<XistiMainCityProfile> _ecuadorCities = [
+    XistiMainCityProfile(
+      id: 'quito',
+      countryId: ecuadorId,
+      displayName: 'Quito',
+      centerLat: -0.1807,
+      centerLng: -78.4678,
+      minLat: -0.35,
+      maxLat: 0.05,
+      minLng: -78.60,
+      maxLng: -78.35,
+      zones: const [],
+    ),
+    XistiMainCityProfile(
+      id: 'guayaquil',
+      countryId: ecuadorId,
+      displayName: 'Guayaquil',
+      centerLat: -2.1709,
+      centerLng: -79.9224,
+      minLat: -2.30,
+      maxLat: -2.05,
+      minLng: -80.05,
+      maxLng: -79.80,
+      zones: const [],
+    ),
+    XistiMainCityProfile(
+      id: 'cuenca',
+      countryId: ecuadorId,
+      displayName: 'Cuenca',
+      centerLat: -2.9001,
+      centerLng: -79.0059,
+      minLat: -2.98,
+      maxLat: -2.82,
+      minLng: -79.10,
+      maxLng: -78.90,
+      zones: const [],
     ),
   ];
 }

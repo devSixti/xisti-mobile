@@ -55,12 +55,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get minutes => 'Minutes';
 
   @override
-  String get distanceApprox => 'Distance approx';
-
-  @override
-  String get estimatedTime => 'Temps estimé';
-
-  @override
   String get seconds => 'secondes';
 
   @override
@@ -299,7 +293,8 @@ class AppLocalizationsFr extends AppLocalizations {
       'Politique de confidentialité et de traitement des données personnelles';
 
   @override
-  String get dataProcessingPolicy => 'Politique de traitement des données personnelles';
+  String get dataProcessingPolicy =>
+      'Politique de traitement des données personnelles';
 
   @override
   String get dataProcessingAuthorizationPrefix =>
@@ -487,6 +482,12 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get maxFare => 'Tarif maximum';
+
+  @override
+  String get distanceApprox => 'Distance approx';
+
+  @override
+  String get estimatedTime => 'Temps estimé';
 
   @override
   String get fareEstimateDisclaimer =>

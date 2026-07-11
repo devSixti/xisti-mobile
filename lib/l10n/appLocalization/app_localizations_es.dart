@@ -55,12 +55,6 @@ class AppLocalizationsEs extends AppLocalizations {
   String get minutes => 'Minutos';
 
   @override
-  String get distanceApprox => 'Distancia aprox';
-
-  @override
-  String get estimatedTime => 'Tiempo estimado';
-
-  @override
   String get seconds => 'segundos';
 
   @override
@@ -300,7 +294,8 @@ class AppLocalizationsEs extends AppLocalizations {
       'Política de Privacidad y Tratamiento de Datos Personales';
 
   @override
-  String get dataProcessingPolicy => 'Política de Tratamiento de Datos Personales';
+  String get dataProcessingPolicy =>
+      'Política de Tratamiento de Datos Personales';
 
   @override
   String get dataProcessingAuthorizationPrefix =>
@@ -490,6 +485,12 @@ class AppLocalizationsEs extends AppLocalizations {
   String get maxFare => 'Máximo orientativo';
 
   @override
+  String get distanceApprox => 'Distancia aprox';
+
+  @override
+  String get estimatedTime => 'Tiempo estimado';
+
+  @override
   String get fareEstimateDisclaimer =>
       'Estimación según ruta, tiempo y tarifa del vehículo.';
 
@@ -631,7 +632,8 @@ class AppLocalizationsEs extends AppLocalizations {
   String get reachYourDestination => 'Has llegado a tu destino';
 
   @override
-  String get cargoAtPickup => 'El conductor llegó al punto de recogida de tu carga';
+  String get cargoAtPickup =>
+      'El conductor llegó al punto de recogida de tu carga';
 
   @override
   String get cargoHeadingDestination => 'Tu carga va hacia el destino';

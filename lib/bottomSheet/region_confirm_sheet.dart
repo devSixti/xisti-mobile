@@ -41,7 +41,7 @@ Future<void> handleRegionPromptIfNeeded(
   double lng, {
   required void Function(ResolvedXistiRegion region) onRegionApplied,
 }) async {
-  final prompt = XistiRegionService.promptForCoordinates(lat, lng);
+  final prompt = await XistiRegionService.promptForCoordinatesAsync(lat, lng);
   if (prompt == null) {
     onRegionApplied(XistiRegionService.activeRegion());
     return;
@@ -52,10 +52,12 @@ Future<void> handleRegionPromptIfNeeded(
   if (!context.mounted) return;
 
   if (confirmed == true) {
-    XistiRegionService.applyRegion(prompt.resolved);
+    await XistiRegionService.applyRegion(prompt.resolved);
     unawaited(syncMarketConfig(
-      countryId: prompt.resolved.country.id,
-      cityId: prompt.resolved.city.id,
+      countryId: prompt.resolved.country.id.startsWith('geo_') ? null : prompt.resolved.country.id,
+      cityId: prompt.resolved.city.id.startsWith('geo_') ? null : prompt.resolved.city.id,
+      lat: lat,
+      lng: lng,
     ));
     onRegionApplied(prompt.resolved);
     return;

@@ -194,18 +194,6 @@ abstract class AppLocalizations {
   /// **'Minutes'**
   String get minutes;
 
-  /// No description provided for @distanceApprox.
-  ///
-  /// In en, this message translates to:
-  /// **'Approx. distance'**
-  String get distanceApprox;
-
-  /// No description provided for @estimatedTime.
-  ///
-  /// In en, this message translates to:
-  /// **'Estimated time'**
-  String get estimatedTime;
-
   /// No description provided for @seconds.
   ///
   /// In en, this message translates to:
@@ -997,6 +985,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Max. fare'**
   String get maxFare;
+
+  /// No description provided for @distanceApprox.
+  ///
+  /// In en, this message translates to:
+  /// **'Approx. distance'**
+  String get distanceApprox;
+
+  /// No description provided for @estimatedTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimated time'**
+  String get estimatedTime;
 
   /// No description provided for @fareEstimateDisclaimer.
   ///

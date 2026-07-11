@@ -16,7 +16,7 @@ class GetRoutesUtils {
   ) async {
     if (!isPlausibleRouteCoordinate(origin.latitude, origin.longitude)
         || !isPlausibleRouteCoordinate(destination.latitude, destination.longitude)) {
-      callBack({}, 0, 0);
+      callBack(_fallbackRoute(origin, destination), _fallbackDuration(origin, destination), _fallbackDistance(origin, destination));
       return;
     }
     try {
@@ -35,6 +35,9 @@ class GetRoutesUtils {
             polylineCoordinates.add(point);
           }
         }
+        if (polylineCoordinates.isEmpty) {
+          polylineCoordinates = [origin, ...wayPoints, destination];
+        }
         PolylineId id = PolylineId("poly");
         final theme = getCurrentTheme(navigatorKey.currentContext!);
         Polyline polyline = Polyline(
@@ -49,14 +52,44 @@ class GetRoutesUtils {
 
         duration = parseRouteDurationSeconds(route.duration);
         distance = route.distanceMeters ?? 0;
+        if (distance <= 0) {
+          distance = _fallbackDistance(origin, destination);
+        }
+        if (duration <= 0) {
+          duration = estimateDurationSecondsFromMeters(distance);
+        }
         callBack(polyLines, duration, distance);
       } else {
-        callBack({}, 0, 0);
+        callBack(_fallbackRoute(origin, destination), _fallbackDuration(origin, destination), _fallbackDistance(origin, destination));
       }
     } catch (e) {
-      callBack({}, 0, 0);
+      callBack(_fallbackRoute(origin, destination), _fallbackDuration(origin, destination), _fallbackDistance(origin, destination));
     }
   }
+
+  Map<PolylineId, Polyline> _fallbackRoute(LatLng origin, LatLng destination) {
+    final context = navigatorKey.currentContext;
+    if (context == null) {
+      return {};
+    }
+    final theme = getCurrentTheme(context);
+    final id = PolylineId("poly");
+    return {
+      id: Polyline(
+        polylineId: id,
+        color: theme.colorPrimary,
+        points: [origin, destination],
+        startCap: Cap.roundCap,
+        endCap: Cap.roundCap,
+        width: 5,
+      ),
+    };
+  }
+
+  int _fallbackDistance(LatLng origin, LatLng destination) => haversineDistanceMeters(origin, destination);
+
+  int _fallbackDuration(LatLng origin, LatLng destination) =>
+      estimateDurationSecondsFromMeters(_fallbackDistance(origin, destination));
 
   List<LatLng> decodeEncodedPolyline(String encoded) {
     List<LatLng> poly = [];
