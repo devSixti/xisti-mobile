@@ -156,14 +156,33 @@ bool isColombiaCurrencySelected() {
   return currency.contains('COL') || currency.contains('COP');
 }
 
-double _normalizeFareNegotiationStep(double step) {
+/// Currencies that use large integer amounts (similar magnitude to COP).
+bool isLargeUnitCurrencySelected() {
   if (isColombiaCurrencySelected()) {
-    if (step < kColombiaFareNegotiationStep) {
+    return true;
+  }
+  final currency = getStringFromSettingBox(hiveSelectedCurrency, defaultValue: defaultCurrency).toUpperCase();
+  const markers = ['ARS', 'CLP', 'PYG', 'CRC', 'UY', 'JPY', 'VND', 'IDR'];
+  for (final m in markers) {
+    if (currency.contains(m)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+double _normalizeFareNegotiationStep(double step) {
+  if (isColombiaCurrencySelected() || isLargeUnitCurrencySelected()) {
+    if (isColombiaCurrencySelected() && step < kColombiaFareNegotiationStep) {
       return kColombiaFareNegotiationStep;
     }
-    return step;
+    return step > 0 ? step : (isColombiaCurrencySelected() ? kColombiaFareNegotiationStep : 1);
   }
-  return step > 0 ? step : 1;
+  // USD / EUR / etc.: reject COP-scale admin steps (500) that zero-out converted fares.
+  if (step <= 0 || step > 10) {
+    return 1;
+  }
+  return step;
 }
 
 double getFareNegotiationStepFromSettings() {
@@ -189,12 +208,17 @@ double applyRegionalMinFareFloor(dynamic apiMinFare) {
 }
 
 /// Rounds a fare to the nearest configured negotiation step (e.g. 500 COP).
+/// Never collapses a positive fare to 0 (e.g. USD 28 snapped with a stale COP step of 500).
 double snapFareToNegotiationStep(double amount, {double? step}) {
   final negotiationStep = step ?? getFareNegotiationStepFromSettings();
   if (negotiationStep <= 1) {
-    return amount.roundToDouble();
+    return amount.roundToDouble() == amount ? amount : (amount * 100).roundToDouble() / 100;
   }
-  return ((amount / negotiationStep).round() * negotiationStep).toDouble();
+  final snapped = ((amount / negotiationStep).round() * negotiationStep).toDouble();
+  if (amount > 0 && snapped <= 0) {
+    return amount;
+  }
+  return snapped;
 }
 
 /// Applies regional floor and negotiation-step snapping for passenger fares.
@@ -207,6 +231,10 @@ double snapFareToNegotiationStep(double amount, {double? step}) {
   var min = snapFareToNegotiationStep(applyRegionalMinFareFloor(minPrice), step: step);
   var max = snapFareToNegotiationStep(double.tryParse(maxPrice?.toString() ?? '') ?? 0, step: step);
   var recommended = snapFareToNegotiationStep(double.tryParse(recommendedFare?.toString() ?? '') ?? 0, step: step);
+  final rawRecommended = double.tryParse(recommendedFare?.toString() ?? '') ?? 0;
+  if (recommended <= 0 && rawRecommended > 0) {
+    recommended = rawRecommended;
+  }
   if (recommended < min) {
     recommended = min;
   }

@@ -30,4 +30,21 @@ void main() {
     applyAppMobileSettingsFromJson({'fare_negotiation_step': 500});
     expect(getFareNegotiationStepFromSettings(), 500);
   });
+
+  test('USD currency rejects COP-scale negotiation step from admin', () async {
+    await putDataInSettingBox(hiveSelectedCurrency, r'$');
+    applyAppMobileSettingsFromJson({'fare_negotiation_step': 500});
+    expect(getFareNegotiationStepFromSettings(), 1);
+  });
+
+  test('snapFareToNegotiationStep never zeros a positive USD fare', () async {
+    await putDataInSettingBox(hiveSelectedCurrency, r'$');
+    await putDataInSettingBox(hiveFareNegotiationStep, 500);
+    expect(snapFareToNegotiationStep(27.94), 27.94);
+    expect(normalizePassengerFareRange(
+      recommendedFare: 27.94,
+      minPrice: 22.0,
+      maxPrice: 35.0,
+    ).recommended, greaterThan(0));
+  });
 }

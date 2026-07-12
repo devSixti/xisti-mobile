@@ -69,10 +69,13 @@ class CurrencyDisplayUtil {
   static String _resolveCurrencyCode(String storedSymbol) {
     final upper = storedSymbol.trim().toUpperCase();
     if (upper.contains('COP') || upper.contains('COL')) return 'COP';
-    if (upper.contains('USD') || upper.contains('US\$')) return 'USD';
+    if (upper.contains('USD') || upper.contains('US\$') || upper == r'$') return 'USD';
     if (upper.contains('EUR') || upper.contains('€')) return 'EUR';
     if (upper.contains('BRL') || upper.contains('R\$')) return 'BRL';
     if (upper.contains('ARS')) return 'ARS';
+    if (upper.contains('MXN') || upper.contains('MX\$')) return 'MXN';
+    if (upper.contains('CLP') || upper.contains('CL\$')) return 'CLP';
+    if (upper.contains('PEN') || upper.startsWith('S/')) return 'PEN';
     return upper.length == 3 ? upper : 'COP';
   }
 }
