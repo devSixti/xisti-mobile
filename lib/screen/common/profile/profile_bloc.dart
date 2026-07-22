@@ -160,10 +160,7 @@ class ProfileBloc extends Bloc {
   Future<void> updateProfileDetailsApiCall() async {
     if (await isNetworkConnected(onRetryPressedCallApi: () => updateProfileDetailsApiCall())) {
       MultipartFile? multipartFile;
-      if (getStringFromUserInfoBox(hiveProfileImage).trim().isEmpty && imgFileController.valueOrNull == null) {
-        if (context.mounted) openSimpleSnackbar(context, languages.pleaseAddProfileImage);
-        return;
-      } else if (imgFileController.valueOrNull != null) {
+      if (imgFileController.valueOrNull != null) {
         multipartFile = MultipartFile.fromFileSync(imgFileController.valueOrNull!.path, filename: imgFileController.valueOrNull!.path.split('/').last);
       }
 

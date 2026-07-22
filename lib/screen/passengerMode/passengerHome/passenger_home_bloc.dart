@@ -871,10 +871,6 @@ class PassengerHomeBloc extends Bloc {
   }
 
   Future<void> callSubmitAcarreoRequest() async {
-    if (getStringFromUserInfoBox(hiveProfileImage).trim().isEmpty) {
-      showProfileImageRequiredSheet(context);
-      return;
-    }
     if ((fromAddressController.valueOrNull?.name ?? '').isEmpty) {
       openSimpleSnackbar(context, languages.selectPickup);
       return;
@@ -916,10 +912,6 @@ class PassengerHomeBloc extends Bloc {
     }
     if (isSharedRidesMode) {
       callSharedRideSearch();
-      return;
-    }
-    if (getStringFromUserInfoBox(hiveProfileImage).trim().isEmpty) {
-      showProfileImageRequiredSheet(context);
       return;
     }
     if (isDeliveryMode && isDeliveryReceive && getStringFromUserInfoBox(hiveContactNumber).trim().isEmpty) {

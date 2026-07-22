@@ -181,12 +181,7 @@ class AccountBloc extends Bloc {
     if (getIntFromSettingBox(hiveAppMode) == AppMode.driver) {
       callChangeAppModeApi();
     } else {
-      if (getStringFromUserInfoBox(hiveProfileImage).trim().isEmpty) {
-        showProfileImageRequiredSheet(context);
-        return;
-      } else {
-        callServiceStatusApi();
-      }
+      callServiceStatusApi();
     }
   }
 

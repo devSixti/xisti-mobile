@@ -822,10 +822,10 @@ void setKeyValuePair({
 }
 
 bool isEmailOrNumNull() {
-  if (getStringFromUserInfoBox(hiveEmail).trim().isEmpty || getStringFromUserInfoBox(hiveContactNumber).trim().isEmpty) {
-    return true;
-  }
-  return false;
+  final hasEmail = getStringFromUserInfoBox(hiveEmail).trim().isNotEmpty;
+  final hasPhone = getStringFromUserInfoBox(hiveContactNumber).trim().isNotEmpty;
+  // Phone OTP users only need a verified mobile; email stays optional.
+  return !hasEmail && !hasPhone;
 }
 
 Future<void> isBackgroundNotification() async {
