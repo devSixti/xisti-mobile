@@ -32,7 +32,8 @@ android {
 
     packaging {
         jniLibs {
-            useLegacyPackaging = true
+            // Uncompressed + page-aligned native libs (required for 16 KB devices on Android 15+).
+            useLegacyPackaging = false
         }
     }
 
@@ -78,6 +79,15 @@ android {
 
     buildTypes {
         release {
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro",
+            )
+            firebaseCrashlytics {
+                mappingFileUploadEnabled = true
+            }
             val hasReleaseSigning = !System.getenv("ANDROID_KEYSTORE_PATH").isNullOrBlank()
                 || rootProject.file("key.properties").exists()
             signingConfig = if (hasReleaseSigning) {
