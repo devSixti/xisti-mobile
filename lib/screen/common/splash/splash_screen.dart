@@ -45,20 +45,22 @@ class _SplashScreenState extends State<SplashScreen> {
         backgroundColor: Colors.transparent,
         systemOverlayStyle: AppThemeColors.dark().systemUiOverlayStyle,
       ),
-      body: ColoredBox(
-        color: XistiBrand.black,
-        child: Image.asset(
-          _splashAsset,
-          fit: BoxFit.cover,
-          width: double.infinity,
-          height: double.infinity,
-          filterQuality: FilterQuality.high,
-          gaplessPlayback: true,
-          errorBuilder: (context, error, stackTrace) => Image.asset(
-            'assets/images/splash_bg.png',
+      body: ExcludeSemantics(
+        child: ColoredBox(
+          color: XistiBrand.black,
+          child: Image.asset(
+            _splashAsset,
             fit: BoxFit.cover,
             width: double.infinity,
             height: double.infinity,
+            filterQuality: FilterQuality.high,
+            gaplessPlayback: true,
+            errorBuilder: (context, error, stackTrace) => Image.asset(
+              'assets/images/splash_bg.png',
+              fit: BoxFit.cover,
+              width: double.infinity,
+              height: double.infinity,
+            ),
           ),
         ),
       ),

@@ -183,12 +183,26 @@ class DriverHomeBloc extends Bloc {
         availableRideSubject.add(ApiResponse.loading());
       }
       try {
-        var response = AvailableRidePojo.fromJson(
+        AvailableRidePojo response = AvailableRidePojo.fromJson(
           await _repo.availableRideRequestApi(
             currentLat: currentLaLng?.latitude,
             currentLng: currentLaLng?.longitude,
           ),
         );
+        for (var attempt = 0; attempt < 2; attempt++) {
+          rideList = [];
+          rideList.addAll(_filterRidesByAvailability(response.rideList));
+          if (rideList.isNotEmpty) {
+            break;
+          }
+          await Future.delayed(const Duration(seconds: 2));
+          response = AvailableRidePojo.fromJson(
+            await _repo.availableRideRequestApi(
+              currentLat: currentLaLng?.latitude,
+              currentLng: currentLaLng?.longitude,
+            ),
+          );
+        }
         String message = getApiMsg(response.message);
         if (!context.mounted) return;
         if (isApiStatus(context, response.status, message, true)) {
