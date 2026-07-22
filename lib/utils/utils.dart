@@ -652,9 +652,9 @@ double getDoubleFromDynamic(dynamic value) {
 dynamic resolveTripPayFromJson(dynamic json) {
   if (json is! Map) return 0;
   final map = Map<String, dynamic>.from(json);
-  final totalPay = getDoubleFromDynamic(map['total_pay']);
+  final totalPay = getDoubleFromDynamic(map['total_pay'] ?? map['total_amount']);
   if (totalPay > 0) {
-    return map['total_pay'];
+    return map['total_pay'] ?? map['total_amount'];
   }
   for (final key in ['ride_fare', 'trip_value', 'offered_price']) {
     final value = getDoubleFromDynamic(map[key]);
@@ -662,7 +662,7 @@ dynamic resolveTripPayFromJson(dynamic json) {
       return map[key];
     }
   }
-  return map['total_pay'] ?? 0;
+  return map['total_pay'] ?? map['total_amount'] ?? 0;
 }
 
 String _amountNumberLocale() => isColombiaCurrencySelected() ? 'es_CO' : 'en_US';

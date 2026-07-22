@@ -1,4 +1,5 @@
 import '../../../networking/base_dl.dart';
+import '../../../utils/utils.dart';
 
 class DriverRunningRidePojo {
   DriverRunningRidePojo({this.status, this.message, this.messageCode, this.rideDetails});
@@ -190,7 +191,7 @@ class RideDetails {
     _contactNumber = json['contact_number'];
     _pickupDatetime = json['pickup_datetime'];
     _serviceDateTime = json['service_date_time'];
-    _totalAmount = json['total_amount'];
+    _totalAmount = resolveTripPayFromJson(json);
     _paymentType = json['payment_type'];
     _destinationPaymentMethod = json['destination_payment_method'];
     _destinationPaymentLabel = json['destination_payment_label'];
@@ -230,7 +231,7 @@ class RideDetails {
     _otherUserContactNumber = json['other_user_contact_number'];
     _wayPointStatus = json['way_point_status'];
     _tollCharge = json['toll_charge'];
-    _rideFare = json['ride_fare'];
+    _rideFare = json['ride_fare'] ?? json['trip_value'] ?? _totalAmount;
     _estimatePrice = json['estimate_price'];
     _vehicleModelName = json['vehicle_model_name'];
     _vehicleImage = json['vehicle_image'];
