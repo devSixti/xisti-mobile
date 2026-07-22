@@ -55,7 +55,10 @@ platform :ios do
     profile_name = sync_signing
 
     dart_defines = ENV.fetch("DART_DEFINES", "").strip
-    flutter_args = ["flutter", "build", "ipa", "--release", "--export-method", "app-store"]
+    flutter_args = [
+      "flutter", "build", "ipa", "--release", "--export-method", "app-store",
+      "--obfuscate", "--split-debug-info=build/ios/debug-info",
+    ]
     flutter_args.concat(dart_defines.split) unless dart_defines.empty?
 
     Dir.chdir("..") do
@@ -144,7 +147,10 @@ platform :ios do
     )
 
     dart_defines = ENV.fetch("DART_DEFINES", "").strip
-    flutter_args = ["flutter", "build", "ipa", "--release", "--export-method", "app-store"]
+    flutter_args = [
+      "flutter", "build", "ipa", "--release", "--export-method", "app-store",
+      "--obfuscate", "--split-debug-info=build/ios/debug-info",
+    ]
     flutter_args.concat(dart_defines.split) unless dart_defines.empty?
 
     Dir.chdir(repo_root) { sh("flutter", "pub", "get") }
