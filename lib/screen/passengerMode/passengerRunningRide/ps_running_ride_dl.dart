@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../networking/base_dl.dart';
+import '../../../utils/utils.dart';
 
 class PassengerRunningRidePojo {
   PassengerRunningRidePojo({
@@ -132,7 +133,7 @@ class PassengerRunningRidePojo {
     userRefundStatus = json['user_refund_status'];
     refundAmount = json['refund_amount'];
     referDiscount = json['refer_discount'];
-    totalPay = json['total_pay'];
+    totalPay = resolveTripPayFromJson(json);
     payment = json['payment'];
     paymentStatus = json['payment_status'];
     destinationPaymentMethod = json['destination_payment_method'];

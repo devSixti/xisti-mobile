@@ -1,3 +1,5 @@
+import '../../../utils/utils.dart';
+
 class PassengerRideHistoryPojo {
   PassengerRideHistoryPojo({this.status, this.message, this.messageCode, this.currentPage, this.lastPage, this.total, this.rides});
 
@@ -83,7 +85,7 @@ class PassengerRideListItem {
     _rideId = json['ride_id'];
     _bookingNo = json['booking_no'];
     _rideStatus = json['ride_status'];
-    _totalPay = json['total_pay'];
+    _totalPay = resolveTripPayFromJson(json);
     _serviceDateTime = json['service_date_time'];
     _scheduleOrderDateTime = json['schedule_order_date_time'];
     _pickupAddress = json['pickup_address'];

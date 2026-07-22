@@ -649,6 +649,22 @@ double getDoubleFromDynamic(dynamic value) {
   return parseSafeDouble(value.toString());
 }
 
+dynamic resolveTripPayFromJson(dynamic json) {
+  if (json is! Map) return 0;
+  final map = Map<String, dynamic>.from(json);
+  final totalPay = getDoubleFromDynamic(map['total_pay']);
+  if (totalPay > 0) {
+    return map['total_pay'];
+  }
+  for (final key in ['ride_fare', 'trip_value', 'offered_price']) {
+    final value = getDoubleFromDynamic(map[key]);
+    if (value > 0) {
+      return map[key];
+    }
+  }
+  return map['total_pay'] ?? 0;
+}
+
 String _amountNumberLocale() => isColombiaCurrencySelected() ? 'es_CO' : 'en_US';
 
 int _effectiveAmountFractionDigits(int numberAfterPoint) {
