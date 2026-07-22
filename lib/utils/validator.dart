@@ -3,6 +3,12 @@ import 'phone_length_rules.dart';
 import 'phone_util.dart';
 import 'utils.dart';
 
+/// Letters including accents (Jerónimo, José, María) and common name punctuation.
+final RegExp _personNamePattern = RegExp(r"^[\p{L}][\p{L}\s'\-.]*$", unicode: true);
+
+bool _isValidPersonName(String value) =>
+    value.trim().isNotEmpty && _personNamePattern.hasMatch(value.trim());
+
 String validateEmptyField(String value, String message) {
   if ((value.trim()).isEmpty) {
     return message;
@@ -31,7 +37,7 @@ String fullNameValidate(String value) {
 String registerFirstNameValidate(String value, String invalidMsg) {
   if (value.trim().isEmpty) {
     return languages.enterYourName;
-  } else if (!RegExp(r'^[A-Za-z ]+$').hasMatch(value)) {
+  } else if (!_isValidPersonName(value)) {
     return invalidMsg;
   }
   return "";
@@ -40,7 +46,7 @@ String registerFirstNameValidate(String value, String invalidMsg) {
 String registerLastNameValidate(String value, String invalidMsg) {
   if (value.trim().isEmpty) {
     return languages.enterYourName;
-  } else if (!RegExp(r'^[A-Za-z ]+$').hasMatch(value)) {
+  } else if (!_isValidPersonName(value)) {
     return invalidMsg;
   }
   return "";
@@ -49,7 +55,7 @@ String registerLastNameValidate(String value, String invalidMsg) {
 String registerFullNameValidate(String value,String invalidMsg) {
   if (value.trim().isEmpty) {
     return languages.enterYourName;
-  } else if (!RegExp(r'^[A-Za-z ]+$').hasMatch(value)) {
+  } else if (!_isValidPersonName(value)) {
     return invalidMsg;
   }
   return "";

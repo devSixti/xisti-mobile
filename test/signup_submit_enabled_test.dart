@@ -97,5 +97,24 @@ void main() {
         isFalse,
       );
     });
+
+    test('enabled for accented Colombian names on social signup', () {
+      expect(
+        isSignupSubmitEnabled(
+          hideNameField: false,
+          hideEmailField: false,
+          requiresPhone: false,
+          requiresEmail: true,
+          firstNameError: '',
+          lastNameError: '',
+          mobileError: '',
+          emailError: '',
+          acceptTerms: true,
+          acceptDataProcessing: true,
+          acceptPlatform: true,
+        ),
+        isTrue,
+      );
+    });
   });
 }
