@@ -372,7 +372,7 @@ class PassengerHomeBloc extends Bloc {
           await _passengerHomeRepo.bookRide(
             addressList: jsonEncode(addressList),
             estimatedTime: timeController.valueOrNull ?? 0,
-            offeredFare: getEditableAmount(offeredFare, numberAfterPoint: 0),
+            offeredFare: offeredFare.round(),
             additionalRemark: commentController.valueOrNull ?? "",
             paymentType: paymentTypeController.valueOrNull ?? 0,
             serviceId: bookServiceId,

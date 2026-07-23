@@ -180,7 +180,10 @@ class DriverVehicleDetailsBloc extends Bloc {
                     (isTaxiController.valueOrNull ?? false)
                 ? 1
                 : 0,
-            acceptDelivery: serviceTypeSelection.valueOrNull?.isDeliveryOnlyService == true ? 1 : 1,
+            acceptDelivery: (serviceTypeSelection.valueOrNull?.isDeliveryOnlyService == true ||
+                    (acceptDeliveryController.valueOrNull ?? false))
+                ? 1
+                : 0,
             deliveryVariant: _deliveryVariantForApi(serviceTypeSelection.valueOrNull),
             alsoTransportPassengers: (alsoTransportPassengersController.valueOrNull ?? false) ? 1 : 0,
             currentLat: currentLatLng?.latitude,

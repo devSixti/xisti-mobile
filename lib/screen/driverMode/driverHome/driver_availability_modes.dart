@@ -29,5 +29,9 @@ bool driverAcceptsRideServiceMode(String serviceMode, {int isEncomienda = 0, int
     return acceptTransport;
   }
 
+  if (serviceMode == ServiceModeKind.acarreos) {
+    return acceptDelivery;
+  }
+
   return acceptTransport;
 }
