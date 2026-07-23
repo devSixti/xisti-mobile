@@ -40,6 +40,7 @@ class DriverVehicleDetailsBloc extends Bloc {
   final isTaxiController = BehaviorSubject<bool>.seeded(false);
   final handyCapAccessibilityController = BehaviorSubject<bool>.seeded(false);
   final alsoTransportPassengersController = BehaviorSubject<bool>.seeded(false);
+  final acceptDeliveryController = BehaviorSubject<bool>.seeded(true);
 
   final vehicleImageFrontFile = BehaviorSubject<File?>();
   final vehicleImageSideFile = BehaviorSubject<File?>();
@@ -449,6 +450,7 @@ class DriverVehicleDetailsBloc extends Bloc {
     isTaxiController.close();
     handyCapAccessibilityController.close();
     alsoTransportPassengersController.close();
+    acceptDeliveryController.close();
     vehicleImageFrontFile.close();
     vehicleImageSideFile.close();
     vehicleImageRearFile.close();
